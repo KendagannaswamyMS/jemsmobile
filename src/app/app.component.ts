@@ -5,6 +5,14 @@ import { AuthService } from './core/services/auth.service';
 import { CurrentUser, MenuItem } from './models/user.model';
 import { App } from '@capacitor/app';
 
+type MobileMenuDef = {
+  route: string;
+  title: string;
+  icon: string;
+  student?: boolean;
+  staff?: boolean;
+};
+
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
@@ -12,6 +20,16 @@ import { App } from '@capacitor/app';
   standalone: false,
 })
 export class AppComponent implements OnInit {
+  private readonly mobileMenuDefs: MobileMenuDef[] = [
+    { route: '/tabs/dashboard', title: 'Home', icon: 'home-outline', student: true, staff: true },
+    { route: '/tabs/student', title: 'Student', icon: 'school-outline', student: true },
+    { route: '/tabs/faculty', title: 'Faculty', icon: 'briefcase-outline', staff: true },
+    { route: '/tabs/helpdesk', title: 'Help Desk', icon: 'help-circle-outline', student: true, staff: true },
+    { route: '/tabs/biometric', title: 'Weekly Biometric', icon: 'finger-print-outline', staff: true },
+    { route: '/tabs/employee-directory', title: 'Employee Directory', icon: 'people-circle-outline', staff: true },
+    { route: '/events', title: 'Events', icon: 'calendar-number-outline', student: true, staff: true }
+  ];
+
   user: CurrentUser | null = null;
   expandedMenuIds = new Set<string | number>();
 
@@ -52,12 +70,17 @@ export class AppComponent implements OnInit {
   }
 
   get menuItems(): MenuItem[] {
-    const apiMenus = this.user?.menus ?? [];
-    // Inject custom 'Events' page at bottom for all users dynamically
-    if (apiMenus.length > 0 && !apiMenus.some(m => m.route === '/events' || m.route === '/pages/events')) {
-      return [...apiMenus, { id: 'evt-custom', title: 'Events', icon: 'calendar-number-outline', route: '/events' }];
-    }
-    return apiMenus;
+    const isStudent = this.isStudent;
+    const allowedRoutes = new Set(this.collectRoutes(this.user?.menus ?? []));
+
+    return this.mobileMenuDefs
+      .filter(item => this.isMenuAllowed(item, isStudent, allowedRoutes))
+      .map(item => ({
+        id: item.route,
+        title: item.title,
+        icon: item.icon,
+        route: item.route
+      }));
   }
 
   get hasApiMenus(): boolean {
@@ -91,5 +114,35 @@ export class AppComponent implements OnInit {
     this.menuCtrl.close();
     this.authService.logout();
     this.router.navigate(['/login'], { replaceUrl: true });
+  }
+
+  private collectRoutes(items: MenuItem[]): string[] {
+    const routes: string[] = [];
+
+    for (const item of items) {
+      if (item.route) {
+        routes.push(item.route);
+      }
+      if (item.children?.length) {
+        routes.push(...this.collectRoutes(item.children));
+      }
+    }
+
+    return routes;
+  }
+
+  private isMenuAllowed(item: MobileMenuDef, isStudent: boolean, allowedRoutes: Set<string>): boolean {
+    if (isStudent && !item.student) return false;
+    if (!isStudent && !item.staff) return false;
+
+    if (item.route === '/tabs/dashboard' || item.route === '/events') {
+      return true;
+    }
+
+    if (allowedRoutes.size === 0) {
+      return true;
+    }
+
+    return allowedRoutes.has(item.route);
   }
 }
