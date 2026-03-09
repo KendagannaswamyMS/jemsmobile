@@ -9,13 +9,52 @@ import { CurrentUser, MenuItem } from '../../models/user.model';
 export class AuthService {
   private readonly USER_KEY = 'currentUser';
   private readonly STUDENT_KEY = 'studentSlnum';
+  private readonly MAX_MENU_DEPTH = 4;
+  private readonly MAX_MENU_ITEMS = 50;
   private currentUser$ = new BehaviorSubject<CurrentUser | null>(null);
+  private readonly menuIconAliases: Record<string, string> = {
+    dashboard: 'home-outline',
+    work: 'briefcase-outline',
+    assignment: 'document-text-outline',
+    schedule: 'calendar-outline',
+    assessment: 'analytics-outline',
+    verified: 'checkmark-done-outline',
+    approval: 'checkmark-circle-outline',
+    domain: 'globe-outline',
+    science: 'flask-outline',
+    quiz: 'help-circle-outline',
+    payments: 'card-outline',
+    biotech: 'medkit-outline',
+    groups: 'people-outline',
+    description: 'document-outline',
+    event: 'calendar-number-outline',
+    timeline: 'time-outline',
+    leaderboard: 'trophy-outline',
+    label: 'pricetag-outline',
+    contacts: 'people-circle-outline',
+    subscriptions: 'layers-outline',
+    psychology: 'accessibility-outline',
+    apartment: 'business-outline',
+    category: 'grid-outline',
+    class: 'school-outline',
+    security: 'shield-outline',
+    church: 'business-outline',
+    translate: 'language-outline',
+    email: 'mail-outline',
+    percent: 'percent-outline',
+    balance: 'scale-outline',
+    transform: 'swap-horizontal-outline'
+  };
 
   user$ = this.currentUser$.asObservable();
 
   constructor(private http: HttpClient, private storage: StorageService) {
     const saved = this.storage.getJson<CurrentUser>(this.USER_KEY);
-    if (saved) this.currentUser$.next(saved);
+    if (saved) {
+      const normalized = this.normalizeStoredUser(saved);
+      this.storage.setJson(this.USER_KEY, normalized);
+      this.currentUser$.next(normalized);
+    }
   }
 
   login(email: string, password: string): Observable<any> {
@@ -24,7 +63,6 @@ export class AuthService {
       UserauthPassword: password
     }).pipe(
       tap(res => {
-        console.log('[AuthService.login] raw response:', JSON.stringify(res));
         if (!res) throw new Error('Empty response from server');
         if (res?.message && !res?.token) throw new Error(res.message);
         
@@ -145,13 +183,114 @@ export class AuthService {
   }
 
   private mapMenus(raw: any[]): MenuItem[] {
-    if (!Array.isArray(raw)) return [];
-    return raw.map((m: any) => ({
-      id: m.id ?? m.menuId ?? m.menuslnum,
-      title: m.title ?? m.menuTitle ?? m.name ?? m.menuName ?? '',
-      icon: m.icon ?? m.menuIcon ?? 'ellipse-outline',
-      route: m.route ?? m.menuRoute ?? m.url ?? undefined,
-      children: this.mapMenus(m.children ?? m.subMenus ?? [])
-    }));
+    return this.mapMenusInternal(raw, 0, { count: 0 });
+  }
+
+  private mapMenusInternal(raw: any, depth: number, state: { count: number }): MenuItem[] {
+    if (!Array.isArray(raw) || depth > this.MAX_MENU_DEPTH || state.count >= this.MAX_MENU_ITEMS) {
+      return [];
+    }
+
+    const result: MenuItem[] = [];
+
+    for (const m of raw) {
+      if (state.count >= this.MAX_MENU_ITEMS) {
+        break;
+      }
+
+      const children = this.mapMenusInternal(m?.children ?? m?.subMenus ?? [], depth + 1, state);
+      const route = this.normalizeMenuRoute(m);
+      const title = m?.title ?? m?.menuTitle ?? m?.name ?? m?.menuName ?? '';
+
+      // Ignore web-only menu entries that do not map to a mobile screen.
+      if (!route && children.length === 0) {
+        continue;
+      }
+
+      state.count += 1;
+      result.push({
+        id: m?.id ?? m?.menuId ?? m?.menuslnum,
+        title,
+        icon: this.normalizeMenuIcon(m?.icon ?? m?.menuIcon),
+        route,
+        children
+      });
+    }
+
+    return result;
+  }
+
+  private normalizeStoredUser(user: CurrentUser): CurrentUser {
+    return {
+      ...user,
+      menus: this.mapMenus(user.menus ?? [])
+    };
+  }
+
+  private normalizeMenuIcon(icon: unknown): string {
+    if (typeof icon !== 'string') return 'ellipse-outline';
+
+    const normalized = icon.trim().toLowerCase();
+    if (!normalized) return 'ellipse-outline';
+
+    if (normalized.includes('-outline') || normalized.includes('-sharp')) {
+      return normalized;
+    }
+
+    if (this.menuIconAliases[normalized]) {
+      return this.menuIconAliases[normalized];
+    }
+
+    return 'ellipse-outline';
+  }
+
+  private normalizeMenuRoute(menu: any): string | undefined {
+    const rawRoute = String(menu?.route ?? menu?.menuRoute ?? menu?.url ?? menu?.menuUrl ?? '').trim().toLowerCase();
+    const rawTitle = String(menu?.title ?? menu?.menuTitle ?? menu?.name ?? menu?.menuName ?? '').trim().toLowerCase();
+
+    if (rawRoute.includes('/tabs/') || rawRoute === '/events') {
+      return rawRoute;
+    }
+
+    if (rawRoute.includes('dashboard') || rawTitle === 'dashboard' || rawTitle === 'general') {
+      return '/tabs/dashboard';
+    }
+
+    if (
+      rawRoute.includes('faculty-workload') ||
+      rawRoute.includes('timetable') ||
+      rawTitle.includes('workload') ||
+      rawTitle.includes('timetable') ||
+      rawTitle.includes('academic')
+    ) {
+      return '/tabs/faculty';
+    }
+
+    if (rawRoute.includes('helpdesk') || rawTitle.includes('help')) {
+      return '/tabs/helpdesk';
+    }
+
+    if (rawRoute.includes('biometric') || rawTitle.includes('biometric')) {
+      return '/tabs/biometric';
+    }
+
+    if (
+      rawRoute.includes('employee') ||
+      rawRoute.includes('directory') ||
+      rawTitle.includes('employee') ||
+      rawTitle.includes('directory')
+    ) {
+      return '/tabs/employee-directory';
+    }
+
+    if (rawRoute.includes('student') || rawTitle.includes('student')) {
+      return '/tabs/student';
+    }
+
+    if (rawRoute.includes('event') || rawTitle.includes('event')) {
+      return '/events';
+    }
+
+    return undefined;
   }
 }

@@ -4,9 +4,9 @@
 
 export const environment = {
   production: false,
-  // Using production API for browser dev testing (ng serve).
-  // Switch back to 'http://localhost:5017/api/' when running the local backend.
-  apiUrl: 'http://localhost:5017/api/'
+  // Use the hosted API for browser dev unless a local backend is running.
+  // Switch this back to 'http://localhost:5017/api/' only when that API is available locally.
+  apiUrl: 'https://jems.jssmvpehbcs.org/api/'
 };
 
 /*
