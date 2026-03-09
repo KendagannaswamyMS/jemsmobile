@@ -1,0 +1,60 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/helpdesk"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Raise a Ticket</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <ion-list lines="none" class="form-list">
+
+      <ion-item class="form-item">
+        <ion-label position="stacked">Request Type <ion-text color="danger">*</ion-text></ion-label>
+        <ion-select formControlName="requestTypeId" placeholder="Select type" interface="action-sheet">
+          <ion-select-option *ngFor="let rt of requestTypes" [value]="rt.requestTypeId">{{ rt.requestTypeName }}</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item class="form-item">
+        <ion-label position="stacked">Department <ion-text color="danger">*</ion-text></ion-label>
+        <ion-select formControlName="departmentId" placeholder="Select department" interface="action-sheet">
+          <ion-select-option *ngFor="let d of departments" [value]="d.departmentId || d.departmentslnum">
+            {{ d.departmentName || d.departmentname }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item class="form-item">
+        <ion-label position="stacked">Priority</ion-label>
+        <ion-select formControlName="priorityId" placeholder="Select priority (optional)" interface="popover">
+          <ion-select-option *ngFor="let p of priorities" [value]="p.priorityId || p.prioritylevelslnum">
+            {{ p.priorityName || p.prioritylevelname }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item class="form-item">
+        <ion-label position="stacked">Subject <ion-text color="danger">*</ion-text></ion-label>
+        <ion-input formControlName="subject" placeholder="Brief subject of the issue"></ion-input>
+      </ion-item>
+
+      <ion-item class="form-item">
+        <ion-label position="stacked">Detail <ion-text color="danger">*</ion-text></ion-label>
+        <ion-textarea formControlName="detail" placeholder="Describe the issue in detail…" rows="4" auto-grow></ion-textarea>
+      </ion-item>
+
+      <ion-item class="form-item">
+        <ion-label position="stacked">Location (optional)</ion-label>
+        <ion-input formControlName="location" placeholder="e.g. Lab 3, Block A"></ion-input>
+      </ion-item>
+    </ion-list>
+
+    <ion-button expand="block" type="submit" [disabled]="form.invalid" class="submit-btn">
+      <ion-icon name="paper-plane-outline" slot="start"></ion-icon>
+      Submit Ticket
+    </ion-button>
+  </form>
+</ion-content>

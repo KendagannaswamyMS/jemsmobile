@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">JEMS</string>
+    <string name="title_activity_main">JEMS</string>
+    <string name="package_name">org.jssstu.jemsapp</string>
+    <string name="custom_url_scheme">org.jssstu.jemsapp</string>
+</resources>

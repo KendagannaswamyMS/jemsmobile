@@ -1,2 +1,81 @@
-// For information on how to create your own theme, please refer to:
-// https://ionicframework.com/docs/theming/
+// JEMS Brand Colors
+// White    — large/base areas
+// #125875  — primary (buttons, toolbar, headers, active)
+// #F26622  — accent  (borders, icons, highlights)
+// #fffcdb  — cream   (tiny badge/tag areas)
+
+:root {
+  --ion-color-primary:              #125875;
+  --ion-color-primary-rgb:          18,88,117;
+  --ion-color-primary-contrast:     #ffffff;
+  --ion-color-primary-contrast-rgb: 255,255,255;
+  --ion-color-primary-shade:        #0f4d68;
+  --ion-color-primary-tint:         #2a6983;
+
+  --ion-color-secondary:              #F26622;
+  --ion-color-secondary-rgb:          242,102,34;
+  --ion-color-secondary-contrast:     #ffffff;
+  --ion-color-secondary-contrast-rgb: 255,255,255;
+  --ion-color-secondary-shade:        #d55a1e;
+  --ion-color-secondary-tint:         #f47538;
+
+  --ion-color-tertiary:              #fffcdb;
+  --ion-color-tertiary-rgb:          255,252,219;
+  --ion-color-tertiary-contrast:     #125875;
+  --ion-color-tertiary-contrast-rgb: 18,88,117;
+  --ion-color-tertiary-shade:        #e0ddc0;
+  --ion-color-tertiary-tint:         #fffde2;
+
+  --ion-color-success:              #2dd36f;
+  --ion-color-success-rgb:          45,211,111;
+  --ion-color-success-contrast:     #ffffff;
+  --ion-color-success-contrast-rgb: 255,255,255;
+  --ion-color-success-shade:        #28ba62;
+  --ion-color-success-tint:         #42d77d;
+
+  --ion-color-warning:              #ffc409;
+  --ion-color-warning-rgb:          255,196,9;
+  --ion-color-warning-contrast:     #000000;
+  --ion-color-warning-contrast-rgb: 0,0,0;
+  --ion-color-warning-shade:        #e0ac08;
+  --ion-color-warning-tint:         #ffca22;
+
+  --ion-color-danger:              #eb445a;
+  --ion-color-danger-rgb:          235,68,90;
+  --ion-color-danger-contrast:     #ffffff;
+  --ion-color-danger-contrast-rgb: 255,255,255;
+  --ion-color-danger-shade:        #cf3c4f;
+  --ion-color-danger-tint:         #ed576b;
+
+  --ion-color-medium:              #92949c;
+  --ion-color-medium-rgb:          146,148,156;
+  --ion-color-medium-contrast:     #000000;
+  --ion-color-medium-contrast-rgb: 0,0,0;
+  --ion-color-medium-shade:        #808289;
+  --ion-color-medium-tint:         #9d9fa6;
+
+  --ion-color-light:              #f4f5f8;
+  --ion-color-light-rgb:          244,245,248;
+  --ion-color-light-contrast:     #000000;
+  --ion-color-light-contrast-rgb: 0,0,0;
+  --ion-color-light-shade:        #d7d8da;
+  --ion-color-light-tint:         #f5f6f9;
+
+  // ── App-wide base: WHITE ───────────────────────────────────────────────────
+  --ion-background-color:         #ffffff;
+  --ion-background-color-rgb:     255,255,255;
+  --ion-text-color:               #1a2a30;
+  --ion-text-color-rgb:           26,42,48;
+
+  // Toolbar & tab bar use primary
+  --ion-toolbar-background:       #125875;
+  --ion-toolbar-color:            #ffffff;
+
+  --ion-tab-bar-background:       #ffffff;
+  --ion-tab-bar-border-color:     rgba(18,88,117,0.12);
+  --ion-tab-bar-color:            #9db4be;
+  --ion-tab-bar-color-selected:   #125875;
+
+  --ion-card-background:          #ffffff;
+  --ion-item-background:          #ffffff;
+}

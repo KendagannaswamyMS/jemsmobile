@@ -1,20 +1,45 @@
 <ion-tabs>
-
   <ion-tab-bar slot="bottom">
-    <ion-tab-button tab="tab1" href="/tabs/tab1">
-      <ion-icon aria-hidden="true" name="triangle"></ion-icon>
-      <ion-label>Tab 1</ion-label>
+
+    <ion-tab-button tab="dashboard" href="/tabs/dashboard">
+      <ion-icon name="home-outline"></ion-icon>
+      <ion-label>Home</ion-label>
     </ion-tab-button>
 
-    <ion-tab-button tab="tab2" href="/tabs/tab2">
-      <ion-icon aria-hidden="true" name="ellipse"></ion-icon>
-      <ion-label>Tab 2</ion-label>
+    <ion-tab-button (click)="goToWorkloads()">
+      <ion-icon name="briefcase-outline"></ion-icon>
+      <ion-label>My Workloads</ion-label>
     </ion-tab-button>
 
-    <ion-tab-button tab="tab3" href="/tabs/tab3">
-      <ion-icon aria-hidden="true" name="square"></ion-icon>
-      <ion-label>Tab 3</ion-label>
+    <ion-tab-button (click)="goToTimetable()">
+      <ion-icon name="calendar-outline"></ion-icon>
+      <ion-label>Timetable</ion-label>
     </ion-tab-button>
+
+    <ion-tab-button tab="biometric" href="/tabs/biometric">
+      <ion-icon name="finger-print-outline"></ion-icon>
+      <ion-label>Biometric</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="helpdesk" href="/tabs/helpdesk">
+      <ion-icon name="help-buoy-outline"></ion-icon>
+      <ion-label>Help Desk</ion-label>
+    </ion-tab-button>
+
   </ion-tab-bar>
-
 </ion-tabs>
+
+<!-- Premium Logout Modal -->
+<div class="logout-overlay" *ngIf="showLogoutModal" (click)="cancelLogout()">
+  <div class="logout-card" (click)="$event.stopPropagation()">
+    <div class="logout-icon-wrap">
+      <ion-icon name="log-out-outline"></ion-icon>
+    </div>
+    <h2 class="logout-title">Sign Out</h2>
+    <p class="logout-message">Are you sure you want to sign out of your account?</p>
+    <div class="logout-actions">
+      <button class="btn-cancel" (click)="cancelLogout()">Cancel</button>
+      <button class="btn-confirm" (click)="confirmLogout()">Sign Out</button>
+    </div>
+  </div>
+</div>

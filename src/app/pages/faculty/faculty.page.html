@@ -1,0 +1,307 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Faculty</ion-title>
+  </ion-toolbar>
+
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="activeTab === 'workload'">
+    <ion-spinner *ngIf="isLoading" name="crescent" color="primary" style="display:block;margin:32px auto"></ion-spinner>
+
+    <div class="loader-container" *ngIf="isLoadingSessionTimetable">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p>Loading session workload...</p>
+    </div>
+
+    <div *ngIf="!isLoading && !isLoadingSessionTimetable && workloads.length === 0 && sessionSubjects.length === 0"
+      class="empty-state">
+      <ion-icon name="briefcase-outline" size="large" color="medium"></ion-icon>
+      <p>No workload records found.</p>
+    </div>
+
+    <ion-card class="teaching-hours-card" *ngIf="!isLoadingSessionTimetable && sessionSubjects.length > 0">
+      <div class="th-header">
+        <div class="th-title">
+          <ion-icon name="school" color="light"></ion-icon>
+          <h3>Teaching Hours</h3>
+        </div>
+        <ion-badge color="light" class="auto-calc-badge">
+          <ion-icon name="sparkles"></ion-icon> Auto-calculated
+        </ion-badge>
+      </div>
+      <div class="th-content">
+        <div class="session-label">
+          Total Teaching Hours (Session) <span class="required">*</span>
+        </div>
+        <div class="total-hours-container">
+          <div class="total-hours-box">
+            <ion-icon name="time-outline"></ion-icon>
+            <span class="hours-text">{{ formatDuration(sessionTeachingTotalMinutes) }}</span>
+          </div>
+          <span class="calc-label">calculated</span>
+        </div>
+
+        <div class="subjects-summary">
+          <ion-icon name="checkmark-circle" color="success"></ion-icon>
+          <span>{{ sessionSubjects.length }} subject(s) across {{ sessionProgrammesCount }} programme(s)</span>
+        </div>
+
+        <div class="subject-breakdown-section">
+          <div class="subject-breakdown-header">
+            <div class="sb-title">
+              <ion-icon name="list-outline"></ion-icon>
+              <span>SUBJECT BREAKDOWN</span>
+            </div>
+            <ion-button size="small" fill="outline" color="dark" class="prog-view-btn">
+              <ion-icon name="file-tray-stacked-outline" slot="start"></ion-icon>
+              Programme View
+            </ion-button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="breakdown-table">
+              <thead>
+                <tr>
+                  <th>SUBJECT</th>
+                  <th>PROGRAMME</th>
+                  <th>ACTIVITY</th>
+                  <th>TOTAL HOURS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let sub of sessionSubjects">
+                  <td>
+                    <div style="margin-bottom: 6px;">
+                      <span class="subj-code" *ngIf="sub.code">{{ sub.code }}</span>
+                      <span class="subj-name">{{ sub.name }}</span>
+                    </div>
+                    <div class="compact-slots">
+                      <span class="slot-chip" *ngFor="let s of sub.scheduleSlots">
+                        <ion-icon name="time-outline"></ion-icon>
+                        {{ s.dayName }} {{ s.start }}-{{ s.end }} <ng-container *ngIf="s.room">({{ s.room
+                          }})</ng-container>
+                      </span>
+                    </div>
+                  </td>
+                  <td><span class="prog-text">{{ sub.prog }}</span></td>
+                  <td><span class="activity-text">{{ sub.activity }}</span></td>
+                  <td><span class="total-hrs-text-green">{{ formatDuration(sub.totalMins) }}</span></td>
+                </tr>
+                <tr class="total-row" *ngIf="sessionSubjects.length > 0">
+                  <td colspan="3"><strong>Total</strong></td>
+                  <td><strong class="total-hrs-text-green">{{ formatDuration(sessionTeachingTotalMinutes) }}</strong>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </ion-card>
+
+    <ion-card class="stay-hours-card" *ngIf="!isLoadingSessionTimetable">
+      <div class="sh-header">
+        <ion-icon name="time-outline"></ion-icon>
+        <h3>Stay Hour Activities</h3>
+      </div>
+      <div class="sh-content">
+        <div class="empty-stay-hours" *ngIf="stayHourActivities.length === 0">
+          <ion-icon name="calendar-clear-outline"></ion-icon>
+          <p>No stay hour activities recorded for this session.</p>
+        </div>
+
+        <div class="table-responsive" *ngIf="stayHourActivities.length > 0">
+          <table class="breakdown-table">
+            <thead>
+              <tr>
+                <th>ACTIVITY</th>
+                <th>TOTAL HOURS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let stay of stayHourActivities">
+                <td><span class="activity-text">{{ stay.activity }}</span></td>
+                <td><span class="total-hrs-text-green">{{ formatDuration(stay.totalMins) }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </ion-card>
+
+    <ion-card *ngFor="let w of workloads" class="workload-card">
+      <ion-card-header>
+        <div class="wl-header">
+          <div>
+            <ion-card-subtitle>{{ w.departmentName }}</ion-card-subtitle>
+            <ion-card-title>Other Duties</ion-card-title>
+          </div>
+          <ion-badge [color]="statusColor(w.workloadStatus)">
+            <ion-icon [name]="statusIcon(w.workloadStatus)" style="vertical-align:middle;margin-right:2px"></ion-icon>
+            {{ w.workloadStatus | titlecase }}
+          </ion-badge>
+        </div>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="hours-grid">
+          <div class="hour-item">
+            <ion-icon name="flask-outline" color="secondary"></ion-icon>
+            <span>Research</span>
+            <strong>{{ w.researchHours }}h</strong>
+          </div>
+          <div class="hour-item">
+            <ion-icon name="settings-outline" color="tertiary"></ion-icon>
+            <span>Admin</span>
+            <strong>{{ w.adminHours }}h</strong>
+          </div>
+          <div class="hour-item">
+            <ion-icon name="people-outline" color="warning"></ion-icon>
+            <span>Counseling</span>
+            <strong>{{ w.counselingHours }}h</strong>
+          </div>
+          <div class="hour-item">
+            <ion-icon name="document-outline" color="success"></ion-icon>
+            <span>Prep/Eval</span>
+            <strong>{{ w.prepEvaluationHours }}h</strong>
+          </div>
+          <div class="hour-item">
+            <ion-icon name="ellipsis-horizontal-outline" color="medium"></ion-icon>
+            <span>Other</span>
+            <strong>{{ w.otherHours }}h</strong>
+          </div>
+        </div>
+
+        <div class="total-summary-card">
+          <div class="summary-label">Total Workload Hours</div>
+          <div class="summary-value">{{ w.totalWorkloadHours | number:'1.1-1' }}h</div>
+        </div>
+
+        <div *ngIf="w.hodRemarks" class="remarks">
+          <ion-icon name="chatbubble-outline" color="warning"></ion-icon>
+          <span>{{ w.hodRemarks }}</span>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <div *ngIf="activeTab === 'timetable'">
+    <div class="filter-row">
+      <div class="picker-wrap">
+        <ion-label>Select Date</ion-label>
+        <ion-datetime-button datetime="weekDatePicker"></ion-datetime-button>
+      </div>
+      <button class="today-btn" type="button" (click)="setToday()">Today</button>
+    </div>
+    <div class="mode-row" style="margin:0 12px 10px;display:flex;align-items:center;gap:8px">
+      <span class="mode-label"
+        style="font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#1b4658">Day
+        Mode</span>
+      <ion-toggle [(ngModel)]="dayMode" color="primary"></ion-toggle>
+      <span class="mode-value"
+        style="margin-left:auto;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#125875;background:#e9f3f8;border:1px solid rgba(18,88,117,.2);padding:4px 10px;border-radius:999px">{{
+        dayMode ? 'Selected Day' : 'Selected Week' }}</span>
+    </div>
+    <div class="context-row">
+      <div class="context-pill">
+        <span>Selected</span>
+        <strong>{{ selectedDateLabel }}</strong>
+      </div>
+      <div class="context-pill">
+        <span>Week</span>
+        <strong>Week {{ selectedWeek }}</strong>
+      </div>
+      <div class="context-pill">
+        <span>Range</span>
+        <strong>{{ selectedWeekRangeLabel }}</strong>
+      </div>
+      <div class="context-pill">
+        <span>Today</span>
+        <strong>{{ todayLabel }}</strong>
+      </div>
+    </div>
+    <ion-modal [keepContentsMounted]="true">
+      <ng-template>
+        <ion-datetime id="weekDatePicker" presentation="date" [value]="selectedDate" [min]="sessionStartDate"
+          [max]="sessionEndDate" [firstDayOfWeek]="1" (ionChange)="onDateChange($event)">
+        </ion-datetime>
+      </ng-template>
+    </ion-modal>
+
+    <div class="week-overview" *ngIf="!isLoading && displayDays.length">
+      <div class="overview-head">
+        <h2>Timetable Summary</h2>
+        <span>{{ selectedSessionName }}</span>
+      </div>
+      <div class="overview-grid">
+        <div class="overview-tile">
+          <strong>{{ totalClasses }}</strong>
+          <span>Total Classes</span>
+        </div>
+        <div class="overview-tile">
+          <strong>{{ totalTeachingDays }}</strong>
+          <span>Teaching Days</span>
+        </div>
+        <div class="overview-tile">
+          <strong>{{ uniqueSubjects }}</strong>
+          <span>Subjects</span>
+        </div>
+      </div>
+    </div>
+
+    <ion-spinner *ngIf="isLoading" name="crescent" color="primary" style="display:block;margin:32px auto"></ion-spinner>
+
+    <div *ngIf="!isLoading && displayDays.length === 0" class="empty-state">
+      <ion-icon name="calendar-outline" size="large" color="medium"></ion-icon>
+      <p>No workload for {{ dayMode ? 'selected day' : 'selected week' }}.</p>
+    </div>
+
+    <div *ngFor="let day of displayDays" class="day-group">
+      <div class="day-header">
+        <div class="day-title">
+          <ion-icon name="sparkles-outline" color="primary"></ion-icon>
+          <span>{{ day.dayName }}</span>
+        </div>
+        <ion-badge color="light">{{ day.slots.length }} classes</ion-badge>
+      </div>
+      <ion-card *ngFor="let slot of day.slots" class="slot-card">
+        <ion-card-content>
+          <div class="slot-header">
+            <span class="time-pill">{{ slot.startTime }} - {{ slot.endTime }}</span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <ion-button size="small" fill="solid" color="primary" (click)="openAttendance(slot)"
+                style="--border-radius:10px;--padding-start:8px;--padding-end:8px;font-size:11px">
+                <ion-icon name="checkbox-outline" slot="start"></ion-icon>
+                Attendance
+              </ion-button>
+              <ion-badge class="status-badge" [color]="slot.attendanceMarked ? 'success' : 'warning'">
+                {{ slot.attendanceMarked ? 'Attendance Marked' : 'Pending' }}
+              </ion-badge>
+            </div>
+          </div>
+          <div class="slot-date" *ngIf="getSlotDateLabel(slot)">
+            <ion-icon name="calendar-clear-outline"></ion-icon>
+            <span>{{ getSlotDateLabel(slot) }}</span>
+          </div>
+          <h3 class="course-name">{{ slot.subjectName }}</h3>
+          <p class="sub-info">{{ slot.subjectCode }} <span *ngIf="slot.sectionName">&bull; {{ slot.sectionName }}</span>
+          </p>
+          <div class="slot-meta">
+            <span *ngIf="slot.roomNumber"><ion-icon name="location-outline"></ion-icon> Room {{ slot.roomNumber
+              }}</span>
+            <span *ngIf="slot.attendanceMarked">
+              <ion-icon name="people-outline"></ion-icon> {{ slot.presentCount }}/{{ slot.totalStudents }} present
+            </span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+</ion-content>

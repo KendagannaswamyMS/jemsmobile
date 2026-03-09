@@ -1,0 +1,16 @@
+.form-list { background: transparent; }
+
+.form-item {
+  --background: var(--ion-color-light);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  ion-label { font-size: 12px !important; font-weight: 600; color: var(--ion-color-medium); }
+}
+
+.submit-btn {
+  --border-radius: 12px;
+  margin-top: 16px;
+  height: 50px;
+  font-size: 15px;
+  font-weight: 600;
+}

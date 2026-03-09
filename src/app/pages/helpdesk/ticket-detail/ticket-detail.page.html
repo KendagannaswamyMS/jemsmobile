@@ -1,0 +1,66 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/helpdesk"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Ticket Detail</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-spinner *ngIf="isLoading" name="crescent" color="primary" style="display:block;margin:32px auto"></ion-spinner>
+
+  <ng-container *ngIf="ticket && !isLoading">
+    <ion-card class="detail-card">
+      <ion-card-header>
+        <div class="ticket-meta">
+          <ion-chip color="medium" outline>{{ ticket.ticketNumber }}</ion-chip>
+          <ion-badge [color]="statusColor(ticket.status)">{{ ticket.status }}</ion-badge>
+        </div>
+        <ion-card-title>{{ ticket.subject }}</ion-card-title>
+        <ion-card-subtitle>{{ ticket.requestType }} &bull; {{ ticket.departmentName }}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <p class="detail-text">{{ ticket.detail }}</p>
+        <div class="info-row">
+          <div><ion-icon name="person-outline"></ion-icon> <span>{{ ticket.requestedBy }}</span></div>
+          <div *ngIf="ticket.assignedTo"><ion-icon name="person-add-outline"></ion-icon> <span>{{ ticket.assignedTo }}</span></div>
+          <div><ion-icon name="time-outline"></ion-icon> <span>{{ ticket.createdAt | date:'d MMM yyyy, h:mm a' }}</span></div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Conversations -->
+    <ion-list-header><ion-label>Conversation</ion-label></ion-list-header>
+
+    <div *ngIf="!ticket.conversations?.length" class="empty-msg">No messages yet.</div>
+
+    <ion-card *ngFor="let c of ticket.conversations" class="convo-card" [class.internal]="c.isInternal">
+      <ion-card-content>
+        <div class="convo-header">
+          <strong>{{ c.senderName }}</strong>
+          <span class="convo-time">{{ c.createdAt | date:'d MMM, h:mm a' }}</span>
+        </div>
+        <p>{{ c.message }}</p>
+        <ion-chip *ngIf="c.isInternal" color="warning" outline style="font-size:10px;height:20px">Internal</ion-chip>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Reply Box -->
+    <div class="reply-box">
+      <ion-item lines="none">
+        <ion-textarea
+          [(ngModel)]="replyMessage"
+          placeholder="Write a reply…"
+          rows="3"
+          auto-grow="true">
+        </ion-textarea>
+      </ion-item>
+      <ion-button expand="block" (click)="sendReply()" [disabled]="!replyMessage.trim() || sending">
+        <ion-spinner *ngIf="sending" name="dots" style="margin-right:8px"></ion-spinner>
+        Send Reply
+        <ion-icon name="send-outline" slot="end"></ion-icon>
+      </ion-button>
+    </div>
+  </ng-container>
+</ion-content>

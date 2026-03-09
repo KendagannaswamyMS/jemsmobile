@@ -1,0 +1,266 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Dashboard</ion-title>
+    <ion-buttons slot="end">
+      <ion-button>
+        <ion-icon name="notifications-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Greeting Card -->
+  <div class="greeting-card">
+    <div class="greeting-text">
+      <p class="time-label">{{ currentTime }}</p>
+      <h2>{{ greeting }},</h2>
+      <h3>{{ currentUser?.name }}</h3>
+      <ion-chip [color]="currentUser?.role === 'Student' ? 'success' : 'warning'" outline>
+        <ion-icon name="person-circle-outline"></ion-icon>
+        <ion-label>{{ currentUser?.role }}</ion-label>
+      </ion-chip>
+    </div>
+    <div class="date-display">
+      <p class="day">{{ today | date:'EEE' }}</p>
+      <p class="date">{{ today | date:'d' }}</p>
+      <p class="month">{{ today | date:'MMM' }}</p>
+    </div>
+  </div>
+
+  <!-- Staff Punch-in card (non-students) -->
+  <ion-card class="punch-card" *ngIf="currentUser?.role !== 'Student'">
+    <ion-card-content>
+      <div class="punch-row">
+        <div class="punch-info">
+          <ion-icon name="time-outline" color="primary"></ion-icon>
+          <div>
+            <p class="punch-label">Today's Punch In</p>
+            <h3 class="punch-time">{{ todayPunchIn }}</h3>
+          </div>
+        </div>
+        <div class="running-time">
+          <p class="punch-label">Running Time</p>
+          <h3 class="punch-time">{{ runningTime }}</h3>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <ion-card class="stat-card" *ngIf="currentUser?.role === 'Student'">
+      <ion-card-content>
+        <ion-icon name="school-outline" [color]="attendanceColor" size="large"></ion-icon>
+        <h2 [style.color]="attendancePercent >= 75 ? 'var(--ion-color-success)' : 'var(--ion-color-danger)'">
+          {{ attendancePercent | number:'1.1-1' }}%
+        </h2>
+        <p>Attendance</p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="stat-card">
+      <ion-card-content>
+        <ion-icon name="ticket-outline" color="warning" size="large"></ion-icon>
+        <h2>{{ openTickets }}</h2>
+        <p>Open Tickets</p>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card class="stat-card" *ngIf="currentUser?.role !== 'Student'">
+      <ion-card-content>
+        <ion-icon name="document-text-outline" color="tertiary" size="large"></ion-icon>
+        <h2>{{ pendingWorkloads }}</h2>
+        <p>Pending Workloads</p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- 🎂 Today's Birthdays -->
+  <div class="bday-section" *ngIf="birthdays.length > 0">
+
+    <div class="bday-header">
+      <div class="bday-title-wrap">
+        <div class="bday-icon-ring">
+          <ion-icon name="gift-outline"></ion-icon>
+        </div>
+        <div>
+          <p class="bday-eyebrow">Upcoming Birthdays</p>
+          <h3 class="bday-heading">Happy Birthday! 🎉</h3>
+        </div>
+      </div>
+      <div class="bday-count">{{ birthdays.length }}</div>
+    </div>
+
+    <div class="bday-scroll">
+      <div class="bday-card" *ngFor="let b of birthdays" [class.is-tomorrow]="b.isTomorrow" (click)="openBirthday(b)">
+
+        <!-- Avatar -->
+        <div class="bday-avatar-wrap">
+          <div class="bday-avatar-ring">
+            <div class="bday-avatar">
+              <img *ngIf="b.pic" [src]="b.pic" [alt]="b.firstName" class="bday-avatar-img">
+              <span *ngIf="!b.pic">{{ b.initials }}</span>
+            </div>
+          </div>
+          <div class="bday-cake-icon">🎂</div>
+        </div>
+
+        <!-- Name block -->
+        <div class="bday-info">
+          <p class="bday-firstname">
+            <span class="bday-salutation" *ngIf="b.salutation">{{ b.salutation }}</span>
+            {{ b.firstName }} {{ b.lastName }} {{ b.middleName }}
+          </p>
+
+          <div class="bday-date-badges" *ngIf="!b.isToday">
+            <span class="badge badge-today" *ngIf="b.isToday">Today</span>
+            <span class="badge badge-tomorrow" *ngIf="b.isTomorrow">Tomorrow</span>
+            <span class="bday-future-date">{{ b.dob | date:'d MMM' }}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Birthday Popup -->
+  <div class="bday-popup-overlay" *ngIf="selectedBirthday" (click)="closeBirthday()">
+    <div class="bday-popup" (click)="$event.stopPropagation()">
+
+      <!-- Close -->
+      <button class="bday-popup-close" (click)="closeBirthday()">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+
+      <!-- Confetti strip -->
+      <div class="bday-popup-confetti">🎈 🎂 🎉 🥳 🎊</div>
+
+      <!-- Large avatar -->
+      <div class="bday-popup-avatar-ring">
+        <div class="bday-popup-avatar">
+          <img *ngIf="selectedBirthday.pic" [src]="selectedBirthday.pic" [alt]="selectedBirthday.firstName"
+            class="bday-popup-img">
+          <span *ngIf="!selectedBirthday.pic">{{ selectedBirthday.initials }}</span>
+        </div>
+      </div>
+
+      <!-- Name -->
+      <div class="bday-popup-name-block">
+        <h2 class="bday-popup-first">
+          <span class="bday-popup-salutation" *ngIf="selectedBirthday.salutation">{{ selectedBirthday.salutation
+            }}</span>
+          {{ selectedBirthday.firstName }} {{ selectedBirthday.lastName }} {{ selectedBirthday.middleName }}
+        </h2>
+        <div class="bday-popup-badges" *ngIf="!selectedBirthday.isToday">
+          <ion-badge *ngIf="selectedBirthday.isToday" color="danger">Today</ion-badge>
+          <ion-badge *ngIf="selectedBirthday.isTomorrow" color="warning">Tomorrow</ion-badge>
+          <span class="bday-future-date-popup">{{ selectedBirthday.dob | date:'d MMM' }}</span>
+        </div>
+      </div>
+
+      <!-- Wish row -->
+      <div class="bday-popup-wish">
+        <ion-icon name="heart-outline"></ion-icon>
+        <span>Wishing a wonderful birthday!</span>
+      </div>
+
+    </div>
+  </div>
+
+
+  <div *ngIf="isLoading" class="loading-overlay">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+  </div>
+
+  <!-- 🌟 New Joiners -->
+  <div class="joiner-section" *ngIf="joiners.length > 0">
+
+    <div class="joiner-header">
+      <div class="joiner-title-wrap">
+        <div class="joiner-icon-ring">
+          <ion-icon name="star-outline"></ion-icon>
+        </div>
+        <div>
+          <p class="joiner-eyebrow">Welcome Aboard</p>
+          <h3 class="joiner-heading">New Joiners ✨</h3>
+        </div>
+      </div>
+      <div class="joiner-count">{{ joiners.length }}</div>
+    </div>
+
+    <div class="joiner-scroll">
+      <div class="joiner-card" *ngFor="let j of joiners" (click)="openJoiner(j)">
+
+        <div class="joiner-avatar-wrap">
+          <div class="joiner-avatar-ring">
+            <div class="joiner-avatar">
+              <img *ngIf="j.pic" [src]="j.pic" [alt]="j.firstName" class="joiner-avatar-img">
+              <span *ngIf="!j.pic">{{ j.initials }}</span>
+            </div>
+          </div>
+          <div class="joiner-star-icon">⭐</div>
+        </div>
+
+        <div class="joiner-info">
+          <p class="joiner-firstname">
+            <span class="joiner-salutation" *ngIf="j.salutation">{{ j.salutation }}</span>
+            {{ j.firstName }} {{ j.lastName }} {{ j.middleName }}
+          </p>
+          <span class="joiner-desig">{{ j.designation }}</span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- New Joiner Popup -->
+  <div class="joiner-popup-overlay" *ngIf="selectedJoiner" (click)="closeJoiner()">
+    <div class="joiner-popup" (click)="$event.stopPropagation()">
+
+      <button class="joiner-popup-close" (click)="closeJoiner()">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+
+      <div class="joiner-popup-banner">✨ &nbsp; Welcome to the Family &nbsp; ✨</div>
+
+      <div class="joiner-popup-avatar-ring">
+        <div class="joiner-popup-avatar">
+          <img *ngIf="selectedJoiner.pic" [src]="selectedJoiner.pic" [alt]="selectedJoiner.firstName"
+            class="joiner-popup-img">
+          <span *ngIf="!selectedJoiner.pic">{{ selectedJoiner.initials }}</span>
+        </div>
+      </div>
+
+      <div class="joiner-popup-name-block">
+        <h2 class="joiner-popup-first">
+          <span class="joiner-popup-salutation" *ngIf="selectedJoiner.salutation">{{ selectedJoiner.salutation }}</span>
+          {{ selectedJoiner.firstName }} {{ selectedJoiner.lastName }} {{ selectedJoiner.middleName }}
+        </h2>
+        <p class="joiner-popup-desig">{{ selectedJoiner.designation }}</p>
+      </div>
+
+      <div class="joiner-popup-meta">
+        <div class="joiner-meta-row">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <span>Joined {{ selectedJoiner.dateOfJoining | date:'dd MMM yyyy' }}</span>
+        </div>
+        <div class="joiner-meta-row">
+          <ion-icon name="id-card-outline"></ion-icon>
+          <span>Emp. Code: {{ selectedJoiner.employeeCode }}</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</ion-content>

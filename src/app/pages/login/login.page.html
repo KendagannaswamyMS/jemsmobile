@@ -1,0 +1,61 @@
+<ion-content class="login-content" [fullscreen]="true">
+
+  <div class="login-wrapper">
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <div class="logo-ring">
+        <img src="assets/images/JEMS_LOGO.png" alt="JEMS Logo" class="logo-img" />
+      </div>
+      <h1 class="app-name">JEMS</h1>
+      <p class="app-tagline">JSS Education Management System</p>
+    </div>
+
+    <!-- Card Section -->
+    <div class="login-card">
+      <h2 class="card-title">Welcome Back</h2>
+      <p class="card-subtitle">Sign in to continue</p>
+
+      <!-- Mode Toggle -->
+      <div class="mode-toggle">
+        <button class="mode-btn" [class.active]="mode === 'staff'" (click)="setMode('staff')">
+          <ion-icon name="briefcase-outline"></ion-icon>
+          Staff / Faculty
+        </button>
+        <button class="mode-btn" [class.active]="mode === 'student'" (click)="setMode('student')">
+          <ion-icon name="school-outline"></ion-icon>
+          Student
+        </button>
+      </div>
+
+      <!-- Form -->
+      <form [formGroup]="form" (ngSubmit)="login()">
+
+        <div class="input-group">
+          <ion-icon name="person-outline" class="input-icon"></ion-icon>
+          <ion-input class="custom-input" formControlName="username" [type]="mode === 'student' ? 'text' : 'email'"
+            [placeholder]="mode === 'student' ? 'Student Username / USN' : 'Email Address'" autocomplete="username"
+            (ionInput)="onUsernameInput($event)"></ion-input>
+        </div>
+
+        <div class="input-group">
+          <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
+          <ion-input class="custom-input" formControlName="password" [type]="showPassword ? 'text' : 'password'"
+            placeholder="Password" autocomplete="current-password"></ion-input>
+          <ion-icon class="eye-icon" [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"
+            (click)="showPassword = !showPassword"></ion-icon>
+        </div>
+
+        <button type="submit" class="sign-in-btn" [disabled]="form.invalid || isLoading">
+          <span>Sign In</span>
+          <ion-icon name="arrow-forward-outline"></ion-icon>
+        </button>
+
+      </form>
+
+      <p class="footer-text">Developed @ JSS STU IT Cell &copy; 2026</p>
+    </div>
+
+  </div>
+
+</ion-content>

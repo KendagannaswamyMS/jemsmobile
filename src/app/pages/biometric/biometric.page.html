@@ -1,0 +1,112 @@
+<ion-header>
+    <ion-toolbar color="primary">
+        <ion-buttons slot="start">
+            <ion-menu-button></ion-menu-button>
+        </ion-buttons>
+        <ion-title>Weekly Biometric</ion-title>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content class="bio-content">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+        <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+
+    <!-- Week Navigator -->
+    <div class="week-nav">
+        <button class="nav-btn" (click)="prevWeek()">
+            <ion-icon name="chevron-back-outline"></ion-icon>
+        </button>
+        <div class="week-label">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <span>{{ weekLabel }}</span>
+        </div>
+        <button class="nav-btn" [disabled]="isCurrentWeek" (click)="nextWeek()">
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+        </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-wrap" *ngIf="isLoading">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+    </div>
+
+    <ng-container *ngIf="!isLoading">
+
+        <!-- Summary Strip -->
+        <div class="summary-strip">
+            <div class="summary-tile tile-green">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                <strong>{{ presentDays }}</strong>
+                <span>Days Present</span>
+            </div>
+            <div class="summary-tile tile-red">
+                <ion-icon name="close-circle-outline"></ion-icon>
+                <strong>{{ absentDays }}</strong>
+                <span>Days Absent</span>
+            </div>
+            <div class="summary-tile tile-blue">
+                <ion-icon name="time-outline"></ion-icon>
+                <strong>{{ totalHours | number:'1.1-1' }}h</strong>
+                <span>Logged Hours</span>
+            </div>
+            <div class="summary-tile tile-purple" *ngIf="attendancePct > 0">
+                <ion-icon name="stats-chart-outline"></ion-icon>
+                <strong>{{ attendancePct | number:'1.0-0' }}%</strong>
+                <span>Attendance</span>
+            </div>
+        </div>
+
+        <!-- Daily Records -->
+        <div class="records-section">
+            <div *ngFor="let record of weekRecords" class="record-card" [class.today]="isToday(record.date)"
+                [class.holiday]="record.status === 'holiday'">
+
+                <div class="record-left">
+                    <div class="day-badge" [class.today-badge]="isToday(record.date)">
+                        <span class="day-abbr">{{ record.dayName }}</span>
+                        <span class="day-num">{{ record.date | date:'d' }}</span>
+                    </div>
+                </div>
+
+                <div class="record-body">
+                    <ng-container *ngIf="record.status !== 'holiday'">
+                        <div class="record-row">
+                            <span class="record-label">Check-in</span>
+                            <span class="record-value">{{ record.checkIn || '—' }}</span>
+                        </div>
+                        <div class="record-row">
+                            <span class="record-label">Check-out</span>
+                            <span class="record-value">{{ record.checkOut || '—' }}</span>
+                        </div>
+                        <div class="record-row" *ngIf="record.totalHours && record.totalHours !== 'NA'">
+                            <span class="record-label">Duration</span>
+                            <span class="record-value">{{ record.totalHours | number:'1.1-1' }}h</span>
+                        </div>
+                    </ng-container>
+                    <span *ngIf="record.status === 'holiday'" class="holiday-label">Holiday / Week off</span>
+                </div>
+
+                <div class="record-right">
+                    <ion-badge [color]="statusColor(record.status)" class="status-badge">
+                        <ion-icon [name]="statusIcon(record.status)"></ion-icon>
+                        {{ record.status | titlecase }}
+                    </ion-badge>
+                </div>
+            </div>
+        </div>
+
+        <!-- No data state -->
+        <div class="empty-state" *ngIf="weekRecords.length === 0">
+            <ion-icon name="finger-print-outline" size="large" color="medium"></ion-icon>
+            <p>No biometric data for this week.</p>
+        </div>
+
+    </ng-container>
+
+    <div class="bio-note">
+        <ion-icon name="information-circle-outline"></ion-icon>
+        <span>Data is synced from the biometric device. Contact HR for corrections.</span>
+    </div>
+
+</ion-content>

@@ -1,0 +1,129 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary" class="header-toolbar">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>News & Events</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding container-content">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="isLoading" class="loading-overlay">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+  </div>
+
+  <div class="events-container" *ngIf="!isLoading">
+
+    <!-- Filters -->
+    <div class="filters-wrap">
+      <div class="filters-row">
+        <ion-item class="filter-item" lines="none">
+          <ion-label position="floating">Month</ion-label>
+          <ion-select [(ngModel)]="selectedMonth" (ionChange)="applyFilters()" interface="popover">
+            <ion-select-option *ngFor="let m of availableMonths" [value]="m">{{ m }}</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item class="filter-item" lines="none">
+          <ion-label position="floating">Year</ion-label>
+          <ion-select [(ngModel)]="selectedYear" (ionChange)="applyFilters()" interface="popover">
+            <ion-select-option *ngFor="let y of availableYears" [value]="y">{{ y }}</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </div>
+    </div> <!-- End Filters Wrap -->
+
+    <!-- Event list (both tabs) -->
+    <div class="vertical-list">
+      <div class="empty-state" *ngIf="paginatedEvents.length === 0">
+        <ion-icon name="search-outline"></ion-icon>
+        <p>No events found in this category.</p>
+      </div>
+
+      <div class="event-card list-card" [ngClass]="{'upcoming-card':  isUpcoming(ev.parsedDate) }"
+        *ngFor="let ev of paginatedEvents" (click)="openDetails(ev)">
+
+        <div class="card-hero-image" *ngIf="isUpcoming(ev.parsedDate) && ev.imageThumbnail"
+          [style.background-image]="'url(' + ev.imageThumbnail + ')'"></div>
+
+        <div class="list-card-layout">
+          <div class="list-thumbnail" *ngIf="!isUpcoming(ev.parsedDate) && ev.imageThumbnail"
+            [style.background-image]="'url(' + ev.imageThumbnail + ')'"></div>
+
+          <div class="list-body-wrap">
+            <div class="event-date-flag outline-flag">
+              <span class="flag-month">{{ ev.monthStr }}</span>
+              <span class="flag-day">{{ ev.eventDD }}</span>
+              <span class="flag-year">{{ ev.yearStr }}</span>
+            </div>
+
+            <div class="event-content">
+              <h3 class="event-title">{{ ev.eventHeading }}</h3>
+
+              <div class="action-row">
+                <span class="event-time" *ngIf="ev.eventTime"><ion-icon name="time-outline"></ion-icon> {{
+                  ev.eventTime }}</span>
+                <ion-button fill="clear" size="small" *ngIf="ev.pdfFiles?.length > 0"
+                  (click)="openAttachment(ev.pdfFiles[0].fileSrc, $event)">
+                  <ion-icon name="document-text-outline" slot="icon-only"></ion-icon>
+                </ion-button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="pagination-controls" *ngIf="totalPages > 1">
+      <ion-button fill="outline" size="small" (click)="prevPage()" [disabled]="currentPage === 1">
+        <ion-icon name="chevron-back-outline"></ion-icon> Prev
+      </ion-button>
+      <span class="page-indicator">Page {{ currentPage }} of {{ totalPages }}</span>
+      <ion-button fill="outline" size="small" (click)="nextPage()" [disabled]="currentPage === totalPages">
+        Next <ion-icon name="chevron-forward-outline"></ion-icon>
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Event Details Popup Modal -->
+  <div class="event-popup-overlay" *ngIf="selectedEvent" (click)="closeDetails()">
+    <div class="event-popup-content" (click)="$event.stopPropagation()">
+      <div class="close-btn" (click)="closeDetails()">
+        <ion-icon name="close-circle"></ion-icon>
+      </div>
+
+      <div class="popup-hero" *ngIf="selectedEvent.imageThumbnail"
+        [style.background-image]="'url(' + selectedEvent.imageThumbnail + ')'"></div>
+
+      <div class="popup-body">
+        <h2 class="popup-title">{{ selectedEvent.eventHeading }}</h2>
+
+        <div class="popup-meta" *ngIf="selectedEvent.eventDate || selectedEvent.eventTime">
+          <span class="meta-item" *ngIf="selectedEvent.eventDate">
+            <ion-icon name="calendar-outline"></ion-icon> {{ selectedEvent.eventDate }}
+          </span>
+          <span class="meta-item" *ngIf="selectedEvent.eventTime">
+            <ion-icon name="time-outline"></ion-icon> {{ selectedEvent.eventTime }}
+          </span>
+        </div>
+
+        <div class="popup-desc" *ngIf="selectedEvent.eventDetail">
+          <p>{{ selectedEvent.eventDetail }}</p>
+        </div>
+
+        <div class="popup-actions" *ngIf="selectedEvent.pdfFiles?.length > 0">
+          <ion-button expand="block" (click)="openAttachment(selectedEvent.pdfFiles[0].fileSrc, $event)">
+            <ion-icon name="cloud-download-outline" slot="start"></ion-icon>
+            View / Download Brochure
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</ion-content>

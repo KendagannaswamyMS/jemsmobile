@@ -1,0 +1,157 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Student Portal</ion-title>
+  </ion-toolbar>
+  <!-- Session Selector -->
+  <ion-toolbar>
+    <ion-select
+      [(ngModel)]="selectedSessionId"
+      (ionChange)="onSessionChange()"
+      interface="action-sheet"
+      placeholder="Select Session"
+      style="max-width:100%">
+      <ion-select-option *ngFor="let s of sessions" [value]="s.sessionslnum || s.Sessionslnum">
+        {{ sessionLabel(s) }}
+      </ion-select-option>
+    </ion-select>
+  </ion-toolbar>
+  <!-- Segment -->
+  <ion-toolbar>
+    <ion-segment [value]="activeTab" (ionChange)="onTabChange($any($event.detail.value))">
+      <ion-segment-button value="timetable">
+        <ion-icon name="calendar-outline"></ion-icon>
+        <ion-label>Timetable</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="attendance">
+        <ion-icon name="bar-chart-outline"></ion-icon>
+        <ion-label>Attendance</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div *ngIf="error" class="error-box">
+    <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- ── TIMETABLE TAB ── -->
+  <div *ngIf="activeTab === 'timetable'">
+    <!-- Week selector -->
+    <div class="week-selector">
+      <ion-select
+        [(ngModel)]="selectedWeek"
+        (ionChange)="onWeekChange()"
+        interface="popover"
+        placeholder="Select Week">
+        <ion-select-option *ngFor="let w of weeks" [value]="w.weekNumber">{{ w.label }}</ion-select-option>
+      </ion-select>
+      <span *ngIf="currentWeekInfo?.weekStartDate" class="week-range">
+        {{ currentWeekInfo!.weekStartDate | date:'d MMM' }} – {{ currentWeekInfo!.weekEndDate | date:'d MMM' }}
+      </span>
+    </div>
+
+    <ion-spinner *ngIf="isLoading" name="crescent" color="primary" style="display:block;margin:32px auto"></ion-spinner>
+
+    <div *ngIf="!isLoading && slotsByDay.length === 0" class="empty-state">
+      <ion-icon name="calendar-outline" size="large" color="medium"></ion-icon>
+      <p>No timetable for this week.</p>
+    </div>
+
+    <div *ngFor="let day of slotsByDay" class="day-group">
+      <div class="day-header">
+        <ion-icon name="sunny-outline" color="primary"></ion-icon>
+        <span>{{ day.dayName }}</span>
+      </div>
+      <ion-card *ngFor="let slot of day.slots" class="slot-card">
+        <ion-card-content>
+          <div class="slot-header">
+            <div class="slot-time">
+              <ion-icon name="time-outline" color="primary"></ion-icon>
+              <span>{{ slot.startTime }} – {{ slot.endTime }}</span>
+            </div>
+            <ion-badge [color]="statusColor(slot.attendanceStatus)">
+              <ion-icon [name]="statusIcon(slot.attendanceStatus)" style="font-size:12px;vertical-align:middle"></ion-icon>
+              {{ slot.attendanceStatus | titlecase }}
+            </ion-badge>
+          </div>
+          <h3 class="subject-name">{{ slot.subjectName }}</h3>
+          <p class="subject-code" *ngIf="slot.subjectCode">{{ slot.subjectCode }}</p>
+          <div class="slot-meta">
+            <span *ngIf="slot.roomNumber">
+              <ion-icon name="location-outline"></ion-icon> {{ slot.roomNumber }}
+            </span>
+            <span *ngIf="slot.facultyName">
+              <ion-icon name="person-outline"></ion-icon> {{ slot.facultyName }}
+            </span>
+            <span *ngIf="slot.activityType" class="activity-type">{{ slot.activityType }}</span>
+          </div>
+          <div *ngIf="slot.topicTitle" class="topic-row">
+            <ion-icon [name]="slot.isTopicCompleted ? 'checkmark-circle' : 'book-outline'"
+                      [color]="slot.isTopicCompleted ? 'success' : 'medium'"></ion-icon>
+            <span>{{ slot.topicTitle }}</span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+
+  <!-- ── ATTENDANCE TAB ── -->
+  <div *ngIf="activeTab === 'attendance'">
+    <!-- Overall summary -->
+    <ion-card class="overall-card" *ngIf="attendanceSummary">
+      <ion-card-content>
+        <div class="overall-row">
+          <div class="overall-circle" [class]="'circle-' + (overallPct >= 75 ? 'good' : overallPct >= 65 ? 'warn' : 'bad')">
+            <span class="pct">{{ overallPct | number:'1.1-1' }}%</span>
+            <span class="label">Overall</span>
+          </div>
+          <div class="overall-stats">
+            <div class="stat"><span>Total</span><strong>{{ overallTotal }}</strong></div>
+            <div class="stat"><span>Present</span><strong class="text-success">{{ overallPresent }}</strong></div>
+            <div class="stat"><span>Absent</span><strong class="text-danger">{{ overallAbsent }}</strong></div>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <div *ngIf="subjects.length === 0 && !isLoading" class="empty-state">
+      <ion-icon name="bar-chart-outline" size="large" color="medium"></ion-icon>
+      <p>No attendance data.</p>
+    </div>
+
+    <ion-card *ngFor="let sub of subjects" class="subject-card">
+      <ion-card-content>
+        <div class="subject-header">
+          <div>
+            <h3>{{ sub.subjectName }}</h3>
+            <p *ngIf="sub.subjectCode" class="code">{{ sub.subjectCode }}</p>
+          </div>
+          <ion-badge [color]="attendanceBadgeColor(sub.attendancePercentage)" class="pct-badge">
+            {{ sub.attendancePercentage | number:'1.1-1' }}%
+          </ion-badge>
+        </div>
+        <ion-progress-bar
+          [value]="sub.attendancePercentage / 100"
+          [color]="attendanceBadgeColor(sub.attendancePercentage)">
+        </ion-progress-bar>
+        <div class="subject-counts">
+          <span>Present: <strong>{{ sub.presentClasses }}</strong></span>
+          <span>Absent: <strong>{{ sub.absentClasses }}</strong></span>
+          <span>Total: <strong>{{ sub.totalClasses }}</strong></span>
+        </div>
+        <p *ngIf="sub.facultyName" class="faculty-name">
+          <ion-icon name="person-outline"></ion-icon> {{ sub.facultyName }}
+        </p>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

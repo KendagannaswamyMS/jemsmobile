@@ -1,0 +1,136 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/faculty"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Attendance</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="attendance-content">
+  <ion-card class="meta-card luxury-card">
+    <ion-card-content>
+      <div class="course-topline">
+        <div class="course-icon">
+          <ion-icon name="book-outline"></ion-icon>
+        </div>
+        <span class="context-chip">Attendance</span>
+      </div>
+
+      <h3 class="course-title">{{ headerCourse }}</h3>
+
+      <div class="meta-grid">
+        <div class="meta-chip" *ngIf="headerSession">
+          <ion-icon name="calendar-number-outline"></ion-icon>
+          <span>{{ headerSession }}</span>
+        </div>
+        <div class="meta-chip" *ngIf="headerDate">
+          <ion-icon name="today-outline"></ion-icon>
+          <span>{{ headerDate }}</span>
+        </div>
+        <div class="meta-chip" *ngIf="headerTime">
+          <ion-icon name="time-outline"></ion-icon>
+          <span>{{ headerTime }}</span>
+        </div>
+        <div class="meta-chip students-chip">
+          <ion-icon name="people-outline"></ion-icon>
+          <span>{{ totalStudents }} Students</span>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-spinner *ngIf="isLoading" name="crescent" color="primary" style="display:block;margin:36px auto"></ion-spinner>
+
+  <div *ngIf="!isLoading && loadError" class="error-state">
+    <ion-icon name="alert-circle-outline"></ion-icon>
+    <p>{{ loadError }}</p>
+  </div>
+
+  <div *ngIf="!isLoading && students.length === 0" class="empty-state">
+    <ion-icon name="people-outline"></ion-icon>
+    <p>No students found for attendance.</p>
+    <small>Request: sessionId={{ sessionId }}, subjectSlnum={{ subjectSlnum }}, slotId={{ slotId }}</small>
+  </div>
+
+  <ion-card *ngIf="!isLoading && attendanceRows.length" class="summary-card">
+    <ion-card-content>
+      <div class="summary-stats">
+        <span class="stat total"><ion-icon name="people-outline"></ion-icon> Total: {{ totalStudents }}</span>
+        <span class="stat present"><ion-icon name="checkmark-circle"></ion-icon> Present: {{ presentStudents }}</span>
+        <span class="stat absent"><ion-icon name="close-circle"></ion-icon> Absent: {{ absentStudents }}</span>
+      </div>
+      <div class="summary-actions">
+        <span class="summary-label">Mark All</span>
+        <div class="mark-all-toggle">
+          <span class="switch-label" [class.active]="markAllMode === 'present'">Present</span>
+          <ion-toggle
+            [checked]="markAllMode === 'present'"
+            (ionChange)="onMarkAllToggle($event.detail.checked)"
+            color="success">
+          </ion-toggle>
+          <span class="switch-label" [class.active]="markAllMode === 'absent'">Absent</span>
+        </div>
+        <ion-button size="small" fill="outline" color="primary" class="filter-btn" (click)="openAlphaFilter()">
+          <ion-icon name="funnel-outline" slot="start"></ion-icon>
+          A-Z
+        </ion-button>
+        <ion-button *ngIf="selectedInitial" size="small" fill="clear" color="medium" (click)="clearInitialFilter()">
+          Clear
+        </ion-button>
+        <span *ngIf="selectedInitial" class="filter-pill">Starts with: {{ selectedInitial }}</span>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-popover [isOpen]="isAlphaPopoverOpen" (didDismiss)="closeAlphaFilter()" side="bottom" alignment="start">
+    <ng-template>
+      <div class="alpha-popover">
+        <div class="alpha-grid">
+          <ion-button
+            *ngFor="let letter of alphabetList"
+            size="small"
+            fill="outline"
+            [color]="selectedInitial === letter ? 'primary' : 'medium'"
+            (click)="setInitialFilter(letter)">
+            {{ letter }}
+          </ion-button>
+        </div>
+        <ion-button expand="block" fill="clear" color="medium" (click)="clearInitialFilter()">Clear Filter</ion-button>
+      </div>
+    </ng-template>
+  </ion-popover>
+
+  <ion-list *ngIf="!isLoading && filteredAttendanceRows.length" lines="none" class="student-list">
+    <div *ngFor="let s of filteredAttendanceRows" class="student-item" [class.is-absent]="!s.isPresent">
+      <div class="student-main">
+        <div class="student-seq">{{ s.seq }}</div>
+        <div class="student-avatar initials">{{ getInitials(s.name) }}</div>
+        <div class="student-text">
+          <h2>{{ s.name }} <sub>{{ s.usn || s.registerNumber }}</sub></h2>
+        </div>
+      </div>
+      <div class="status-switch-inline">
+        <span class="switch-label" [class.active]="s.isPresent">Present</span>
+        <ion-toggle [checked]="s.isPresent" (ionChange)="setStudentAttendance(s, $event.detail.checked)" color="success"></ion-toggle>
+        <span class="switch-label" [class.active]="!s.isPresent">Absent</span>
+      </div>
+    </div>
+  </ion-list>
+
+  <div *ngIf="!isLoading && attendanceRows.length && selectedInitial && filteredAttendanceRows.length === 0" class="empty-state">
+    <ion-icon name="search-outline"></ion-icon>
+    <p>No students found for '{{ selectedInitial }}'.</p>
+    <ion-button size="small" fill="clear" color="medium" (click)="clearInitialFilter()">Clear Filter</ion-button>
+  </div>
+  <div *ngIf="!isLoading && attendanceRows.length" class="save-bar">
+    <ion-button
+      expand="block"
+      [disabled]="isSaving"
+      (click)="saveAttendance()"
+      style="--border-radius:14px;height:48px;font-weight:700;letter-spacing:.02em;text-transform:none;">
+      <ion-icon slot="start" name="save-outline"></ion-icon>
+      {{ isSaving ? 'Saving Attendance...' : 'Save Attendance' }}
+    </ion-button>
+  </div>
+</ion-content>

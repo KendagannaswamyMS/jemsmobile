@@ -34,4 +34,158 @@
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import "@ionic/angular/css/palettes/dark.system.css";
+/* @import "@ionic/angular/css/palettes/dark.system.css"; */
+
+// ── Brand Colors ──────────────────────────────────────────────────────────────
+:root {
+  --color-primary: #125875;
+  --color-accent:  #F26622;
+  --color-cream:   #fffcdb;
+}
+
+// ── Custom Three-Color Loading Spinner ────────────────────────────────────────
+ion-loading {
+  .loading-wrapper {
+    background: #ffffff !important;
+    border-radius: 18px !important;
+    padding: 24px 28px !important;
+    box-shadow: 0 12px 40px rgba(18, 88, 117, 0.18) !important;
+    border: 1.5px solid rgba(242, 102, 34, 0.2) !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+    min-width: 140px !important;
+    align-items: center !important;
+  }
+
+  // Hide default Ionic spinner
+  ion-spinner { display: none !important; }
+
+  // Inject 3-color spinner via ::before on the wrapper
+  .loading-wrapper::before {
+    content: '';
+    display: block;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: transparent;
+    border: 4px solid transparent;
+    border-top-color:   #125875;
+    border-right-color: #F26622;
+    border-bottom-color: #fffcdb;
+    animation: tri-spin 0.9s linear infinite;
+    flex-shrink: 0;
+  }
+
+  .loading-content {
+    color: #125875 !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+  }
+}
+
+@keyframes tri-spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Ensure select option overlays keep readable text in all modes */
+ion-action-sheet {
+  --background: #ffffff;
+  --color: #1a2a30;
+  --button-color: #1a2a30;
+  --cancel-button-color: #125875;
+}
+
+ion-popover ion-select-popover {
+  --background: #ffffff;
+  --color: #1a2a30;
+}
+
+ion-popover ion-select-popover ion-item {
+  --color: #1a2a30;
+}
+
+// ── Global Luxury Select ──────────────────────────────────────────────────────
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 44px;
+  padding: 0 40px 0 44px;   // left room for icon, right room for chevron
+  background-color: #ffffff;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 512 512'%3E%3Cpath fill='%23F26622' d='M256 294.1L383 167c9.4-9.4 24.6-9.4 33.9 0s9.3 24.6 0 34L273 345c-9.4 9.4-24.6 9.4-33.9 0L95 201c-9.3-9.4-9.3-24.6 0-34s24.6-9.4 33.9 0l127.1 127.1z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+
+  border: 1.5px solid rgba(18, 88, 117, 0.22);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #125875;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:focus {
+    border-color: #F26622;
+    box-shadow: 0 0 0 3px rgba(242, 102, 34, 0.15);
+  }
+
+  // options
+  option {
+    font-weight: 500;
+    color: #1a2a30;
+    background: #ffffff;
+    padding: 6px 0;
+  }
+  option:checked {
+    background: #125875;
+    color: #ffffff;
+    font-weight: 700;
+  }
+}
+
+// Wrapper pattern used in employee-directory + any future page
+.luxury-select-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1.5px solid rgba(18, 88, 117, 0.22);
+  border-radius: 12px;
+  height: 44px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:focus-within {
+    border-color: #F26622;
+    box-shadow: 0 0 0 3px rgba(242, 102, 34, 0.15);
+  }
+
+  .select-prefix-icon {
+    position: absolute;
+    left: 13px;
+    font-size: 18px;
+    color: #125875;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  select {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    padding-left: 40px;
+
+    &:focus {
+      border: none;
+      box-shadow: none;
+    }
+  }
+}
+

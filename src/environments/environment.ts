@@ -3,7 +3,10 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  // Using production API for browser dev testing (ng serve).
+  // Switch back to 'http://localhost:5017/api/' when running the local backend.
+  apiUrl: '/api/'
 };
 
 /*

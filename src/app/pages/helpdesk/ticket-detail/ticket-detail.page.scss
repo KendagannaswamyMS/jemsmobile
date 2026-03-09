@@ -1,0 +1,25 @@
+.detail-card {
+  margin: 12px; border-radius: 14px;
+  .ticket-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .detail-text { font-size: 14px; line-height: 1.5; margin: 8px 0; }
+  .info-row {
+    display: flex; flex-direction: column; gap: 6px; margin-top: 12px;
+    font-size: 12px; color: var(--ion-color-medium);
+    div { display: flex; align-items: center; gap: 6px; }
+  }
+}
+
+.convo-card {
+  margin: 4px 12px; border-radius: 10px;
+  &.internal { --background: rgba(var(--ion-color-warning-rgb), 0.05); }
+  .convo-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
+  .convo-time { font-size: 11px; color: var(--ion-color-medium); }
+  p { font-size: 13px; margin: 0; }
+}
+
+.empty-msg { text-align: center; padding: 16px; color: var(--ion-color-medium); font-size: 13px; }
+
+.reply-box {
+  padding: 12px;
+  ion-item { --background: var(--ion-color-light); border-radius: 12px; margin-bottom: 8px; }
+}

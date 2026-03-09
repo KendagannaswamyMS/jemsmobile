@@ -1,0 +1,167 @@
+<ion-header>
+    <ion-toolbar color="primary">
+        <ion-buttons slot="start">
+            <ion-menu-button></ion-menu-button>
+        </ion-buttons>
+        <ion-title>Employee Directory</ion-title>
+    </ion-toolbar>
+
+    <!-- Sticky Filter Bar -->
+    <ion-toolbar class="filter-toolbar">
+        <!-- Department Select -->
+        <div class="filter-row">
+            <div class="luxury-select-wrap">
+                <ion-icon name="business-outline" class="select-prefix-icon"></ion-icon>
+                <select [(ngModel)]="selectedDeptId" (change)="onDeptChange()">
+                    <option [value]="-1">All Departments</option>
+                    <option *ngFor="let d of departments" [value]="d.id">{{ d.name }}</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Search -->
+        <div class="search-row">
+            <div class="search-box">
+                <ion-icon name="search-outline"></ion-icon>
+                <input type="text" placeholder="Search by name or emp code…" [(ngModel)]="searchQuery"
+                    (input)="onSearch()" class="search-input">
+                <button class="clear-btn" *ngIf="searchQuery" (click)="clearSearch()">
+                    <ion-icon name="close-circle-outline"></ion-icon>
+                </button>
+            </div>
+            <div class="result-count" *ngIf="!isLoading">
+                {{ filteredEmployees.length }} employee{{ filteredEmployees.length !== 1 ? 's' : '' }}
+            </div>
+        </div>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content class="dir-content">
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+        <ion-refresher-content></ion-refresher-content>
+    </ion-refresher>
+
+    <!-- Loading -->
+    <div class="loading-wrap" *ngIf="isLoading">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+        <p>Loading directory…</p>
+    </div>
+
+    <!-- Employee Cards -->
+    <div class="emp-list" *ngIf="!isLoading">
+        <div class="emp-card" *ngFor="let e of filteredEmployees" (click)="openProfile(e)">
+
+            <!-- Avatar -->
+            <div class="emp-avatar-wrap">
+                <img *ngIf="e.userProfilepic" [src]="e.userProfilepic" [alt]="e.userFName" class="emp-avatar-img"
+                    (error)="e.userProfilepic = ''">
+                <div *ngIf="!e.userProfilepic" class="emp-avatar-placeholder">{{ initials(e) }}</div>
+            </div>
+
+            <!-- Info -->
+            <div class="emp-info">
+                <h3 class="emp-name">{{ fullName(e) }}</h3>
+                <p class="emp-desig">{{ e.designationName }}</p>
+                <p class="emp-dept">
+                    <ion-icon name="business-outline"></ion-icon>
+                    {{ e.departmentName }}
+                </p>
+                <div class="emp-meta-row">
+                    <span class="emp-code">
+                        <ion-icon name="id-card-outline"></ion-icon>
+                        {{ e.useremployeecode }}
+                    </span>
+                    <span class="emp-phone" *ngIf="e.userMobileNumber">
+                        <ion-icon name="call-outline"></ion-icon>
+                        {{ e.userMobileNumber }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Arrow -->
+            <ion-icon name="chevron-forward-outline" class="emp-arrow"></ion-icon>
+        </div>
+
+        <!-- Empty state -->
+        <div class="empty-state" *ngIf="filteredEmployees.length === 0">
+            <ion-icon name="people-outline" size="large" color="medium"></ion-icon>
+            <p>No employees found.</p>
+        </div>
+    </div>
+
+</ion-content>
+
+<!-- ── Full Profile Popup (sibling to ion-header/ion-content so it covers everything) ── -->
+<div class="profile-overlay" *ngIf="selectedEmployee" (click)="closeProfile()">
+    <div class="profile-popup" (click)="$event.stopPropagation()">
+
+        <button class="profile-close" (click)="closeProfile()">
+            <ion-icon name="close-outline"></ion-icon>
+        </button>
+
+        <!-- Banner with avatar ring sitting at its bottom edge -->
+        <div class="profile-banner">
+            <div class="profile-avatar-ring-wrap">
+                <div class="profile-avatar-ring">
+                    <div class="profile-avatar">
+                        <img *ngIf="selectedEmployee.userProfilepic" [src]="selectedEmployee.userProfilepic"
+                            [alt]="selectedEmployee.userFName" class="profile-avatar-img"
+                            (error)="selectedEmployee.userProfilepic = ''">
+                        <span *ngIf="!selectedEmployee.userProfilepic">{{ initials(selectedEmployee) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Name block -->
+        <div class="profile-name-block">
+            <span class="profile-sal" *ngIf="selectedEmployee.salutationName">{{ selectedEmployee.salutationName
+                }}</span>
+            <h2 class="profile-name">{{ selectedEmployee.userFName }} {{ selectedEmployee.userMname }} {{
+                selectedEmployee.userLName }}</h2>
+            <p class="profile-desig">{{ selectedEmployee.designationName }}</p>
+            <p class="profile-dept">{{ selectedEmployee.departmentName }}</p>
+        </div>
+
+        <!-- Details grid -->
+        <div class="profile-details">
+            <div class="detail-row">
+                <ion-icon name="id-card-outline"></ion-icon>
+                <span class="detail-label">Emp. Code</span>
+                <span class="detail-val">{{ selectedEmployee.useremployeecode }}</span>
+            </div>
+            <div class="detail-row" *ngIf="selectedEmployee.userMobileNumber">
+                <ion-icon name="call-outline"></ion-icon>
+                <span class="detail-label">Phone</span>
+                <span class="detail-val">{{ selectedEmployee.userMobileNumber }}</span>
+            </div>
+            <div class="detail-row" *ngIf="selectedEmployee.userEmailOfficial">
+                <ion-icon name="mail-outline"></ion-icon>
+                <span class="detail-label">Email</span>
+                <span class="detail-val email-val">{{ selectedEmployee.userEmailOfficial }}</span>
+            </div>
+            <div class="detail-row">
+                <ion-icon name="people-outline"></ion-icon>
+                <span class="detail-label">Staff Type</span>
+                <span class="detail-val">{{ selectedEmployee.staffTypeName }}</span>
+            </div>
+            <div class="detail-row">
+                <ion-icon name="layers-outline"></ion-icon>
+                <span class="detail-label">Category</span>
+                <span class="detail-val">{{ selectedEmployee.usercategoryName }} / {{ selectedEmployee.emptype
+                    }}</span>
+            </div>
+            <div class="detail-row">
+                <ion-icon name="calendar-outline"></ion-icon>
+                <span class="detail-label">Joined</span>
+                <span class="detail-val">{{ formatDate(selectedEmployee.userdateofjoin) }}</span>
+            </div>
+            <div class="detail-row">
+                <ion-icon name="person-outline"></ion-icon>
+                <span class="detail-label">Gender</span>
+                <span class="detail-val">{{ selectedEmployee.userGendername }}</span>
+            </div>
+        </div>
+
+    </div>
+</div>
