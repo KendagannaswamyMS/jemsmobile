@@ -1,0 +1,124 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <div class="header-brand">
+      <img src="assets/images/JEMS_LOGO.png" alt="JEMS Logo" class="header-logo-img" />
+      <span class="header-title">CAMPUS WIFI</span>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- ── 1. WIFI STATUS CARD ──────────────────────────── -->
+  <div class="card-box wifi-status-card">
+    <div class="wifi-status-header">
+      <div class="wifi-icon-ring" [class.active-ring]="!isOffCampus" [class.off-ring]="isOffCampus">
+        <ion-icon [name]="isOffCampus ? 'wifi-outline' : 'wifi'"></ion-icon>
+      </div>
+      <div class="wifi-account-info">
+        <h3 class="wifi-username">{{ username || 'Sophos WiFi User' }}</h3>
+        <p class="wifi-email" *ngIf="email">{{ email }}</p>
+      </div>
+      <span class="status-badge" [class.active-badge]="!isOffCampus" [class.off-badge]="isOffCampus">
+        {{ isOffCampus ? 'Off-Campus' : 'Connected' }}
+      </span>
+    </div>
+  </div>
+
+  <!-- ── 2. CHANGE / SET WIFI PASSWORD CARD ──────────────────────────── -->
+  <div class="card-box pwd-card">
+    <div class="card-title-row">
+      <ion-icon name="key-outline" class="card-icon"></ion-icon>
+      <h3 class="card-title">Sophos Firewall WiFi Password</h3>
+    </div>
+
+    <p class="card-sub">
+      Set or update your campus Sophos firewall WiFi password to log into campus hotspots across JSS STU.
+    </p>
+
+    <!-- New Password -->
+    <div class="form-group">
+      <label class="input-label">New WiFi Password</label>
+      <div class="input-wrap">
+        <ion-icon name="lock-closed-outline" class="field-icon"></ion-icon>
+        <input [type]="showNewPassword ? 'text' : 'password'" [(ngModel)]="newPassword" placeholder="Enter new password" class="text-input" />
+        <button class="eye-btn" (click)="showNewPassword = !showNewPassword">
+          <ion-icon [name]="showNewPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Confirm Password -->
+    <div class="form-group">
+      <label class="input-label">Confirm Password</label>
+      <div class="input-wrap">
+        <ion-icon name="lock-closed-outline" class="field-icon"></ion-icon>
+        <input [type]="showConfirmPassword ? 'text' : 'password'" [(ngModel)]="confirmPassword" placeholder="Confirm new password" class="text-input" />
+        <button class="eye-btn" (click)="showConfirmPassword = !showConfirmPassword">
+          <ion-icon [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Password Rules Checklist -->
+    <div class="rules-box">
+      <span class="rules-title">Sophos Password Requirements:</span>
+      <ul class="rules-list">
+        <li [class.rule-pass]="hasMinLength">Min 10 characters long</li>
+        <li [class.rule-pass]="hasUppercase">At least 1 uppercase letter (A-Z)</li>
+        <li [class.rule-pass]="hasLowercase">At least 1 lowercase letter (a-z)</li>
+        <li [class.rule-pass]="hasDigit">At least 1 digit (0-9)</li>
+        <li [class.rule-pass]="hasSpecial">At least 1 special character (!@#$%^&*)</li>
+      </ul>
+    </div>
+
+    <!-- Action Button -->
+    <button class="submit-btn" (click)="changeWifiPassword()">
+      <span>Update Sophos WiFi Password</span>
+      <ion-icon name="checkmark-done-outline"></ion-icon>
+    </button>
+  </div>
+
+  <!-- ── 3. ACTIVE SESSIONS CARD ──────────────────────────── -->
+  <div class="card-box sessions-card">
+    <div class="card-title-row">
+      <ion-icon name="desktop-outline" class="card-icon"></ion-icon>
+      <h3 class="card-title">Active WiFi Sessions</h3>
+      <span class="session-count-badge" *ngIf="activeSessions.length > 0">{{ activeSessions.length }} Active</span>
+    </div>
+
+    <div class="session-list" *ngIf="activeSessions.length > 0; else noSessions">
+      <div class="session-item" *ngFor="let s of activeSessions">
+        <div class="session-info">
+          <div class="session-ip-row">
+            <ion-icon name="hardware-chip-outline"></ion-icon>
+            <span class="ip-address">{{ s.iPAddress }}</span>
+            <span class="mac-address">({{ s.macAddress }})</span>
+          </div>
+          <p class="session-time">Login: {{ s.loginTime }}</p>
+        </div>
+
+        <div class="session-data">
+          <span class="data-in">↓ {{ s.bytesIn }}</span>
+          <span class="data-out">↑ {{ s.bytesOut }}</span>
+        </div>
+      </div>
+
+      <button class="logout-sessions-btn" (click)="logoutOtherSessions()">
+        <ion-icon name="log-out-outline"></ion-icon>
+        <span>Logout Other WiFi Sessions</span>
+      </button>
+    </div>
+
+    <ng-template #noSessions>
+      <div class="empty-sessions">
+        <ion-icon name="wifi-outline" class="empty-icon"></ion-icon>
+        <p class="empty-text">No active remote sessions detected.</p>
+      </div>
+    </ng-template>
+  </div>
+
+</ion-content>

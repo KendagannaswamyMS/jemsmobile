@@ -1,0 +1,222 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="backToTimetable()">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ courseName }}</ion-title>
+    <ion-note slot="end" class="section-note" *ngIf="vsectionName">{{ vsectionName }}</ion-note>
+    <ion-buttons slot="end">
+      <ion-button (click)="showTopicPopup = true" *ngIf="!loading" class="topic-btn-header"
+        [class.topic-selected]="selectedTopic">
+        <ion-icon slot="icon-only" [name]="selectedTopic ? 'book' : 'book-outline'"></ion-icon>
+      </ion-button>
+      <ion-button (click)="showFilterPopup = true" *ngIf="!loading" class="filter-btn-header"
+        [class.filter-active]="filterLetter">
+        <ion-icon slot="icon-only" name="filter-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="att-content">
+
+  <!-- Loading skeleton -->
+  <div *ngIf="loading" class="skeleton-wrap">
+    <div class="stats-skeleton">
+      <ion-skeleton-text animated style="width:100%;height:40px;border-radius:12px"></ion-skeleton-text>
+    </div>
+    <div class="btn-skeleton">
+      <ion-skeleton-text animated style="width:48%;height:36px;border-radius:8px"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width:48%;height:36px;border-radius:8px"></ion-skeleton-text>
+    </div>
+    <div *ngFor="let i of [1,2,3,4,5,6]" class="card-skeleton">
+      <ion-skeleton-text animated style="width:100%;height:60px;border-radius:12px;margin-bottom:8px"></ion-skeleton-text>
+    </div>
+  </div>
+
+  <div *ngIf="!loading">
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-chip total">
+        <ion-icon name="people-outline"></ion-icon>
+        <span class="stat-label">Total</span>
+        <span class="stat-val">{{ totalCount }}</span>
+      </div>
+      <div class="stat-chip present">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        <span class="stat-label">Present</span>
+        <span class="stat-val">{{ presentCount }}</span>
+      </div>
+      <div class="stat-chip absent">
+        <ion-icon name="close-circle-outline"></ion-icon>
+        <span class="stat-label">Absent</span>
+        <span class="stat-val">{{ absentCount }}</span>
+      </div>
+    </div>
+
+    <!-- Topic selected banner -->
+    <div class="topic-banner" *ngIf="selectedTopic" (click)="showTopicPopup = true">
+      <ion-icon name="book-outline"></ion-icon>
+      <span class="topic-banner-text">{{ topicLabel }}</span>
+      <ion-icon name="chevron-forward-outline" class="topic-banner-arrow"></ion-icon>
+    </div>
+
+    <!-- Mark All Buttons -->
+    <div class="mark-all-row">
+      <button class="mark-btn mark-present-btn" (click)="markAll(true)">
+        <ion-icon name="checkmark-done-outline"></ion-icon>
+        Mark All Present
+      </button>
+      <button class="mark-btn mark-absent-btn" (click)="markAll(false)">
+        <ion-icon name="close-circle-outline"></ion-icon>
+        Mark All Absent
+      </button>
+    </div>
+
+    <!-- Active filter chip -->
+    <div class="active-filter-row" *ngIf="filterLetter">
+      <span class="active-filter-chip">
+        <ion-icon name="filter-outline"></ion-icon>
+        Names starting with <strong>{{ filterLetter }}</strong>
+        &nbsp;·&nbsp; {{ filteredStudents.length }} student{{ filteredStudents.length !== 1 ? 's' : '' }}
+      </span>
+      <button class="clear-filter-btn" (click)="clearFilter()">
+        <ion-icon name="close-outline"></ion-icon>
+        Clear
+      </button>
+    </div>
+
+    <!-- Student List -->
+    <div class="student-list">
+      <div
+        class="student-card"
+        *ngFor="let s of filteredStudents"
+        [class.is-present]="s.isPresent"
+        [class.is-absent]="!s.isPresent"
+        (click)="toggle(s)">
+
+        <div class="student-avatar">{{ initials(s.name) }}</div>
+
+        <div class="student-info">
+          <p class="student-name">{{ s.name }}</p>
+          <p class="student-usn">{{ s.usn }}</p>
+        </div>
+
+        <div class="student-status" [class.present]="s.isPresent" [class.absent]="!s.isPresent">
+          <ion-icon [name]="s.isPresent ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+          <span>{{ s.isPresent ? 'PRESENT' : 'ABSENT' }}</span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</ion-content>
+
+<!-- ── Topic Selector Popup ───────────────────────────────────────────────── -->
+<div class="topic-overlay" *ngIf="showTopicPopup" (click)="showTopicPopup = false">
+  <div class="topic-popup" (click)="$event.stopPropagation()">
+
+    <div class="topic-popup-header">
+      <span class="topic-popup-icon"><ion-icon name="book-outline"></ion-icon></span>
+      <span class="topic-popup-title">Select Topic Covered</span>
+      <button class="topic-close-btn" (click)="showTopicPopup = false">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </div>
+
+    <!-- Unit -->
+    <div class="topic-select-wrap">
+      <select class="topic-select"
+        [value]="selectedUnit?.nodeId || ''"
+        (change)="onUnitChange(+$any($event.target).value)">
+        <option value="" disabled>Unit</option>
+        <option *ngFor="let u of units" [value]="u.nodeId">{{ u.nodeTitle }}</option>
+      </select>
+      <ion-icon name="chevron-down-outline" class="select-arrow"></ion-icon>
+    </div>
+
+    <!-- Chapter -->
+    <div class="topic-select-wrap" [class.sel-disabled]="!selectedUnit">
+      <select class="topic-select"
+        [value]="selectedChapter?.nodeId || ''"
+        [disabled]="!selectedUnit"
+        (change)="onChapterChange(+$any($event.target).value)">
+        <option value="" disabled>Chapter</option>
+        <option *ngFor="let c of chapters" [value]="c.nodeId">{{ c.nodeTitle }}</option>
+      </select>
+      <ion-icon name="chevron-down-outline" class="select-arrow"></ion-icon>
+    </div>
+
+    <!-- Topic -->
+    <div class="topic-select-wrap" [class.sel-disabled]="!selectedChapter">
+      <select class="topic-select"
+        [value]="selectedTopic?.nodeId || ''"
+        [disabled]="!selectedChapter"
+        (change)="onTopicChange(+$any($event.target).value)">
+        <option value="" disabled>Topic</option>
+        <option *ngFor="let t of topics" [value]="t.nodeId">{{ t.nodeTitle }}</option>
+      </select>
+      <ion-icon name="chevron-down-outline" class="select-arrow"></ion-icon>
+    </div>
+
+    <!-- Note -->
+    <div class="topic-note">
+      <ion-icon name="information-circle-outline"></ion-icon>
+      <span><strong>Note:</strong> Select the topic covered in this class to enable attendance submission.</span>
+    </div>
+
+    <!-- Done -->
+    <button class="topic-done-btn" [disabled]="!selectedTopic" (click)="showTopicPopup = false">
+      <ion-icon name="checkmark-outline"></ion-icon>
+      {{ selectedTopic ? 'Confirm Topic' : 'Select a Topic to Continue' }}
+    </button>
+
+  </div>
+</div>
+
+<!-- ── A-Z Filter Popup ────────────────────────────────────────────────────── -->
+<div class="az-overlay" *ngIf="showFilterPopup" (click)="showFilterPopup = false">
+  <div class="az-popup" (click)="$event.stopPropagation()">
+
+    <div class="az-popup-header">
+      <span class="az-popup-title">Filter by Name</span>
+      <button class="az-close-btn" (click)="showFilterPopup = false">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </div>
+
+    <button class="az-all-btn" [class.az-selected]="!filterLetter" (click)="clearFilter()">
+      All ({{ totalCount }})
+    </button>
+
+    <div class="az-grid">
+      <button
+        *ngFor="let letter of alphabet"
+        class="az-letter"
+        [class.az-has-names]="hasLetter(letter)"
+        [class.az-selected]="filterLetter === letter"
+        [disabled]="!hasLetter(letter)"
+        (click)="selectLetter(letter)">
+        {{ letter }}
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Bottom Action Bar -->
+<div class="bottom-bar" *ngIf="!loading">
+  <button class="back-btn" (click)="backToTimetable()">
+    <ion-icon name="arrow-back-outline"></ion-icon>
+    Back to Timetable
+  </button>
+  <button class="save-btn" (click)="saveAttendance()" [disabled]="saving || !selectedTopic">
+    <ion-icon name="save-outline"></ion-icon>
+    {{ saving ? 'Saving…' : 'Save Attendance' }}
+  </button>
+</div>

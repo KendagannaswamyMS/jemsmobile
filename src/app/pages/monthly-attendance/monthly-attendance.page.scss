@@ -1,0 +1,354 @@
+$primary: #125875;
+$accent:  #F26622;
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 8px;
+}
+
+.header-logo-img {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 3px 6px;
+}
+
+.header-title {
+  color: #ffffff;
+  font-size: 15.5px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+// ── Filter Bar ───────────────────────────────────────────────────────
+.filter-container {
+  background: $primary;
+  padding: 0 16px 14px;
+}
+
+.filter-row {
+  display: flex;
+  gap: 10px;
+}
+
+.filter-col {
+  &.flex-1 { flex: 1; }
+
+  .filter-lbl {
+    font-size: 10px;
+    font-weight: 700;
+    color: #cbd5e1;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    display: block;
+  }
+}
+
+.select-wrap {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  padding: 0 10px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+
+  .custom-select {
+    width: 100%;
+    --padding-start: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: #ffffff;
+  }
+}
+
+// ── Card Box ─────────────────────────────────────────────────────────
+.card-box {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 18px;
+  margin-bottom: 18px;
+  box-shadow:
+    0 10px 30px rgba(18, 88, 117, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(18, 88, 117, 0.08);
+}
+
+// ── Summary Metrics ──────────────────────────────────────────────────
+.summary-card {
+  border-top: 4px solid $accent;
+}
+
+.summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.summary-main-stat {
+  display: flex;
+  flex-direction: column;
+
+  .pct-num {
+    font-size: 32px;
+    font-weight: 900;
+    color: $primary;
+    line-height: 1;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  .pct-lbl {
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    margin-top: 4px;
+  }
+}
+
+.progress-ring-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  padding: 4px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .ring-fill {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+  }
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.metric-box {
+  border-radius: 14px;
+  padding: 10px 6px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .metric-num {
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .metric-lbl {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  &.present-box {
+    background: rgba(34, 197, 94, 0.1);
+    .metric-num { color: #16a34a; }
+    .metric-lbl { color: #15803d; }
+  }
+
+  &.leave-box {
+    background: rgba(245, 158, 11, 0.1);
+    .metric-num { color: #d97706; }
+    .metric-lbl { color: #b45309; }
+  }
+
+  &.absent-box {
+    background: rgba(239, 68, 68, 0.1);
+    .metric-num { color: #dc2626; }
+    .metric-lbl { color: #b91c1c; }
+  }
+
+  &.holiday-box {
+    background: rgba(18, 88, 117, 0.1);
+    .metric-num { color: $primary; }
+    .metric-lbl { color: $primary; }
+  }
+}
+
+// ── Daily Register Logs ──────────────────────────────────────────────
+.logs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: $primary;
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  .records-count {
+    font-size: 11px;
+    font-weight: 800;
+    color: $accent;
+    background: rgba(242, 102, 34, 0.1);
+    padding: 3px 8px;
+    border-radius: 10px;
+  }
+}
+
+.records-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.record-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 12px 14px;
+  box-shadow:
+    0 4px 12px rgba(18, 88, 117, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(18, 88, 117, 0.08);
+
+  &.is-holiday {
+    background: #f8fafc;
+    border-style: dashed;
+  }
+}
+
+.record-date-col {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, $primary 0%, #17688b 100%);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  .day-number {
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .day-name {
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-top: 2px;
+    opacity: 0.9;
+  }
+}
+
+.record-details-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-chip {
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+
+  &.status-present {
+    background: rgba(34, 197, 94, 0.12);
+    color: #16a34a;
+  }
+  &.status-absent {
+    background: rgba(239, 68, 68, 0.12);
+    color: #dc2626;
+  }
+  &.status-leave {
+    background: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+  }
+  &.status-holiday {
+    background: rgba(18, 88, 117, 0.12);
+    color: $primary;
+  }
+}
+
+.leave-tag, .holiday-tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+.timing-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11.5px;
+  color: #334155;
+
+  .time-col {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .time-icon {
+      font-size: 14px;
+
+      &.in-icon  { color: #16a34a; }
+      &.out-icon { color: #dc2626; }
+    }
+
+    &.hours-col {
+      margin-left: auto;
+      color: $primary;
+    }
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+
+  .empty-icon {
+    font-size: 48px;
+    color: #cbd5e1;
+    margin-bottom: 8px;
+  }
+
+  .empty-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: $primary;
+    margin: 0 0 4px;
+  }
+
+  .empty-sub {
+    font-size: 12.5px;
+    color: #64748b;
+    margin: 0;
+  }
+}

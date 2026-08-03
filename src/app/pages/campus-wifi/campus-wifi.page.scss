@@ -1,0 +1,391 @@
+$primary: #125875;
+$accent:  #F26622;
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 8px;
+}
+
+.header-logo-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.header-title {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+// ── Generic Card Container ───────────────────────────────────────────
+.card-box {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow:
+    0 10px 30px rgba(18, 88, 117, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(18, 88, 117, 0.08);
+}
+
+.card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+
+  .card-icon {
+    font-size: 22px;
+    color: $accent;
+  }
+
+  .card-title {
+    font-size: 16.5px;
+    font-weight: 800;
+    color: $primary;
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    flex: 1;
+  }
+}
+
+.card-sub {
+  font-size: 12.5px;
+  color: #64748b;
+  margin: 0 0 16px;
+  line-height: 1.4;
+}
+
+// ── 1. WiFi Status Card ──────────────────────────────────────────────
+.wifi-status-card {
+  border-left: 4px solid $accent;
+}
+
+.wifi-status-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.wifi-icon-ring {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  ion-icon {
+    font-size: 26px;
+  }
+
+  &.active-ring {
+    background: rgba(34, 197, 94, 0.12);
+    color: #16a34a;
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
+  }
+
+  &.off-ring {
+    background: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15);
+  }
+}
+
+.wifi-account-info {
+  flex: 1;
+
+  .wifi-username {
+    font-size: 16px;
+    font-weight: 800;
+    color: $primary;
+    margin: 0 0 2px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  .wifi-email {
+    font-size: 12px;
+    color: #64748b;
+    margin: 0;
+    font-weight: 500;
+  }
+}
+
+.status-badge {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+
+  &.active-badge {
+    background: rgba(34, 197, 94, 0.12);
+    color: #16a34a;
+  }
+  &.off-badge {
+    background: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+  }
+}
+
+.captive-portal-btn-wrap {
+  .portal-btn {
+    width: 100%;
+    height: 44px;
+    border: 1px dashed rgba(18, 88, 117, 0.25);
+    background: rgba(18, 88, 117, 0.04);
+    border-radius: 14px;
+    color: $primary;
+    font-size: 12.5px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+
+    ion-icon {
+      font-size: 16px;
+      color: $accent;
+    }
+
+    &:active {
+      background: rgba(18, 88, 117, 0.08);
+    }
+  }
+}
+
+// ── 2. Password Change Form ──────────────────────────────────────────
+.form-group {
+  margin-bottom: 14px;
+}
+
+.input-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.input-wrap {
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0 12px;
+  height: 48px;
+  transition: all 0.2s ease;
+
+  &:focus-within {
+    border-color: $accent;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(242, 102, 34, 0.15);
+  }
+
+  .field-icon {
+    font-size: 20px;
+    color: $primary;
+    margin-right: 10px;
+    flex-shrink: 0;
+  }
+}
+
+.text-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.eye-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  cursor: pointer;
+
+  ion-icon { font-size: 20px; }
+}
+
+// Rules Box
+.rules-box {
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 18px;
+  border: 1px solid #f1f5f9;
+
+  .rules-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: #475569;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .rules-list {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 12px;
+    color: #64748b;
+
+    li {
+      margin-bottom: 3px;
+      transition: color 0.2s ease;
+
+      &.rule-pass {
+        color: #16a34a;
+        font-weight: 700;
+      }
+    }
+  }
+}
+
+// Submit Button
+.submit-btn {
+  width: 100%;
+  height: 50px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(135deg, $primary 0%, #17688b 100%);
+  color: #ffffff;
+  font-size: 14.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(18, 88, 117, 0.25);
+  transition: all 0.2s ease;
+
+  ion-icon { font-size: 18px; }
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+// ── 3. Active Sessions ───────────────────────────────────────────────
+.session-count-badge {
+  font-size: 11px;
+  font-weight: 800;
+  color: $primary;
+  background: rgba(18, 88, 117, 0.08);
+  padding: 3px 8px;
+  border-radius: 10px;
+}
+
+.session-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.session-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 12px;
+  border: 1px solid #f1f5f9;
+}
+
+.session-info {
+  .session-ip-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #0f172a;
+
+    ion-icon {
+      font-size: 16px;
+      color: $accent;
+    }
+
+    .mac-address {
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 600;
+    }
+  }
+
+  .session-time {
+    font-size: 11px;
+    color: #94a3b8;
+    margin: 2px 0 0;
+  }
+}
+
+.session-data {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 11px;
+  font-weight: 700;
+
+  .data-in  { color: #16a34a; }
+  .data-out { color: $primary; }
+}
+
+.logout-sessions-btn {
+  width: 100%;
+  height: 44px;
+  border: none;
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+  cursor: pointer;
+
+  ion-icon { font-size: 18px; }
+
+  &:active { background: rgba(239, 68, 68, 0.2); }
+}
+
+.empty-sessions {
+  text-align: center;
+  padding: 20px 0;
+
+  .empty-icon {
+    font-size: 40px;
+    color: #cbd5e1;
+  }
+
+  .empty-text {
+    font-size: 12.5px;
+    color: #64748b;
+    margin: 4px 0 0;
+  }
+}

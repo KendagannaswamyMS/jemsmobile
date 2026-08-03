@@ -1,0 +1,555 @@
+$primary:  #125875;
+$accent:   #F26622;
+$present:  #16a34a;
+$absent:   #dc2626;
+
+// ── Section note in header ────────────────────────────────────────────────────
+ion-note.section-note {
+  color: rgba(255,255,255,0.8);
+  font-size: 12px;
+  font-weight: 600;
+  padding-right: 12px;
+  letter-spacing: 0.5px;
+}
+
+// ── Content ───────────────────────────────────────────────────────────────────
+.att-content {
+  --background: #f0f4f6;
+  --padding-bottom: 80px;
+}
+
+// ── Stats Bar ─────────────────────────────────────────────────────────────────
+.stats-bar {
+  display: flex;
+  gap: 8px;
+  padding: 14px 16px 8px;
+  background: #fff;
+  border-bottom: 1px solid #e8eef1;
+}
+
+.stat-chip {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 13px;
+
+  ion-icon { font-size: 16px; }
+
+  .stat-label {
+    flex: 1;
+    font-weight: 500;
+    color: #4a6070;
+    font-size: 12px;
+  }
+  .stat-val {
+    font-weight: 800;
+    font-size: 15px;
+  }
+
+  &.total {
+    background: #f0f4f6;
+    ion-icon { color: $primary; }
+    .stat-val { color: $primary; }
+  }
+  &.present {
+    background: #dcfce7;
+    ion-icon { color: $present; }
+    .stat-val { color: $present; }
+  }
+  &.absent {
+    background: #fee2e2;
+    ion-icon { color: $absent; }
+    .stat-val { color: $absent; }
+  }
+}
+
+// ── Mark All Row ──────────────────────────────────────────────────────────────
+.mark-all-row {
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e8eef1;
+}
+
+.mark-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  ion-icon { font-size: 15px; }
+}
+
+.mark-present-btn {
+  background: #dcfce7;
+  color: $present;
+  border: 1px solid #bbf7d0;
+}
+
+.mark-absent-btn {
+  background: #fee2e2;
+  color: $absent;
+  border: 1px solid #fecaca;
+}
+
+// ── Student List ──────────────────────────────────────────────────────────────
+.student-list {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.student-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 6px rgba(18,88,117,0.07);
+  border-left: 4px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.18s, box-shadow 0.18s;
+
+  &.is-present { border-left-color: $present; }
+  &.is-absent  { border-left-color: $absent; }
+
+  &:active { box-shadow: 0 2px 10px rgba(18,88,117,0.15); }
+}
+
+.student-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e0eff5;
+  color: $primary;
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.student-info {
+  flex: 1;
+  min-width: 0;
+
+  .student-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a2e38;
+    margin: 0 0 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .student-usn {
+    font-size: 11px;
+    color: #8a9ea6;
+    margin: 0;
+  }
+}
+
+.student-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+
+  ion-icon { font-size: 22px; }
+  span {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+
+  &.present {
+    ion-icon, span { color: $present; }
+  }
+  &.absent {
+    ion-icon, span { color: $absent; }
+  }
+}
+
+// ── Bottom bar ────────────────────────────────────────────────────────────────
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  background: #fff;
+  border-top: 1px solid #e0e8ec;
+  box-shadow: 0 -2px 12px rgba(18,88,117,0.08);
+  z-index: 100;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0f4f6;
+  color: $primary;
+  border: 1px solid #d0dce2;
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  ion-icon { font-size: 16px; }
+}
+
+.save-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: $primary;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  ion-icon { font-size: 16px; }
+
+  &[disabled] {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+// ── Topic button in header ────────────────────────────────────────────────────
+.topic-btn-header {
+  --color: rgba(255,255,255,0.85);
+  &.topic-selected { --color: #fff; }
+}
+
+// ── Topic selected banner ─────────────────────────────────────────────────────
+.topic-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #f0fdf4;
+  border-bottom: 1px solid #bbf7d0;
+  cursor: pointer;
+
+  ion-icon:first-child { font-size: 15px; color: #16a34a; flex-shrink: 0; }
+
+  .topic-banner-text {
+    flex: 1;
+    font-size: 12px;
+    font-weight: 600;
+    color: #15803d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .topic-banner-arrow { font-size: 14px; color: #16a34a; flex-shrink: 0; }
+}
+
+// ── Topic Popup ───────────────────────────────────────────────────────────────
+.topic-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.topic-popup {
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  padding: 20px 16px 32px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
+}
+
+.topic-popup-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.topic-popup-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #e0eff5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  ion-icon { font-size: 18px; color: $primary; }
+}
+
+.topic-popup-title {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a2e38;
+}
+
+.topic-close-btn {
+  background: #f0f4f6;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  ion-icon { font-size: 18px; color: #4a6070; }
+}
+
+.topic-select-wrap {
+  position: relative;
+  margin-bottom: 12px;
+  &.sel-disabled { opacity: 0.45; }
+}
+
+.topic-select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 12px 40px 12px 14px;
+  border: 1.5px solid #d0dce2;
+  border-radius: 10px;
+  background: #f8fafb;
+  font-size: 13px;
+  color: #1a2e38;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+
+  &:focus { border-color: $primary; background: #fff; }
+  &:disabled { cursor: not-allowed; }
+}
+
+.select-arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #8a9ea6;
+  pointer-events: none;
+}
+
+.topic-note {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 14px 0;
+
+  ion-icon { font-size: 16px; color: $accent; flex-shrink: 0; margin-top: 1px; }
+  span { font-size: 12px; color: #7c4a1c; line-height: 1.5; }
+}
+
+.topic-done-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px;
+  border: none;
+  border-radius: 12px;
+  background: $primary;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  ion-icon { font-size: 17px; }
+
+  &[disabled] {
+    background: #c4d8e0;
+    color: #7a9aaa;
+    cursor: not-allowed;
+  }
+}
+
+// ── Active filter chip ────────────────────────────────────────────────────────
+.active-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #eff8ff;
+  border-bottom: 1px solid #bfdbfe;
+}
+
+.active-filter-chip {
+  flex: 1;
+  font-size: 12px;
+  color: #1d4ed8;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  ion-icon { font-size: 13px; }
+}
+
+.clear-filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1d4ed8;
+  background: #dbeafe;
+  border: 1px solid #93c5fd;
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  ion-icon { font-size: 14px; }
+}
+
+// ── Filter button in header ───────────────────────────────────────────────────
+.filter-btn-header {
+  --color: rgba(255,255,255,0.85);
+  &.filter-active {
+    --color: #fff;
+    --background: rgba(255,255,255,0.2);
+    border-radius: 8px;
+  }
+}
+
+// ── A-Z Popup overlay ─────────────────────────────────────────────────────────
+.az-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.az-popup {
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  padding: 20px 16px 32px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
+}
+
+.az-popup-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.az-popup-title {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a2e38;
+}
+
+.az-close-btn {
+  background: #f0f4f6;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  ion-icon { font-size: 18px; color: #4a6070; }
+}
+
+.az-all-btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1.5px solid #d0dce2;
+  background: #f8fafb;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3a5060;
+  margin-bottom: 14px;
+  cursor: pointer;
+
+  &.az-selected {
+    background: $primary;
+    color: #fff;
+    border-color: $primary;
+  }
+}
+
+.az-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.az-letter {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  border: 1.5px solid #e0e8ec;
+  background: #f8fafb;
+  font-size: 14px;
+  font-weight: 700;
+  color: #b0c0c8;
+  cursor: not-allowed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.az-has-names {
+    color: $primary;
+    border-color: #c4dae5;
+    background: #f0f8fc;
+    cursor: pointer;
+
+    &:active { opacity: 0.8; }
+  }
+
+  &.az-selected {
+    background: $primary;
+    color: #fff;
+    border-color: $primary;
+  }
+}
+
+// ── Skeletons ─────────────────────────────────────────────────────────────────
+.skeleton-wrap {
+  padding: 14px 16px;
+}
+.stats-skeleton { margin-bottom: 10px; }
+.btn-skeleton {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}

@@ -1,0 +1,336 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <div class="header-brand">
+      <img src="assets/images/JEMS_LOGO.png" alt="JEMS Logo" class="header-logo-img" />
+      <span class="header-title">LEAVE MANAGEMENT</span>
+    </div>
+  </ion-toolbar>
+  
+  <div class="segment-container">
+    <ion-segment [(ngModel)]="selectedSegment" mode="md">
+      <ion-segment-button value="apply">
+        <ion-icon name="add-circle-outline"></ion-icon>
+        <ion-label>Apply</ion-label>
+      </ion-segment-button>
+
+      <ion-segment-button value="history">
+        <ion-icon name="list-outline"></ion-icon>
+        <ion-label>My Requests</ion-label>
+      </ion-segment-button>
+
+      <ion-segment-button value="approvals" *ngIf="isApprover">
+        <ion-icon name="checkmark-done-circle-outline"></ion-icon>
+        <ion-label>Approvals</ion-label>
+        <ion-badge color="danger" class="tab-badge" *ngIf="pendingApprovals.length > 0">{{ pendingApprovals.length }}</ion-badge>
+      </ion-segment-button>
+
+      <ion-segment-button value="balances">
+        <ion-icon name="pie-chart-outline"></ion-icon>
+        <ion-label>Balances</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </div>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- ── 1. APPLY LEAVE FORM TAB ──────────────────────────── -->
+  <div *ngIf="selectedSegment === 'apply'" class="tab-content">
+    <div class="card-box form-card">
+      <div class="card-header">
+        <ion-icon name="calendar-clear-outline" class="card-icon"></ion-icon>
+        <h3 class="card-title">New Leave Application</h3>
+      </div>
+
+      <!-- Leave Type Selection -->
+      <div class="form-group">
+        <label class="input-label">Leave Type <span class="required">*</span></label>
+        <div class="select-wrap">
+          <ion-icon name="briefcase-outline" class="field-icon"></ion-icon>
+          <ion-select [(ngModel)]="selectedLeaveTypeId" placeholder="Select Leave Type" interface="action-sheet" class="custom-select">
+            <ion-select-option *ngFor="let t of leaveTypes" [value]="t.leaveTypeId">
+              {{ t.leaveName }} ({{ t.leaveCode }})
+            </ion-select-option>
+          </ion-select>
+        </div>
+      </div>
+
+      <!-- Substitute Staff Selection (MANDATORY) -->
+      <div class="form-group">
+        <label class="input-label">Substitute Staff (Mandatory) <span class="required">*</span></label>
+        <div class="substitute-picker-wrap" (click)="openSubstituteModal()">
+          <ion-icon name="people-outline" class="field-icon"></ion-icon>
+          <div class="picker-value" [class.placeholder]="!selectedSubstituteUserId">
+            {{ getSelectedSubstituteName() || 'Select Substitute Faculty / Staff' }}
+          </div>
+          <ion-button fill="clear" size="small" class="clear-btn" *ngIf="selectedSubstituteUserId" (click)="clearSubstituteSelection($event)">
+            <ion-icon name="close-circle" slot="icon-only"></ion-icon>
+          </ion-button>
+          <ion-icon name="chevron-down-outline" class="dropdown-chevron" *ngIf="!selectedSubstituteUserId"></ion-icon>
+        </div>
+      </div>
+
+      <!-- Date Pickers Grid -->
+      <div class="form-row">
+        <div class="form-group half-width">
+          <label class="input-label">From Date <span class="required">*</span></label>
+          <div class="input-wrap">
+            <ion-icon name="calendar-outline" class="field-icon"></ion-icon>
+            <input type="date" [(ngModel)]="fromDate" (change)="calculateDays()" class="date-input" />
+          </div>
+        </div>
+
+        <div class="form-group half-width">
+          <label class="input-label">To Date <span class="required">*</span></label>
+          <div class="input-wrap">
+            <ion-icon name="calendar-outline" class="field-icon"></ion-icon>
+            <input type="date" [(ngModel)]="toDate" [disabled]="isHalfDay" (change)="calculateDays()" class="date-input" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Half Day Toggle -->
+      <div class="toggle-card">
+        <div class="toggle-info">
+          <span class="toggle-title">Half Day Leave</span>
+          <span class="toggle-subtitle">Apply for half day session (0.5 day)</span>
+        </div>
+        <ion-toggle [(ngModel)]="isHalfDay" (ionChange)="onHalfDayToggle()" color="primary"></ion-toggle>
+      </div>
+
+      <div class="form-group" *ngIf="isHalfDay">
+        <label class="input-label">Session</label>
+        <ion-segment [(ngModel)]="halfDaySession" mode="ios" class="session-segment">
+          <ion-segment-button value="FN">
+            <ion-label>Forenoon (FN)</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="AN">
+            <ion-label>Afternoon (AN)</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </div>
+
+      <!-- Total Days Banner -->
+      <div class="duration-banner" [class.error-banner]="calculatedDays <= 0">
+        <ion-icon name="time-outline"></ion-icon>
+        <span>Total Duration: <strong>{{ calculatedDays }} Day(s)</strong></span>
+      </div>
+
+      <!-- Reason -->
+      <div class="form-group">
+        <label class="input-label">Reason for Leave <span class="required">*</span></label>
+        <textarea [(ngModel)]="reason" rows="3" placeholder="Enter reason for leave..." class="textarea-input"></textarea>
+      </div>
+
+      <!-- Emergency Contact -->
+      <div class="form-group">
+        <label class="input-label">Emergency Contact No.</label>
+        <div class="input-wrap">
+          <ion-icon name="call-outline" class="field-icon"></ion-icon>
+          <input type="tel" [(ngModel)]="emergencyContact" placeholder="e.g. 9876543210" class="text-input" />
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <button class="submit-btn" (click)="submitLeaveApplication()">
+        <span>Submit Leave Application</span>
+        <ion-icon name="send-outline"></ion-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── 2. MY REQUESTS HISTORY TAB ──────────────────────────── -->
+  <div *ngIf="selectedSegment === 'history'" class="tab-content">
+    <div class="history-list" *ngIf="leaveApplications.length > 0; else noHistory">
+      <div class="history-card" *ngFor="let app of leaveApplications">
+        <div class="history-header">
+          <div class="leave-badge-wrap">
+            <span class="leave-code-badge">{{ app.leaveCode }}</span>
+            <span class="leave-type-title">{{ app.leaveTypeName }}</span>
+          </div>
+          <span class="status-chip" [class.approved]="app.status === 'APPROVED'" [class.pending]="app.status === 'PENDING'" [class.rejected]="app.status === 'REJECTED'" [class.cancelled]="app.status === 'CANCELLED'">
+            {{ app.status }}
+          </span>
+        </div>
+
+        <div class="history-dates">
+          <div class="date-chip">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <span>{{ app.fromDate }} <span *ngIf="app.fromDate !== app.toDate">to {{ app.toDate }}</span></span>
+          </div>
+          <div class="days-chip">
+            {{ app.totalDays }} {{ app.totalDays === 1 ? 'Day' : 'Days' }}
+          </div>
+        </div>
+
+        <p class="history-reason" *ngIf="app.reason">
+          "{{ app.reason }}"
+        </p>
+
+        <div class="history-footer">
+          <span class="applied-date">Applied on {{ app.appliedDate }}</span>
+          <span class="app-id">ID #{{ app.applicationId }}</span>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noHistory>
+      <div class="empty-state">
+        <ion-icon name="document-text-outline" class="empty-icon"></ion-icon>
+        <p class="empty-title">No Leave Requests</p>
+        <p class="empty-sub">You have not submitted any leave applications yet.</p>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- ── 3. HOD / AUTHORITY LEAVE APPROVALS TAB ──────────────────────────── -->
+  <div *ngIf="selectedSegment === 'approvals'" class="tab-content">
+    <div class="history-list" *ngIf="pendingApprovals.length > 0; else noApprovals">
+      <div class="approval-card" *ngFor="let p of pendingApprovals">
+        <div class="approval-applicant-header">
+          <div class="applicant-avatar">
+            {{ p.employeeName[0] || 'E' }}
+          </div>
+          <div class="applicant-info">
+            <h4 class="applicant-name">{{ p.employeeName }}</h4>
+            <p class="applicant-meta">{{ p.employeeCode }} <span *ngIf="p.departmentName">• {{ p.departmentName }}</span></p>
+          </div>
+          <span class="leave-code-badge alt-badge">{{ p.leaveCode }}</span>
+        </div>
+
+        <div class="history-dates">
+          <div class="date-chip">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <span>{{ p.fromDate }} <span *ngIf="p.fromDate !== p.toDate">to {{ p.toDate }}</span></span>
+          </div>
+          <div class="days-chip">
+            {{ p.totalDays }} {{ p.totalDays === 1 ? 'Day' : 'Days' }}
+          </div>
+        </div>
+
+        <div class="reason-box">
+          <span class="reason-lbl">Reason:</span>
+          <span class="reason-txt">{{ p.reason }}</span>
+        </div>
+
+        <div class="approval-actions">
+          <button class="action-btn reject-btn" (click)="rejectLeaveRequest(p)">
+            <ion-icon name="close-circle-outline"></ion-icon>
+            <span>Reject</span>
+          </button>
+          <button class="action-btn approve-btn" (click)="approveLeaveRequest(p)">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+            <span>Approve</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noApprovals>
+      <div class="empty-state">
+        <ion-icon name="checkmark-done-circle-outline" class="empty-icon approved-icon"></ion-icon>
+        <p class="empty-title">All Approvals Clear</p>
+        <p class="empty-sub">There are no pending leave requests requiring your approval.</p>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- ── 4. LEAVE BALANCES TAB ──────────────────────────── -->
+  <div *ngIf="selectedSegment === 'balances'" class="tab-content">
+    <div class="balance-grid">
+      <div class="balance-card" *ngFor="let b of leaveBalances" [style.border-top-color]="b.color">
+        <div class="balance-header">
+          <span class="balance-code" [style.background]="b.color">{{ b.leaveCode }}</span>
+          <span class="balance-name">{{ b.leaveName }}</span>
+        </div>
+
+        <div class="balance-stats">
+          <div class="stat-col">
+            <span class="stat-num color-balance">{{ b.balance }}</span>
+            <span class="stat-lbl">Remaining</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-col">
+            <span class="stat-num color-used">{{ b.used }}</span>
+            <span class="stat-lbl">Used</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-col">
+            <span class="stat-num color-alloc">{{ b.allocated }}</span>
+            <span class="stat-lbl">Total</span>
+          </div>
+        </div>
+
+        <div class="progress-bar-wrap">
+          <div class="progress-fill" [style.width.%]="(b.balance / b.allocated) * 100" [style.background]="b.color"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</ion-content>
+
+<!-- Substitute Staff Search Modal -->
+<ion-modal [isOpen]="isSubstituteModalOpen" (didDismiss)="closeSubstituteModal()" class="substitute-search-modal">
+  <ng-template>
+    <ion-header class="ion-no-border">
+      <ion-toolbar color="primary">
+        <ion-title>Select Substitute Staff</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeSubstituteModal()">
+            <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+      <ion-toolbar color="primary" class="search-toolbar">
+        <ion-searchbar [(ngModel)]="substituteSearchQuery" 
+                       (ionInput)="filterSubstituteStaff()" 
+                       placeholder="Search by name or emp code..." 
+                       class="modal-searchbar"
+                       [debounce]="150"
+                       animated="true"
+                       showClearButton="always">
+        </ion-searchbar>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="modal-content ion-padding">
+      <div class="staff-count-badge" *ngIf="filteredSubstituteStaffList.length > 0">
+        Showing {{ filteredSubstituteStaffList.length }} staff member(s)
+      </div>
+
+      <ion-list class="staff-list" *ngIf="filteredSubstituteStaffList.length > 0; else noStaffFound">
+        <ion-item *ngFor="let s of filteredSubstituteStaffList" 
+                  (click)="selectSubstituteStaff(s)" 
+                  button 
+                  detail="false"
+                  [class.selected-staff]="s.userId === selectedSubstituteUserId"
+                  class="staff-item">
+          <ion-avatar slot="start" class="staff-avatar">
+            <img *ngIf="s.profilePic && !s.imgError" [src]="s.profilePic" (error)="s.imgError = true" alt="profile" class="staff-profile-img" />
+            <div *ngIf="!s.profilePic || s.imgError" class="avatar-initials">{{ getInitials(s.fullName) }}</div>
+          </ion-avatar>
+          <ion-label>
+            <h2 class="staff-name">{{ s.fullName }}</h2>
+            <p class="staff-code" *ngIf="s.employeeCode">
+              <ion-badge color="secondary" class="code-badge">EMP Code: {{ s.employeeCode }}</ion-badge>
+            </p>
+          </ion-label>
+          <ion-icon name="checkmark-circle" color="primary" slot="end" *ngIf="s.userId === selectedSubstituteUserId" class="check-icon"></ion-icon>
+        </ion-item>
+      </ion-list>
+
+      <ng-template #noStaffFound>
+        <div class="empty-staff-state">
+          <ion-icon name="person-outline" class="empty-icon"></ion-icon>
+          <h3>No Staff Found</h3>
+          <p *ngIf="substituteSearchQuery">No staff members match "{{ substituteSearchQuery }}"</p>
+          <p *ngIf="!substituteSearchQuery">No substitute staff available.</p>
+        </div>
+      </ng-template>
+    </ion-content>
+  </ng-template>
+</ion-modal>

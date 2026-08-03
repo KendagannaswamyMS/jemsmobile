@@ -1,0 +1,91 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
+    <ion-title>Timetable</ion-title>
+  </ion-toolbar>
+
+  <!-- Week Navigator -->
+  <ion-toolbar color="primary" *ngIf="selectedWeek && !loading">
+    <ion-buttons slot="start">
+      <ion-button [disabled]="isFirstWeek" (click)="prevWeek()">
+        <ion-icon slot="icon-only" name="chevron-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title class="week-title">
+      <ion-select
+        interface="action-sheet"
+        [value]="selectedWeek.weekNumber"
+        (ionChange)="selectWeek(+$any($event).detail.value)"
+        class="week-select">
+        <ion-select-option *ngFor="let w of weeks" [value]="w.weekNumber">
+          {{ w.label }}
+        </ion-select-option>
+      </ion-select>
+    </ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button [disabled]="isLastWeek" (click)="nextWeek()">
+        <ion-icon slot="icon-only" name="chevron-forward-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="skeleton-wrap">
+    <ion-skeleton-text animated *ngFor="let i of [1,2,3]"
+      style="width:100%;height:80px;border-radius:14px;margin-bottom:12px">
+    </ion-skeleton-text>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error && !loading" class="empty-state">
+    <ion-icon name="warning-outline"></ion-icon>
+    <p>Could not load timetable</p>
+  </div>
+
+  <!-- Day Groups -->
+  <div *ngIf="!loading && !error">
+    <div *ngFor="let group of dayGroups" class="day-section">
+
+      <!-- Day Header -->
+      <div class="day-header" [class.today]="isToday(group)">
+        <span class="day-name">{{ group.label }}</span>
+        <span class="day-date">{{ group.date }}</span>
+        <span class="today-pill" *ngIf="isToday(group)">Today</span>
+        <span class="slot-count" *ngIf="group.slots.length > 0">{{ group.slots.length }} class{{ group.slots.length > 1 ? 'es' : '' }}</span>
+      </div>
+
+      <!-- Slots -->
+      <div *ngIf="group.slots.length > 0" class="slots-list">
+        <div class="slot-card" *ngFor="let slot of group.slots" [class]="activityColor(slot.activitytype)" (click)="openAttendance(slot)">
+          <div class="slot-time-col">
+            <span class="slot-start">{{ slot.starttime }}</span>
+            <div class="slot-timeline-line"></div>
+            <span class="slot-end">{{ slot.endtime }}</span>
+          </div>
+          <div class="slot-body">
+            <div class="slot-top-row">
+              <span class="activity-pill" [class]="activityColor(slot.activitytype)">{{ slot.activitytype }}</span>
+              <span class="slot-room">
+                <ion-icon name="location-outline"></ion-icon>{{ slot.roomnumber }}
+              </span>
+            </div>
+            <h4 class="slot-course">{{ slot.courseName }}</h4>
+            <p class="slot-code">{{ slot.courseCode }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- No class day -->
+      <div *ngIf="group.slots.length === 0" class="no-slots">
+        <span>No classes</span>
+      </div>
+
+    </div>
+  </div>
+
+</ion-content>

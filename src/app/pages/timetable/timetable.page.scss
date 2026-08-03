@@ -1,0 +1,167 @@
+$primary:  #125875;
+$accent:   #F26622;
+$theory:   #125875;
+$lab:      #2a7f4f;
+$tutorial: #b45309;
+
+// ── Week selector ─────────────────────────────────────────────────────────────
+.week-title {
+  padding: 0;
+  text-align: center;
+}
+
+.week-select {
+  --color: #fff;
+  --placeholder-color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  max-width: 100%;
+  justify-content: center;
+}
+
+// ── Day section ───────────────────────────────────────────────────────────────
+.day-section { margin-bottom: 16px; }
+
+.day-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px;
+  margin-bottom: 8px;
+
+  .day-name {
+    font-size: 14px;
+    font-weight: 800;
+    color: $primary;
+    min-width: 32px;
+  }
+  .day-date {
+    font-size: 12px;
+    color: #8a9ea6;
+  }
+  .today-pill {
+    font-size: 10px;
+    font-weight: 700;
+    background: $accent;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-left: 2px;
+  }
+  .slot-count {
+    margin-left: auto;
+    font-size: 11px;
+    color: #8a9ea6;
+  }
+
+  &.today .day-name { color: $accent; }
+}
+
+// ── Slot cards ────────────────────────────────────────────────────────────────
+.slots-list { display: flex; flex-direction: column; gap: 8px; }
+
+.slot-card {
+  display: flex;
+  gap: 12px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 2px 10px rgba(18,88,117,0.09);
+  border-left: 4px solid $theory;
+  cursor: pointer;
+
+  &.lab      { border-left-color: $lab; }
+  &.tutorial { border-left-color: $tutorial; }
+  &:active   { opacity: 0.85; }
+}
+
+.slot-time-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 38px;
+
+  .slot-start, .slot-end {
+    font-size: 10px;
+    font-weight: 700;
+    color: #3a5060;
+    white-space: nowrap;
+  }
+  .slot-timeline-line {
+    flex: 1;
+    width: 2px;
+    background: rgba(18,88,117,0.15);
+    margin: 3px 0;
+    min-height: 12px;
+    border-radius: 2px;
+  }
+}
+
+.slot-body { flex: 1; min-width: 0; }
+
+.slot-top-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.activity-pill {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  color: #fff;
+  background: $theory;
+  flex-shrink: 0;
+
+  &.lab      { background: $lab; }
+  &.tutorial { background: $tutorial; }
+}
+
+.slot-room {
+  font-size: 11px;
+  color: #5a7a8a;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: auto;
+  flex-shrink: 0;
+  ion-icon { font-size: 12px; color: $accent; }
+}
+
+.slot-course {
+  font-size: 13px;
+  font-weight: 700;
+  color: $primary;
+  margin: 0 0 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.slot-code {
+  font-size: 11px;
+  color: #8a9ea6;
+  margin: 0;
+}
+
+// ── No classes / empty ────────────────────────────────────────────────────────
+.no-slots {
+  padding: 6px 8px;
+  font-size: 12px;
+  color: #b0c0c8;
+  font-style: italic;
+}
+
+.skeleton-wrap { padding-top: 8px; }
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 20px;
+  color: #8a9ea6;
+  ion-icon { font-size: 48px; margin-bottom: 12px; }
+  p { font-size: 14px; margin: 0; }
+}

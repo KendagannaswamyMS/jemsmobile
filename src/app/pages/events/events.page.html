@@ -1,0 +1,156 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
+    <ion-title>Events</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- ── Filter Bar ───────────────────────────────── -->
+  <div class="filter-bar">
+
+    <button class="chip" [class.chip-active]="showUpcoming"
+      (click)="showUpcoming = !showUpcoming; onFilterChange()">
+      <ion-icon name="flash-outline"></ion-icon>
+      Upcoming
+    </button>
+
+    <div class="month-select-wrap">
+      <ion-icon name="calendar-outline" class="month-icon"></ion-icon>
+      <select class="month-select" [(ngModel)]="selectedMonth" (change)="onFilterChange()">
+        <option value="">All Months</option>
+        <option *ngFor="let m of monthOptions" [value]="m">{{ m }}</option>
+      </select>
+      <ion-icon name="chevron-down-outline" class="select-caret"></ion-icon>
+    </div>
+
+  </div>
+
+  <!-- ── Loading ──────────────────────────────────── -->
+  <div *ngIf="loading" class="skeleton-list">
+    <div class="event-skeleton" *ngFor="let s of [1,2,3,4]">
+      <ion-skeleton-text animated class="skel-thumb"></ion-skeleton-text>
+      <div class="skel-body">
+        <ion-skeleton-text animated style="width:40%;height:10px;border-radius:4px"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width:80%;height:13px;border-radius:4px;margin-top:6px"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width:60%;height:10px;border-radius:4px;margin-top:5px"></ion-skeleton-text>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Empty ─────────────────────────────────────── -->
+  <div class="empty-state" *ngIf="!loading && filtered.length === 0">
+    <ion-icon name="calendar-outline"></ion-icon>
+    <p>No events found</p>
+  </div>
+
+  <!-- ── Event Cards ───────────────────────────────── -->
+  <div class="event-list" *ngIf="!loading && paginated.length > 0">
+    <div class="event-card" *ngFor="let e of paginated" (click)="openDetail(e)">
+
+      <!-- Thumbnail -->
+      <div class="event-thumb-wrap">
+        <img *ngIf="thumb(e)" [src]="thumb(e)" class="event-thumb"
+          (error)="$any($event.target).style.display='none'; $any($event.target).nextElementSibling.style.display='flex'" alt="" />
+        <div class="event-thumb-fallback" [style.display]="thumb(e) ? 'none' : 'flex'">
+          <ion-icon name="image-outline"></ion-icon>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="event-content">
+        <div class="event-meta">
+          <span class="event-date-badge">
+            <span class="event-dd">{{ e.eventDD }}</span>
+            <span class="event-my">{{ e.eventMMYYYY }}</span>
+          </span>
+          <span class="event-time" *ngIf="e.eventTime">
+            <ion-icon name="time-outline"></ion-icon>{{ e.eventTime }}
+          </span>
+        </div>
+        <h3 class="event-heading">{{ e.eventHeading }}</h3>
+        <p class="event-detail" *ngIf="e.eventDetail">{{ shortDetail(e.eventDetail) }}</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Pagination ────────────────────────────────── -->
+  <div class="pagination" *ngIf="!loading && totalPages > 1">
+    <button class="page-btn" (click)="prevPage()" [disabled]="page === 1">
+      <ion-icon name="chevron-back-outline"></ion-icon>
+    </button>
+    <span class="page-info">{{ page }} / {{ totalPages }}</span>
+    <button class="page-btn" (click)="nextPage()" [disabled]="page === totalPages">
+      <ion-icon name="chevron-forward-outline"></ion-icon>
+    </button>
+  </div>
+
+</ion-content>
+
+<!-- ── Event Detail Popup ──────────────────────────────── -->
+<div class="detail-overlay" *ngIf="selectedEvent" (click)="closeDetail()">
+  <div class="detail-sheet" (click)="$event.stopPropagation()">
+
+    <!-- Handle + Close -->
+    <div class="sheet-handle"></div>
+    <button class="sheet-close" (click)="closeDetail()">
+      <ion-icon name="close-outline"></ion-icon>
+    </button>
+
+    <!-- Scrollable body -->
+    <div class="sheet-body">
+
+      <!-- Active image -->
+      <div class="detail-hero" *ngIf="activeImage">
+        <img [src]="activeImage" class="detail-hero-img"
+          (error)="$any($event.target).style.display='none'" alt="" />
+      </div>
+      <div class="detail-hero-placeholder" *ngIf="!activeImage">
+        <ion-icon name="image-outline"></ion-icon>
+      </div>
+
+      <!-- Image thumbnails strip -->
+      <div class="detail-img-strip" *ngIf="(selectedEvent.imageFiles?.length ?? 0) > 1">
+        <div class="detail-img-thumb"
+          *ngFor="let img of selectedEvent.imageFiles"
+          [class.active-thumb]="activeImage === img.imgSrc"
+          (click)="selectImage(img.imgSrc)">
+          <img [src]="img.imgSrc" (error)="$any($event.target).style.display='none'" alt="" />
+        </div>
+      </div>
+
+      <!-- Date + Time -->
+      <div class="detail-meta">
+        <span class="event-date-badge">
+          <span class="event-dd">{{ selectedEvent.eventDD }}</span>
+          <span class="event-my">{{ selectedEvent.eventMMYYYY }}</span>
+        </span>
+        <span class="event-time" *ngIf="selectedEvent.eventTime">
+          <ion-icon name="time-outline"></ion-icon>{{ selectedEvent.eventTime }}
+        </span>
+      </div>
+
+      <!-- Heading -->
+      <h2 class="detail-heading">{{ selectedEvent.eventHeading }}</h2>
+
+      <!-- Full detail text -->
+      <p class="detail-body" *ngIf="selectedEvent.eventDetail">{{ selectedEvent.eventDetail }}</p>
+
+      <!-- PDF attachments -->
+      <div class="detail-pdfs" *ngIf="selectedEvent.pdfFiles?.length">
+        <h4 class="attach-label">
+          <ion-icon name="document-outline"></ion-icon> Attachments
+        </h4>
+        <a class="pdf-row" *ngFor="let pdf of selectedEvent.pdfFiles"
+          [href]="pdf.fileSrc" target="_blank" (click)="$event.stopPropagation()">
+          <ion-icon name="document-text-outline"></ion-icon>
+          <span>{{ pdf.title || pdf.desc || 'View PDF' }}</span>
+          <ion-icon name="open-outline" class="pdf-open"></ion-icon>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>

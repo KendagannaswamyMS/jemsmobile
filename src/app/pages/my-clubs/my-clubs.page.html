@@ -1,0 +1,83 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
+    <ion-title>My Clubs</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- ── Loading ──────────────────────────────────── -->
+  <div *ngIf="loading" class="skeleton-list">
+    <div class="club-skeleton" *ngFor="let s of [1,2]">
+      <ion-skeleton-text animated class="skel-logo"></ion-skeleton-text>
+      <div class="skel-body">
+        <ion-skeleton-text animated style="width:60%;height:13px;border-radius:4px"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width:40%;height:10px;border-radius:4px;margin-top:6px"></ion-skeleton-text>
+      </div>
+    </div>
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- ── Active ─────────────────────────────────── -->
+    <div class="section-header">
+      <ion-icon name="checkmark-circle-outline" class="section-icon-active"></ion-icon>
+      <h3 class="section-title">Active Memberships ({{ activeClubs.length }})</h3>
+    </div>
+    <div class="empty-state" *ngIf="!activeClubs.length">
+      <p>You are not a member of any club yet.</p>
+    </div>
+    <div class="club-list" *ngIf="activeClubs.length">
+      <div class="mc-item" *ngFor="let m of activeClubs">
+        <div class="mc-item-logo"><ion-icon name="people-outline"></ion-icon></div>
+        <div class="mc-item-body">
+          <h3>{{ m.clubname }}</h3>
+          <p class="mc-since" *ngIf="m.processeddate">Member since {{ m.processeddate | date:'dd MMM yyyy' }}</p>
+        </div>
+        <span class="status-badge status-member">Active</span>
+      </div>
+    </div>
+
+    <!-- ── Pending ────────────────────────────────── -->
+    <ng-container *ngIf="pendingClubs.length">
+      <div class="section-header">
+        <ion-icon name="hourglass-outline" class="section-icon-pending"></ion-icon>
+        <h3 class="section-title">Pending Requests ({{ pendingClubs.length }})</h3>
+      </div>
+      <div class="club-list">
+        <div class="mc-item" *ngFor="let m of pendingClubs">
+          <div class="mc-item-logo pending"><ion-icon name="hourglass-outline"></ion-icon></div>
+          <div class="mc-item-body">
+            <h3>{{ m.clubname }}</h3>
+            <p class="mc-since" *ngIf="m.requestdate">Requested {{ m.requestdate | date:'dd MMM yyyy' }}</p>
+          </div>
+          <span class="status-badge status-pending">Awaiting</span>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- ── Rejected ───────────────────────────────── -->
+    <ng-container *ngIf="rejectedClubs.length">
+      <div class="section-header">
+        <ion-icon name="close-circle-outline" class="section-icon-rejected"></ion-icon>
+        <h3 class="section-title">Rejected ({{ rejectedClubs.length }})</h3>
+      </div>
+      <div class="club-list">
+        <div class="mc-item" *ngFor="let m of rejectedClubs">
+          <div class="mc-item-logo rejected"><ion-icon name="close-circle-outline"></ion-icon></div>
+          <div class="mc-item-body">
+            <h3>{{ m.clubname }}</h3>
+            <p class="mc-reason" *ngIf="m.rejectionreason">Reason: {{ m.rejectionreason }}</p>
+            <p class="mc-since" *ngIf="!m.rejectionreason && m.processeddate">Rejected {{ m.processeddate | date:'dd MMM yyyy' }}</p>
+          </div>
+          <button class="join-btn" (click)="reApply(m.clubslnum)">
+            <ion-icon name="refresh-outline"></ion-icon>Re-Apply
+          </button>
+        </div>
+      </div>
+    </ng-container>
+
+  </ng-container>
+
+</ion-content>

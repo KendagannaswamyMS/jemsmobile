@@ -1,0 +1,277 @@
+$primary: #125875;
+$accent:  #F26622;
+$cream:   #fffcdb;
+
+.login-content {
+  --background: #f8fafc;
+}
+
+.login-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  align-items: center;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+// ── Hero Section (Deep Brand Teal with Wave Glow) ───────────────────────────
+.hero-section {
+  width: 100%;
+  background: linear-gradient(165deg, #093447 0%, $primary 60%, #17688b 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 42px 24px 44px;
+  border-radius: 0 0 36px 36px;
+  box-shadow: 0 12px 32px rgba(18, 88, 117, 0.22);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(242, 102, 34, 0.28) 0%, transparent 70%);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -40px;
+    left: -40px;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 252, 219, 0.15) 0%, transparent 70%);
+  }
+}
+
+.logo-ring {
+  width: 88px;
+  height: 88px;
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border: 2px solid rgba(242, 102, 34, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.25),
+    0 0 0 6px rgba(242, 102, 34, 0.12);
+  transform: rotate(-3deg);
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: rotate(0deg) scale(1.04);
+  }
+}
+
+.logo-img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.app-name {
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin: 0 0 4px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.app-tagline {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  font-weight: 500;
+  margin: 0;
+  text-align: center;
+  letter-spacing: 0.3px;
+}
+
+// ── Floating Glassmorphic Card ─────────────────────────────────────────────
+.login-card {
+  background: #ffffff;
+  border-radius: 28px;
+  border: 1px solid rgba(18, 88, 117, 0.08);
+  padding: 28px 24px 24px;
+  margin: -24px 16px 24px;
+  width: calc(100% - 32px);
+  max-width: 410px;
+  box-shadow:
+    0 20px 40px rgba(18, 88, 117, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.04);
+  animation: slideUp 0.4s cubic-bezier(0.34, 1.25, 0.64, 1);
+  z-index: 10;
+}
+
+.card-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: $primary;
+  margin: 0 0 4px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.card-subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0 0 20px;
+  font-weight: 500;
+}
+
+// ── Mode Toggle Switcher ───────────────────────────────────────────────────
+.mode-toggle {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(18, 88, 117, 0.12);
+  border-radius: 16px;
+  padding: 5px;
+  background: #f1f5f9;
+}
+
+.mode-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 42px;
+  border: none;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.25s ease;
+
+  ion-icon { font-size: 17px; }
+
+  &.active {
+    background: $primary;
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(18, 88, 117, 0.28);
+  }
+}
+
+// ── Input Fields ──────────────────────────────────────────────────────────
+.input-group {
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 0 16px;
+  margin-bottom: 16px;
+  height: 52px;
+  border: 1.5px solid rgba(18, 88, 117, 0.14);
+  transition: all 0.2s ease;
+
+  &:focus-within {
+    border-color: $accent;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(242, 102, 34, 0.12);
+
+    .input-icon { color: $accent; }
+  }
+}
+
+.input-icon {
+  font-size: 19px;
+  color: $primary;
+  flex-shrink: 0;
+  margin-right: 12px;
+  transition: color 0.2s ease;
+}
+
+.eye-icon {
+  font-size: 19px;
+  color: #94a3b8;
+  flex-shrink: 0;
+  cursor: pointer;
+  margin-left: 8px;
+
+  &:hover { color: $primary; }
+}
+
+.custom-input {
+  --color: #0f172a;
+  --placeholder-color: #94a3b8;
+  --padding-start: 0;
+  --padding-end: 0;
+  font-size: 14px;
+  font-weight: 500;
+  flex: 1;
+}
+
+// ── Sign In Button ─────────────────────────────────────────────────────────
+.sign-in-btn {
+  width: 100%;
+  height: 52px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, $primary 0%, #196f94 100%);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(18, 88, 117, 0.3);
+  border-bottom: 3px solid $accent;
+  transition: all 0.2s ease;
+
+  ion-icon {
+    font-size: 19px;
+    transition: transform 0.2s ease;
+  }
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 10px 24px rgba(18, 88, 117, 0.4);
+
+    ion-icon {
+      transform: translateX(4px);
+    }
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+    box-shadow: 0 4px 12px rgba(18, 88, 117, 0.2);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+.footer-text {
+  text-align: center;
+  font-size: 12px;
+  margin: 16px 0 0;
+  padding: 12px 0 0;
+  border-top: 1px solid rgba(242, 102, 34, 0.15);
+  color: #b0c0c8;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}

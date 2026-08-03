@@ -1,0 +1,229 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start"><ion-menu-button></ion-menu-button></ion-buttons>
+    <ion-title>Department Master</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openSearch()">
+        <ion-icon slot="icon-only" name="search-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- ── Department filter ─────────────────────────── -->
+  <div class="dept-select-wrap">
+    <ion-icon name="business-outline" class="dept-icon"></ion-icon>
+    <select class="dept-select" [(ngModel)]="selectedDept">
+      <option value="">All Departments</option>
+      <option *ngFor="let d of departments" [value]="d">{{ d }}</option>
+    </select>
+    <ion-icon name="chevron-down-outline" class="select-caret"></ion-icon>
+  </div>
+
+  <!-- Count pill -->
+  <p class="result-count" *ngIf="!loading">
+    {{ filtered.length }} staff
+    <span *ngIf="selectedDept"> · {{ selectedDept }}</span>
+  </p>
+
+  <!-- ── Loading ──────────────────────────────────── -->
+  <div *ngIf="loading" class="skel-list">
+    <div class="staff-skel" *ngFor="let s of [1,2,3,4,5]">
+      <ion-skeleton-text animated class="skel-avatar"></ion-skeleton-text>
+      <div class="skel-body">
+        <ion-skeleton-text animated style="width:55%;height:11px;border-radius:4px"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width:75%;height:13px;border-radius:4px;margin-top:5px"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width:45%;height:10px;border-radius:4px;margin-top:5px"></ion-skeleton-text>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Empty ─────────────────────────────────────── -->
+  <div class="empty-state" *ngIf="!loading && filtered.length === 0">
+    <ion-icon name="people-outline"></ion-icon>
+    <p>No staff found</p>
+  </div>
+
+  <!-- ── Staff Cards ───────────────────────────────── -->
+  <div class="staff-list" *ngIf="!loading && filtered.length > 0">
+    <div class="staff-card" *ngFor="let s of filtered" (click)="openDetail(s)">
+
+      <div class="staff-avatar-wrap">
+        <img *ngIf="s.userProfilepic" [src]="s.userProfilepic" class="staff-avatar-img"
+          (error)="$any($event.target).style.display='none'; $any($event.target).nextElementSibling.style.display='flex'" alt="" />
+        <div class="staff-avatar-fallback" [style.display]="s.userProfilepic ? 'none' : 'flex'">
+          {{ initials(s) }}
+        </div>
+      </div>
+
+      <div class="staff-info">
+        <p class="staff-name">{{ fullName(s) }}</p>
+        <p class="staff-desig" *ngIf="s.designationName">{{ s.designationName }}</p>
+        <p class="staff-dept" *ngIf="s.departmentName">
+          <ion-icon name="business-outline"></ion-icon>{{ s.departmentName }}
+        </p>
+        <div class="staff-tags" *ngIf="s.staffTypeName || s.usercategoryName">
+          <span class="staff-tag" *ngIf="s.staffTypeName">{{ s.staffTypeName }}</span>
+          <span class="staff-tag accent-tag" *ngIf="s.usercategoryName">{{ s.usercategoryName }}</span>
+        </div>
+        <div class="staff-contacts">
+          <a *ngIf="s.userMobileNumber" class="contact-chip"
+            [href]="'tel:' + s.userMobileNumber" (click)="$event.stopPropagation()">
+            <ion-icon name="call-outline"></ion-icon>{{ s.userMobileNumber }}
+          </a>
+          <span *ngIf="s.userEmailOfficial" class="contact-chip email-chip">
+            <ion-icon name="mail-outline"></ion-icon>{{ s.userEmailOfficial }}
+          </span>
+        </div>
+      </div>
+
+      <ion-icon name="chevron-forward-outline" class="card-arrow"></ion-icon>
+    </div>
+  </div>
+
+</ion-content>
+
+<!-- ── Search Overlay ─────────────────────────────── -->
+<div class="search-overlay" *ngIf="searchOpen" (click)="closeSearch()">
+  <div class="search-panel" (click)="$event.stopPropagation()">
+
+    <!-- Input bar -->
+    <div class="search-bar">
+      <ion-icon name="search-outline" class="sbar-icon"></ion-icon>
+      <input #searchInputEl class="sbar-input" type="text" placeholder="Name or employee code…"
+        [(ngModel)]="searchText" autofocus />
+      <button *ngIf="searchText" class="sbar-clear" (click)="searchText=''">
+        <ion-icon name="close-circle"></ion-icon>
+      </button>
+      <button class="sbar-cancel" (click)="closeSearch()">Cancel</button>
+    </div>
+
+    <!-- Results -->
+    <div class="search-results">
+
+      <div *ngIf="!searchText" class="search-hint">
+        <ion-icon name="person-circle-outline"></ion-icon>
+        <p>Type a name or employee code</p>
+      </div>
+
+      <div *ngIf="searchText && searchResults.length === 0" class="search-hint">
+        <ion-icon name="search-outline"></ion-icon>
+        <p>No results for "{{ searchText }}"</p>
+      </div>
+
+      <div class="sr-list" *ngIf="searchText && searchResults.length > 0">
+        <div class="sr-card" *ngFor="let s of searchResults" (click)="openDetail(s)">
+          <div class="sr-avatar-wrap">
+            <img *ngIf="s.userProfilepic" [src]="s.userProfilepic" class="sr-avatar-img"
+              (error)="$any($event.target).style.display='none'; $any($event.target).nextElementSibling.style.display='flex'" alt="" />
+            <div class="sr-avatar-fallback" [style.display]="s.userProfilepic ? 'none' : 'flex'">
+              {{ initials(s) }}
+            </div>
+          </div>
+          <div class="sr-info">
+            <p class="sr-name">{{ fullName(s) }}</p>
+            <p class="sr-sub">{{ s.designationName }}<span *ngIf="s.useremployeecode"> · {{ s.useremployeecode }}</span></p>
+            <p class="sr-dept" *ngIf="s.departmentName">{{ s.departmentName }}</p>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="sr-arrow"></ion-icon>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── Detail Popup ──────────────────────────────── -->
+<div class="detail-overlay" *ngIf="selected" (click)="closeDetail()">
+  <div class="detail-sheet" (click)="$event.stopPropagation()">
+
+    <div class="sheet-handle"></div>
+    <button class="sheet-close" (click)="closeDetail()">
+      <ion-icon name="close-outline"></ion-icon>
+    </button>
+
+    <div class="sheet-body">
+
+      <div class="detail-header">
+        <div class="detail-avatar-wrap">
+          <img *ngIf="selected.userProfilepic && !selectedImgError"
+            [src]="selected.userProfilepic" class="detail-avatar-img"
+            (error)="selectedImgError = true" alt="" />
+          <div *ngIf="!selected.userProfilepic || selectedImgError" class="detail-avatar-fallback">
+            {{ initials(selected) }}
+          </div>
+        </div>
+        <div class="detail-name-block">
+          <h2 class="detail-name">{{ fullName(selected) }}</h2>
+          <p class="detail-desig">{{ selected.designationName }}</p>
+        </div>
+      </div>
+
+      <div class="detail-rows">
+
+        <div class="detail-row" *ngIf="selected.departmentName">
+          <ion-icon name="business-outline"></ion-icon>
+          <div class="detail-row-content">
+            <span class="detail-row-label">Department</span>
+            <span class="detail-row-value">{{ selected.departmentName }}</span>
+          </div>
+        </div>
+
+        <div class="detail-row" *ngIf="selected.useremployeecode">
+          <ion-icon name="id-card-outline"></ion-icon>
+          <div class="detail-row-content">
+            <span class="detail-row-label">Employee Code</span>
+            <span class="detail-row-value">{{ selected.useremployeecode }}</span>
+          </div>
+        </div>
+
+        <div class="detail-row" *ngIf="selected.staffTypeName || selected.usercategoryName">
+          <ion-icon name="briefcase-outline"></ion-icon>
+          <div class="detail-row-content">
+            <span class="detail-row-label">Staff Type · Category</span>
+            <span class="detail-row-value">{{ selected.staffTypeName }}{{ selected.staffTypeName && selected.usercategoryName ? ' · ' : '' }}{{ selected.usercategoryName }}</span>
+          </div>
+        </div>
+
+        <div class="detail-row" *ngIf="selected.userGendername">
+          <ion-icon name="person-outline"></ion-icon>
+          <div class="detail-row-content">
+            <span class="detail-row-label">Gender</span>
+            <span class="detail-row-value">{{ selected.userGendername }}</span>
+          </div>
+        </div>
+
+        <div class="detail-row" *ngIf="selected.userdateofjoin">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <div class="detail-row-content">
+            <span class="detail-row-label">Date of Joining</span>
+            <span class="detail-row-value">{{ selected.userdateofjoin | date:'dd MMM yyyy' }}</span>
+          </div>
+        </div>
+
+        <a class="detail-row detail-row-link" *ngIf="selected.userMobileNumber"
+          [href]="'tel:' + selected.userMobileNumber" (click)="$event.stopPropagation()">
+          <ion-icon name="call-outline"></ion-icon>
+          <div class="detail-row-content">
+            <span class="detail-row-label">Mobile</span>
+            <span class="detail-row-value">{{ selected.userMobileNumber }}</span>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="row-arrow"></ion-icon>
+        </a>
+
+        <a class="detail-row detail-row-link" *ngIf="selected.userEmailOfficial"
+          [href]="'mailto:' + selected.userEmailOfficial" (click)="$event.stopPropagation()">
+          <ion-icon name="mail-outline"></ion-icon>
+          <div class="detail-row-content">
+            <span class="detail-row-label">Email</span>
+            <span class="detail-row-value">{{ selected.userEmailOfficial }}</span>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="row-arrow"></ion-icon>
+        </a>
+
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,133 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <div class="header-brand">
+      <img src="assets/images/JEMS_LOGO.png" alt="JEMS Logo" class="header-logo-img" />
+      <span class="header-title">MONTHLY ATTENDANCE</span>
+    </div>
+  </ion-toolbar>
+
+  <!-- Filter Bar -->
+  <div class="filter-container">
+    <div class="filter-row">
+      <div class="filter-col flex-1">
+        <label class="filter-lbl">Month</label>
+        <div class="select-wrap">
+          <ion-select [(ngModel)]="selectedMonth" (ionChange)="fetchMonthlyAttendance()" interface="action-sheet" class="custom-select">
+            <ion-select-option *ngFor="let m of months" [value]="m.value">{{ m.name }}</ion-select-option>
+          </ion-select>
+        </div>
+      </div>
+
+      <div class="filter-col flex-1">
+        <label class="filter-lbl">Year</label>
+        <div class="select-wrap">
+          <ion-select [(ngModel)]="selectedYear" (ionChange)="fetchMonthlyAttendance()" interface="action-sheet" class="custom-select">
+            <ion-select-option *ngFor="let y of years" [value]="y">{{ y }}</ion-select-option>
+          </ion-select>
+        </div>
+      </div>
+    </div>
+  </div>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- ── 1. ATTENDANCE SUMMARY METRICS ──────────────────────────── -->
+  <div class="card-box summary-card">
+    <div class="summary-header">
+      <div class="summary-main-stat">
+        <span class="pct-num">{{ attendancePercentage }}%</span>
+        <span class="pct-lbl">Monthly Attendance</span>
+      </div>
+
+      <div class="progress-ring-badge">
+        <div class="ring-fill" [style.background]="'conic-gradient(#16a34a ' + attendancePercentage + '%, #e2e8f0 0)'"></div>
+      </div>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-box present-box">
+        <span class="metric-num">{{ presentCount }}</span>
+        <span class="metric-lbl">Present</span>
+      </div>
+
+      <div class="metric-box leave-box">
+        <span class="metric-num">{{ leaveCount }}</span>
+        <span class="metric-lbl">Leave</span>
+      </div>
+
+      <div class="metric-box absent-box">
+        <span class="metric-num">{{ absentCount }}</span>
+        <span class="metric-lbl">Absent</span>
+      </div>
+
+      <div class="metric-box holiday-box">
+        <span class="metric-num">{{ holidayCount }}</span>
+        <span class="metric-lbl">Holiday</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 2. DAILY ATTENDANCE LOGS ──────────────────────────── -->
+  <div class="logs-header">
+    <h3 class="section-title">Biometric Attendance Register</h3>
+    <span class="records-count">{{ records.length }} Days</span>
+  </div>
+
+  <div class="records-list" *ngIf="records.length > 0; else noRecords">
+    <div class="record-card" *ngFor="let r of records" [class.is-holiday]="r.isSunday || r.isHoliday">
+      <div class="record-date-col">
+        <span class="day-number">{{ r.date | date:'dd' }}</span>
+        <span class="day-name">{{ r.dayOfWeek || (r.date | date:'EEE') }}</span>
+      </div>
+
+      <div class="record-details-col">
+        <div class="status-row">
+          <span class="status-chip"
+            [class.status-present]="r.attendanceStatus === 'PRESENT' || r.attendanceStatus === 'P'"
+            [class.status-absent]="r.attendanceStatus === 'ABSENT' || r.attendanceStatus === 'A'"
+            [class.status-leave]="r.isOnLeave || r.attendanceStatus === 'LEAVE' || r.attendanceStatus === 'L'"
+            [class.status-holiday]="r.isSunday || r.isHoliday || r.attendanceStatus === 'HOLIDAY' || r.attendanceStatus === 'H'">
+            {{ r.attendanceStatus }}
+          </span>
+
+          <span class="leave-tag" *ngIf="r.isOnLeave || r.leaveCode">
+            {{ r.leaveCode || r.leaveType || 'Leave' }}
+          </span>
+          <span class="holiday-tag" *ngIf="r.isHoliday || r.specialDayDescription">
+            {{ r.specialDayDescription || 'Holiday' }}
+          </span>
+        </div>
+
+        <div class="timing-row" *ngIf="!r.isSunday && !r.isHoliday">
+          <div class="time-col">
+            <ion-icon name="log-in-outline" class="time-icon in-icon"></ion-icon>
+            <span class="time-txt">IN: <strong>{{ r.hoursDetails?.in || '--:--' }}</strong></span>
+          </div>
+
+          <div class="time-col">
+            <ion-icon name="log-out-outline" class="time-icon out-icon"></ion-icon>
+            <span class="time-txt">OUT: <strong>{{ r.hoursDetails?.out || '--:--' }}</strong></span>
+          </div>
+
+          <div class="time-col hours-col">
+            <ion-icon name="time-outline" class="time-icon"></ion-icon>
+            <span class="time-txt"><strong>{{ r.totalHours }}</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noRecords>
+    <div class="empty-state">
+      <ion-icon name="calendar-outline" class="empty-icon"></ion-icon>
+      <p class="empty-title">No Attendance Logs</p>
+      <p class="empty-sub">No biometric logs found for the selected month.</p>
+    </div>
+  </ng-template>
+
+</ion-content>

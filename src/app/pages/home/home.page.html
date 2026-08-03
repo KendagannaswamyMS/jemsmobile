@@ -1,0 +1,289 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <div class="header-brand">
+      <img src="assets/images/JEMS_LOGO.png" alt="JEMS Logo" class="header-logo-img" />
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+
+  <!-- ── Student Welcome Card ──────────────────────── -->
+  <div class="bio-card" *ngIf="isStudent">
+    <div class="bio-profile">
+      <div class="bio-avatar-wrap">
+        <img *ngIf="user?.profilePic" [src]="user!.profilePic" class="bio-avatar-img" alt="" />
+        <div *ngIf="!user?.profilePic" class="bio-avatar-fallback">
+          {{ (user?.firstName?.[0] || '') + (user?.lastName?.[0] || '') | uppercase }}
+        </div>
+      </div>
+      <div class="bio-profile-info">
+        <h3 class="bio-name">
+          Welcome, {{ user?.firstName }} {{ user?.lastName }}
+        </h3>
+        <p class="bio-emp" *ngIf="user?.departmentName">{{ user!.departmentName }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Student Clubs ──────────────────────────────── -->
+  <div class="bday-section" *ngIf="isStudent && clubs.length > 0">
+    <div class="section-header">
+      <span class="section-icon">👥</span>
+      <h3 class="section-title">Student Clubs</h3>
+    </div>
+    <div class="bday-scroll">
+      <div class="bday-card club-card" *ngFor="let c of clubs">
+        <div class="bday-avatar-wrap club-avatar-wrap">
+          <img *ngIf="c.logopath" [src]="c.logopath" class="bday-avatar-img" alt="" />
+          <div *ngIf="!c.logopath" class="bday-avatar-fallback club-bg">
+            <ion-icon name="people-outline"></ion-icon>
+          </div>
+        </div>
+        <p class="bday-name">{{ c.clubname }}</p>
+        <p class="club-coord" *ngIf="c.facultyCoordinatorName">{{ c.facultyCoordinatorName }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Club Events ────────────────────────────────── -->
+  <div class="news-section" *ngIf="isStudent && clubEvents.length > 0">
+    <div class="news-header">
+      <div class="news-header-title">
+        <span class="news-trophy">🎉</span>
+        <h3 class="news-title-txt">Club Events</h3>
+      </div>
+      <span class="section-badge joiner-badge">{{ clubEvents.length }} Upcoming</span>
+    </div>
+
+    <div class="news-scroll">
+      <div class="news-card" *ngFor="let e of clubEvents">
+        <div class="news-banner-box">
+          <img *ngIf="e.posterpath" [src]="e.posterpath" class="news-banner-img" alt="" />
+          <div class="news-banner-fallback" *ngIf="!e.posterpath">
+            <div class="fallback-branding">
+              <span class="jss-logo-badge">{{ e.clubname || 'CLUB' }}</span>
+            </div>
+            <p class="fallback-heading">{{ e.eventname }}</p>
+          </div>
+          <span class="event-date-badge" *ngIf="e.eventdate">
+            <span class="event-date-day">{{ e.eventdate | date:'dd' }}</span>
+            <span class="event-date-mon">{{ e.eventdate | date:'MMM' }}</span>
+          </span>
+        </div>
+
+        <div class="news-staff-footer">
+          <h4 class="staff-name">{{ e.eventname }}</h4>
+          <p class="staff-desig">{{ e.clubname }}</p>
+          <div class="event-meta-row">
+            <span *ngIf="e.eventtime"><ion-icon name="time-outline"></ion-icon>{{ e.eventtime }}</span>
+            <span *ngIf="e.venue"><ion-icon name="location-outline"></ion-icon>{{ e.venue }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Biometric Card ──────────────────────────── -->
+  <div class="bio-card" *ngIf="!isStudent && !bioLoading && biometric">
+
+    <!-- Profile row -->
+    <div class="bio-profile">
+      <div class="bio-avatar-wrap">
+        <img *ngIf="biometric.userProfilepic && !bioImgError"
+          [src]="biometric.userProfilepic" class="bio-avatar-img"
+          (error)="bioImgError = true" alt="" />
+        <div *ngIf="!biometric.userProfilepic || bioImgError" class="bio-avatar-fallback">
+          {{ (biometric.userFName[0] || '') + (biometric.userLName[0] || '') | uppercase }}
+        </div>
+      </div>
+      <div class="bio-profile-info">
+        <h3 class="bio-name">
+          {{ biometric.salutationName }} {{ biometric.userFName }} {{ biometric.userMname }} {{ biometric.userLName }}
+        </h3>
+        <p class="bio-emp">Emp # {{ biometric.useremployeecode }}</p>
+      </div>
+    </div>
+
+    <div class="bio-divider"></div>
+
+    <!-- Today label -->
+    <div class="bio-week-label">
+      <ion-icon name="calendar-outline"></ion-icon>
+      <span>{{ todayDateLabel }}</span>
+    </div>
+
+    <!-- Today punch -->
+    <div class="today-punch" *ngIf="todayLog && todayLog.logs.length; else noPunch">
+      <div class="punch-row">
+        <div class="punch-item">
+          <ion-icon name="log-in-outline" class="in-icon"></ion-icon>
+          <div class="punch-detail">
+            <span class="punch-label">In</span>
+            <span class="punch-time in-time">{{ firstIn(todayLog) }}</span>
+          </div>
+        </div>
+        <div class="punch-sep">·</div>
+        <div class="punch-item">
+          <ion-icon name="log-out-outline" class="out-icon"></ion-icon>
+          <div class="punch-detail">
+            <span class="punch-label">Out</span>
+            <span class="punch-time">{{ lastOut(todayLog) }}</span>
+          </div>
+        </div>
+        <div class="punch-sep">·</div>
+        <div class="running-time" *ngIf="runningTime">
+          <ion-icon [name]="isStillIn(todayLog) ? 'timer-outline' : 'time-outline'"
+                    [class.still-in]="isStillIn(todayLog)"></ion-icon>
+          <div class="punch-detail">
+            <span class="punch-label">{{ isStillIn(todayLog) ? 'Running' : 'Total' }}</span>
+            <span class="punch-time">{{ runningTime }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ng-template #noPunch>
+      <p class="no-punch">No punch recorded today</p>
+    </ng-template>
+
+  </div>
+
+  <!-- Loading skeleton -->
+  <div class="bio-skeleton" *ngIf="!isStudent && bioLoading">
+    <ion-skeleton-text animated style="width:60%;height:14px;border-radius:6px;margin-bottom:8px"></ion-skeleton-text>
+    <ion-skeleton-text animated style="width:100%;height:80px;border-radius:12px"></ion-skeleton-text>
+  </div>
+
+  <!-- ── 🏆 University Staff in News ──────────────────────────── -->
+  <div class="news-section" *ngIf="!isStudent">
+    <div class="news-header">
+      <div class="news-header-title">
+        <span class="news-trophy">🏆</span>
+        <h3 class="news-title-txt">University Staff in News</h3>
+      </div>
+    </div>
+
+    <div class="news-scroll">
+      <div class="news-card" *ngFor="let item of staffNewsList" (click)="openStaffNewsDetail(item)">
+        <!-- Banner Box -->
+        <div class="news-banner-box">
+          <img *ngIf="item.bannerImg && !item.imgError" [src]="item.bannerImg" (error)="item.imgError = true" class="news-banner-img" alt="" />
+          <div class="news-banner-fallback" *ngIf="!item.bannerImg || item.imgError">
+            <div class="fallback-branding">
+              <span class="jss-logo-badge">JSS STU</span>
+              <span class="congrats-txt">Congratulations!</span>
+            </div>
+            <p class="fallback-heading">{{ item.title }}</p>
+          </div>
+          <span class="news-cat-chip">{{ item.category || 'Achievement' }}</span>
+        </div>
+
+        <!-- Staff Meta Footer -->
+        <div class="news-staff-footer">
+          <div class="news-staff-item" *ngFor="let staff of item.staffList">
+            <div class="staff-avatar">
+              <img *ngIf="staff.avatar" [src]="staff.avatar" (error)="staff.avatar = ''" alt="" />
+              <div *ngIf="!staff.avatar" class="staff-avatar-fallback">{{ getStaffInitials(staff.name) }}</div>
+            </div>
+            <div class="staff-info">
+              <h4 class="staff-name">{{ staff.name }}</h4>
+              <p class="staff-desig">{{ staff.designation }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── New Joiners ────────────────────────────────── -->
+  <div class="bday-section" *ngIf="latestJoiners.length > 0">
+    <div class="section-header">
+      <span class="section-icon">🆕</span>
+      <h3 class="section-title">New Joiners</h3>
+      <span class="section-badge joiner-badge">{{ latestJoiners.length }}</span>
+    </div>
+    <div class="bday-scroll">
+      <div class="bday-card" *ngFor="let j of latestJoiners">
+        <div class="bday-avatar-wrap" (click)="openJoinerPopup(j)">
+          <img *ngIf="j.profilePicPath" [src]="j.profilePicPath" class="bday-avatar-img"
+            (error)="$any($event.target).style.display='none'" alt="" />
+          <div *ngIf="!j.profilePicPath" class="bday-avatar-fallback joiner-bg">{{ joinerInitials(j) }}</div>
+          <span class="bday-cake-badge">🆕</span>
+        </div>
+        <p class="bday-name">{{ j.firstName }}</p>
+      </div>
+    </div>
+  </div>
+
+</ion-content>
+
+<!-- ── Staff News Detail Modal ────────────────────── -->
+<div class="popup-overlay" *ngIf="selectedNewsItem" (click)="closeStaffNewsDetail()">
+  <div class="popup-card news-detail-popup" (click)="$event.stopPropagation()">
+    <button class="popup-close" (click)="closeStaffNewsDetail()">
+      <ion-icon name="close-outline"></ion-icon>
+    </button>
+    <div class="news-popup-banner">
+      <img *ngIf="selectedNewsItem.bannerImg && !selectedNewsItem.imgError" [src]="selectedNewsItem.bannerImg" class="popup-banner-img" alt="" />
+      <div class="popup-banner-fallback" *ngIf="!selectedNewsItem.bannerImg || selectedNewsItem.imgError">
+        <div class="banner-brand-tag">
+          <img src="assets/images/JEMS_LOGO.png" class="banner-jems-logo" alt="" />
+          <span>JSS STU</span>
+        </div>
+        <span class="banner-trophy-icon">🏆</span>
+      </div>
+    </div>
+    <div class="news-popup-body">
+      <span class="news-cat-chip popup-chip">{{ selectedNewsItem.category || 'Achievement' }}</span>
+      <h2 class="popup-news-title">{{ selectedNewsItem.title }}</h2>
+      <p class="popup-news-detail" *ngIf="selectedNewsItem.detail">{{ selectedNewsItem.detail }}</p>
+
+      <div class="news-popup-staff-section">
+        <h4 class="popup-staff-header">Featured Faculty / Staff</h4>
+        <div class="popup-staff-row" *ngFor="let staff of selectedNewsItem.staffList">
+          <div class="staff-avatar">
+            <img *ngIf="staff.avatar" [src]="staff.avatar" (error)="staff.avatar = ''" alt="" />
+            <div *ngIf="!staff.avatar" class="staff-avatar-fallback">{{ getStaffInitials(staff.name) }}</div>
+          </div>
+          <div class="staff-info">
+            <h4 class="staff-name">{{ staff.name }}</h4>
+            <p class="staff-desig">{{ staff.designation }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Joiner Popup ──────────────────────────────── -->
+<div class="popup-overlay" *ngIf="selectedJoiner" (click)="closeJoinerPopup()">
+  <div class="popup-card" (click)="$event.stopPropagation()">
+    <button class="popup-close" (click)="closeJoinerPopup()">
+      <ion-icon name="close-outline"></ion-icon>
+    </button>
+    <div class="popup-avatar-wrap">
+      <img *ngIf="selectedJoiner.profilePicPath && !joinerImgError"
+        [src]="selectedJoiner.profilePicPath" class="popup-avatar-img"
+        (error)="joinerImgError = true" alt="profile" />
+      <div *ngIf="!selectedJoiner.profilePicPath || joinerImgError" class="popup-avatar-fallback joiner-popup-bg">
+        {{ joinerInitials(selectedJoiner) }}
+      </div>
+      <span class="popup-cake">🆕</span>
+    </div>
+    <h2 class="popup-name">{{ joinerName(selectedJoiner) }}</h2>
+    <p class="popup-gender">{{ selectedJoiner.designation }}</p>
+    <div class="popup-details">
+      <div class="popup-detail-row">
+        <ion-icon name="id-card-outline"></ion-icon>
+        <span>Emp # {{ selectedJoiner.employeeCode }}</span>
+      </div>
+      <div class="popup-detail-row">
+        <ion-icon name="calendar-outline"></ion-icon>
+        <span>Joined {{ joiningDate(selectedJoiner.dateOfJoining) }}</span>
+      </div>
+    </div>
+  </div>
+</div>
