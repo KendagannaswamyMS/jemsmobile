@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Matches the ion-color-primary token in src/theme/variables.scss, which
+         the Ionic toolbar and tab bar both use. Because the app is laid out
+         edge-to-edge on SDK 35+, this shows through in the status and
+         navigation bar strips left by the safe-area padding. -->
+    <color name="brandPrimary">#125875</color>
+</resources>

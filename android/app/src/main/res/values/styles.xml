@@ -12,7 +12,9 @@
     <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <item name="android:windowBackground">@android:color/white</item>
+        <!-- Shows through the safe-area padding behind the status/navigation bars.
+             Left dark so the default light system icons stay legible. -->
+        <item name="android:windowBackground">@color/brandPrimary</item>
     </style>
 
 

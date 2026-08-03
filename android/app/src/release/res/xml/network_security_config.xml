@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Release-only override of the debug config in src/main.
+
+  The API is served over HTTPS, so release builds reject cleartext outright and
+  trust only the system CA store. Trusting user-installed CAs (as the debug
+  config does, for proxy tooling) would let an attacker who can add a cert to
+  the device intercept traffic, and Play's pre-launch report flags it.
+-->
+<network-security-config>
+  <base-config cleartextTrafficPermitted="false">
+    <trust-anchors>
+      <certificates src="system" />
+    </trust-anchors>
+  </base-config>
+</network-security-config>

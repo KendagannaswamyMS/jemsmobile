@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Release-only manifest override. The debug manifest permits cleartext so local
+  dev servers and proxy tooling work; the API itself is HTTPS, so release builds
+  turn it off. This is the flag Play's security checks read, separate from the
+  network_security_config override alongside it.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:usesCleartextTraffic="false"
+        tools:replace="android:usesCleartextTraffic" />
+</manifest>
