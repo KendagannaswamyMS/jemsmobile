@@ -1,277 +1,31 @@
-$primary: #125875;
-$accent:  #F26622;
-$cream:   #fffcdb;
-
-.login-content {
-  --background: #f8fafc;
-}
-
-.login-wrapper {
-  display: flex;
-  flex-direction: column;
-  min-height: 100%;
-  align-items: center;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-// ── Hero Section (Deep Brand Teal with Wave Glow) ───────────────────────────
-.hero-section {
-  width: 100%;
-  background: linear-gradient(165deg, #093447 0%, $primary 60%, #17688b 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 42px 24px 44px;
-  border-radius: 0 0 36px 36px;
-  box-shadow: 0 12px 32px rgba(18, 88, 117, 0.22);
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: -60px;
-    right: -60px;
-    width: 180px;
-    height: 180px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(242, 102, 34, 0.28) 0%, transparent 70%);
-  }
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -40px;
-    left: -40px;
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255, 252, 219, 0.15) 0%, transparent 70%);
-  }
-}
-
-.logo-ring {
-  width: 88px;
-  height: 88px;
-  border-radius: 26px;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  border: 2px solid rgba(242, 102, 34, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 14px;
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.25),
-    0 0 0 6px rgba(242, 102, 34, 0.12);
-  transform: rotate(-3deg);
-  transition: transform 0.3s ease;
-
-  &:hover {
-    transform: rotate(0deg) scale(1.04);
-  }
-}
-
-.logo-img {
-  width: 64px;
-  height: 64px;
-  object-fit: contain;
-  border-radius: 12px;
-}
-
-.app-name {
-  color: #ffffff;
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  margin: 0 0 4px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-
-.app-tagline {
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 13px;
-  font-weight: 500;
-  margin: 0;
-  text-align: center;
-  letter-spacing: 0.3px;
-}
-
-// ── Floating Glassmorphic Card ─────────────────────────────────────────────
-.login-card {
-  background: #ffffff;
-  border-radius: 28px;
-  border: 1px solid rgba(18, 88, 117, 0.08);
-  padding: 28px 24px 24px;
-  margin: -24px 16px 24px;
-  width: calc(100% - 32px);
-  max-width: 410px;
-  box-shadow:
-    0 20px 40px rgba(18, 88, 117, 0.12),
-    0 2px 6px rgba(0, 0, 0, 0.04);
-  animation: slideUp 0.4s cubic-bezier(0.34, 1.25, 0.64, 1);
-  z-index: 10;
-}
-
-.card-title {
-  font-size: 22px;
-  font-weight: 800;
-  color: $primary;
-  margin: 0 0 4px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-}
-
-.card-subtitle {
-  font-size: 13px;
-  color: #64748b;
-  margin: 0 0 20px;
-  font-weight: 500;
-}
-
-// ── Mode Toggle Switcher ───────────────────────────────────────────────────
-.mode-toggle {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 20px;
-  border: 1px solid rgba(18, 88, 117, 0.12);
-  border-radius: 16px;
-  padding: 5px;
-  background: #f1f5f9;
-}
-
-.mode-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 42px;
-  border: none;
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #64748b;
-  background: transparent;
-  cursor: pointer;
-  transition: all 0.25s ease;
-
-  ion-icon { font-size: 17px; }
-
-  &.active {
-    background: $primary;
-    color: #ffffff;
-    box-shadow: 0 4px 14px rgba(18, 88, 117, 0.28);
-  }
-}
-
-// ── Input Fields ──────────────────────────────────────────────────────────
-.input-group {
-  display: flex;
-  align-items: center;
-  background: #f8fafc;
-  border-radius: 14px;
-  padding: 0 16px;
-  margin-bottom: 16px;
-  height: 52px;
-  border: 1.5px solid rgba(18, 88, 117, 0.14);
-  transition: all 0.2s ease;
-
-  &:focus-within {
-    border-color: $accent;
-    background: #ffffff;
-    box-shadow: 0 0 0 4px rgba(242, 102, 34, 0.12);
-
-    .input-icon { color: $accent; }
-  }
-}
-
-.input-icon {
-  font-size: 19px;
-  color: $primary;
-  flex-shrink: 0;
-  margin-right: 12px;
-  transition: color 0.2s ease;
-}
-
-.eye-icon {
-  font-size: 19px;
-  color: #94a3b8;
-  flex-shrink: 0;
-  cursor: pointer;
-  margin-left: 8px;
-
-  &:hover { color: $primary; }
-}
-
-.custom-input {
-  --color: #0f172a;
-  --placeholder-color: #94a3b8;
-  --padding-start: 0;
-  --padding-end: 0;
-  font-size: 14px;
-  font-weight: 500;
-  flex: 1;
-}
-
-// ── Sign In Button ─────────────────────────────────────────────────────────
-.sign-in-btn {
-  width: 100%;
-  height: 52px;
-  margin-top: 10px;
-  border: none;
-  border-radius: 14px;
-  background: linear-gradient(135deg, $primary 0%, #196f94 100%);
-  color: #ffffff;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  cursor: pointer;
-  box-shadow: 0 8px 20px rgba(18, 88, 117, 0.3);
-  border-bottom: 3px solid $accent;
-  transition: all 0.2s ease;
-
-  ion-icon {
-    font-size: 19px;
-    transition: transform 0.2s ease;
-  }
-
-  &:hover:not(:disabled) {
-    box-shadow: 0 10px 24px rgba(18, 88, 117, 0.4);
-
-    ion-icon {
-      transform: translateX(4px);
-    }
-  }
-
-  &:active:not(:disabled) {
-    transform: scale(0.98);
-    box-shadow: 0 4px 12px rgba(18, 88, 117, 0.2);
-  }
-
-  &:disabled {
-    opacity: 0.4;
-    box-shadow: none;
-    cursor: not-allowed;
-  }
-}
-
-// ── Footer ────────────────────────────────────────────────────────────────────
-.footer-text {
-  text-align: center;
-  font-size: 12px;
-  margin: 16px 0 0;
-  padding: 12px 0 0;
-  border-top: 1px solid rgba(242, 102, 34, 0.15);
-  color: #b0c0c8;
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(40px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
+:host { --login-ink: #18313b; }
+.login-content { --background: #f1f4f8; }
+.login-wrapper { min-height: 100%; display: flex; flex-direction: column; align-items: center; padding-bottom: max(24px, env(safe-area-inset-bottom)); }
+.login-wrapper > * { flex-shrink: 0; }
+.hero-section { width: 100%; padding: 32px 28px 52px; background: #0d3d50; color: white; position: relative; overflow: hidden; }
+.hero-section::after { content: ''; position: absolute; width: 210px; height: 210px; border: 36px solid #24525b; border-radius: 50%; right: -110px; top: 45px; pointer-events: none; }
+.logo-ring { width: 56px; height: 56px; padding: 8px; border-radius: 16px; background: white; margin-bottom: 22px; }
+.logo-img { width: 100%; height: 100%; object-fit: contain; }
+.login-university { font-size: 9px; font-weight: 700; letter-spacing: 1.6px; color: #c6dcd7; margin: 0 0 12px; position: relative; z-index: 1; }
+.app-name { margin: 0; color: #fff; font-size: clamp(30px, 8vw, 42px); line-height: 1.12; letter-spacing: -1.3px; font-weight: 650; position: relative; z-index: 1; text-transform: none; }
+.app-tagline { font-size: 13px; line-height: 1.6; color: #c6dcd7; margin: 14px 0 0; position: relative; z-index: 1; }
+.login-card { background: white; border: 1px solid #e3eae7; border-radius: 24px; padding: 26px 22px; margin: -24px 16px 0; width: calc(100% - 32px); max-width: 440px; z-index: 1; box-shadow: 0 8px 32px #163d4610; }
+.login-eyebrow { font-size: 10px; font-weight: 750; letter-spacing: 1.6px; color: #125875; margin: 0 0 10px; }
+.card-title { font-size: 23px; letter-spacing: -.7px; color: #18313b; margin: 0 0 8px; font-weight: 700; }
+.card-subtitle { color: #687b80; font-size: 13px; margin: 0 0 22px; }
+.mode-toggle { display: flex; background: #f0f4f2; padding: 4px; gap: 4px; border-radius: 12px; margin-bottom: 22px; }
+.mode-btn { flex: 1; min-height: 44px; border-radius: 9px; color: #63766f; background: transparent; font-size: 12px; font-weight: 650; display: flex; gap: 6px; align-items: center; justify-content: center; }
+.mode-btn.active { background: white; color: #125875; box-shadow: 0 2px 6px #173d4612; }
+.mode-btn ion-icon { font-size: 17px; }
+.field-label { display: block; color: #334f56; font-size: 12px; font-weight: 650; margin-bottom: 8px; }
+.input-group { min-height: 54px; display: flex; align-items: center; border: 1px solid #dbe4df; background: #fcfdfc; border-radius: 12px; padding: 0 12px; margin-bottom: 18px; }
+.input-group:focus-within { border-color: #387766; box-shadow: 0 0 0 3px #38776615; }
+.input-icon { color: #718b83; margin-right: 10px; flex-shrink: 0; font-size: 18px; }
+.custom-input { --color: #18313b; --placeholder-color: #778984; --padding-start: 0; --padding-end: 0; min-width: 0; font-size: 16px; flex: 1; }
+.password-toggle { min-width: 44px; min-height: 44px; display: grid; place-items: center; background: transparent; color: #55776c; border-radius: 8px; font-size: 21px; }
+.sign-in-btn { width: 100%; min-height: 54px; border-radius: 12px; background: #125875; color: white; font-size: 14px; font-weight: 650; display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 8px; }
+.sign-in-btn:disabled { opacity: .5; }
+.sign-in-btn ion-icon { font-size: 19px; }
+.footer-text { text-align: center; color: #72867d; font-size: 10px; margin: 22px 0 0; }
+@media (min-width: 700px) { .hero-section { text-align: center; padding-bottom: 60px; } .logo-ring { margin: 0 auto 20px; } }
+@media (max-height: 600px) { .hero-section { padding: 16px 24px 34px; } .logo-ring, .app-tagline, .login-university, .footer-text { display: none; } .app-name { font-size: 25px; } .app-name br { display: none; } .login-card { padding: 18px; } .card-subtitle, .mode-toggle { margin-bottom: 14px; } .input-group { margin-bottom: 12px; } }

@@ -1,4 +1,4 @@
-<ion-content class="login-content" [fullscreen]="true">
+<ion-content class="login-content" [scrollY]="true">
 
   <div class="login-wrapper">
 
@@ -7,48 +7,55 @@
       <div class="logo-ring">
         <img src="assets/images/JEMS_LOGO.png" alt="JEMS Logo" class="logo-img" />
       </div>
-      <h1 class="app-name">JEMS</h1>
-      <p class="app-tagline">JSS Education Management System</p>
+      <p class="login-university">JSS SCIENCE & TECHNOLOGY UNIVERSITY</p>
+      <h1 class="app-name">Your campus. <br />One connection.</h1>
+      <p class="app-tagline">Your classes, people and everyday essentials.</p>
     </div>
 
     <!-- Card Section -->
     <div class="login-card">
-      <h2 class="card-title">Welcome Back</h2>
-      <p class="card-subtitle">Sign in to continue</p>
+      <p class="login-eyebrow">WELCOME TO JEMS</p>
+      <h2 class="card-title">Make yourself at home.</h2>
+      <p class="card-subtitle">Choose your account to get started.</p>
 
       <!-- Mode Toggle -->
       <div class="mode-toggle">
-        <button class="mode-btn" [class.active]="mode === 'staff'" (click)="setMode('staff')">
+        <button class="mode-btn" [disabled]="isLoading" [class.active]="mode === 'staff'" (click)="setMode('staff')">
           <ion-icon name="briefcase-outline"></ion-icon>
           Staff / Faculty
         </button>
-        <button class="mode-btn" [class.active]="mode === 'student'" (click)="setMode('student')">
+        <button class="mode-btn" [disabled]="isLoading" [class.active]="mode === 'student'" (click)="setMode('student')">
           <ion-icon name="school-outline"></ion-icon>
           Student
         </button>
       </div>
 
       <!-- Form -->
-      <form [formGroup]="form" (ngSubmit)="login()">
+      <form [formGroup]="form" (ngSubmit)="login()" autocomplete="on">
 
+        <label class="field-label" [attr.for]="'login-username'">{{ mode === 'student' ? 'SR number, USN or email' : 'University email' }}</label>
         <div class="input-group">
           <ion-icon name="person-outline" class="input-icon"></ion-icon>
-          <ion-input class="custom-input" formControlName="username" [type]="mode === 'student' ? 'text' : 'email'"
-            [placeholder]="mode === 'student' ? 'Student Username / USN' : 'Email Address'" autocomplete="username"
+          <ion-input id="login-username" class="custom-input" name="username" aria-label="Email, SR number or USN" formControlName="username" [type]="mode === 'student' ? 'text' : 'email'"
+            [placeholder]="mode === 'student' ? 'SR number / USN / Email' : 'Email Address'" autocomplete="username" autocapitalize="off" [spellcheck]="false" enterkeyhint="next"
+            (keydown.enter)="$event.preventDefault(); passwordInput.setFocus()"
             (ionInput)="onUsernameInput($event)"></ion-input>
         </div>
 
+        <label class="field-label" for="login-password">Password</label>
         <div class="input-group">
           <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
-          <ion-input class="custom-input" formControlName="password" [type]="showPassword ? 'text' : 'password'"
-            placeholder="Password" autocomplete="current-password"></ion-input>
-          <ion-icon class="eye-icon" [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"
-            (click)="showPassword = !showPassword"></ion-icon>
+          <ion-input id="login-password" #passwordInput class="custom-input" name="password" aria-label="Password" formControlName="password" [type]="showPassword ? 'text' : 'password'"
+            placeholder="Password" autocomplete="current-password" enterkeyhint="go" (keydown.enter)="$event.preventDefault(); login()"></ion-input>
+          <button type="button" class="password-toggle" [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'" [attr.aria-pressed]="showPassword"
+            (click)="showPassword = !showPassword">
+            <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'" aria-hidden="true"></ion-icon>
+          </button>
         </div>
 
         <button type="submit" class="sign-in-btn" [disabled]="form.invalid || isLoading">
           <span *ngIf="isLoading" class="btn-spinner"></span>
-          <span *ngIf="!isLoading">Sign In</span>
+          <span *ngIf="!isLoading">Sign in to JEMS</span>
           <ion-icon *ngIf="!isLoading" name="arrow-forward-outline"></ion-icon>
         </button>
 

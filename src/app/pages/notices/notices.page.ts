@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, finalize, timeout } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -21,20 +21,39 @@ export class NoticesPage implements OnInit {
   loading = false;
   notices: any[] = [];
   expandedSlnum: number | null = null;
+  searchTerm = '';
+  loadError = '';
+
+  get filteredNotices(): any[] {
+    const query = this.searchTerm.trim().toLowerCase();
+    return this.notices.filter(n => !query ||
+      [n.title, n.message, n.categoryName].some(value => String(value || '').toLowerCase().includes(query)));
+  }
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
   ngOnInit() {
-    const studentId = this.authService.getCurrentUser()?.userId || 0;
+    this.loadNotices();
+  }
+
+  loadNotices(event?: any) {
+    if (this.loading) { event?.target?.complete(); return; }
+    const studentId = this.authService.isStudent() ? this.authService.getCurrentUser()?.userId || 0 : 0;
+    this.loadError = '';
+    const failed = () => {
+      this.loadError = 'Some notices could not be loaded. Check your connection and try again.';
+      return of(null);
+    };
 
     this.loading = true;
     forkJoin({
       notices: studentId
-        ? this.http.get<any[]>(`${environment.apiUrl}studentnotice/student/${studentId}`).pipe(catchError(() => of([])))
+        ? this.http.get<any[]>(`${environment.apiUrl}studentnotice/student/${studentId}`).pipe(timeout(20000), catchError(failed))
         : of([]),
-      examPosts: this.http.get<any[]>(`${environment.apiUrl}jsswebportlang/feed`).pipe(catchError(() => of([])))
-    }).subscribe({
+      examPosts: this.http.get<any[]>(`${environment.apiUrl}jsswebportlang/feed`).pipe(timeout(20000), catchError(failed))
+    }).pipe(finalize(() => { this.loading = false; event?.target?.complete(); })).subscribe({
       next: ({ notices, examPosts }) => {
+        if (notices === null && examPosts === null) return;
         const exam = (examPosts || [])
           .filter((c: any) => c.websiteSection === EXAM_ANNOUNCEMENT_SECTION)
           .map((c: any) => this.mapExamPostToNotice(c));

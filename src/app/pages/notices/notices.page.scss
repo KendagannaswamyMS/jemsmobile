@@ -171,3 +171,8 @@ $accent:  #F26622;
 
   .attach-open { font-size: 14px; color: $accent; flex-shrink: 0; }
 }
+
+.notice-card { border-color: #e3e8f0; box-shadow: none; border-radius: 16px; }
+.notice-header { padding: 18px 16px; }
+.notice-title { font-size: 15px; font-weight: 650; line-height: 1.45; color: #18313b; }
+.notice-icon-wrap { border-radius: 12px; background: #eaf3f7; color: #125875; }

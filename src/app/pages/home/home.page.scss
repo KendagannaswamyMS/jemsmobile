@@ -24,13 +24,7 @@ $tmrw-col:  #457b9d;
   display: block;
 }
 
-.header-title {
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: 2.5px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-}
+
 
 // ── Biometric Widget Card ──────────────────────────────────────────────────
 .bio-card {
@@ -569,31 +563,7 @@ popup-wish-btn {
   }
 }
 
-.post-achievement-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: #ffffff;
-  border: 1.5px solid rgba(18, 88, 117, 0.25);
-  color: #125875;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(18, 88, 117, 0.05);
-  transition: background 0.2s, border-color 0.2s;
 
-  ion-icon {
-    font-size: 16px;
-    color: $accent;
-  }
-
-  &:active {
-    background: rgba(18, 88, 117, 0.06);
-    border-color: $accent;
-  }
-}
 
 .news-scroll {
   display: flex;
@@ -890,92 +860,35 @@ popup-wish-btn {
   }
 }
 
-.post-modal-card {
-  max-width: 380px !important;
-  width: 90% !important;
-  padding: 22px !important;
 
-  .post-modal-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 18px;
 
-    .modal-trophy { font-size: 24px; }
-    .modal-title {
-      font-size: 16px;
-      font-weight: 800;
-      color: #125875;
-      margin: 0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-  }
-
-  .post-form-body {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    text-align: left;
-  }
-
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .form-row {
-    display: flex;
-    gap: 10px;
-  }
-
-  .form-label {
-    font-size: 11.5px;
-    font-weight: 700;
-    color: #475569;
-  }
-
-  .form-input, .form-select, .form-textarea {
-    width: 100%;
-    padding: 9px 12px;
-    border-radius: 10px;
-    border: 1.5px solid rgba(18, 88, 117, 0.2);
-    font-size: 13px;
-    font-family: inherit;
-    color: #0f172a;
-    background: #ffffff;
-    box-sizing: border-box;
-
-    &:focus {
-      outline: none;
-      border-color: #F26622;
-    }
-  }
-
-  .modal-btn-row {
-    display: flex;
-    gap: 10px;
-    margin-top: 8px;
-
-    button {
-      flex: 1;
-      height: 42px;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-    }
-
-    .btn-cancel {
-      background: #f1f5f9;
-      color: #64748b;
-    }
-
-    .btn-submit {
-      background: #125875;
-      color: #ffffff;
-      box-shadow: 0 4px 12px rgba(18, 88, 117, 0.2);
-    }
-  }
-}
+/* Dashboard: clear hierarchy and direct access to daily tasks. */
+.brand-wordmark { font-size: 18px; font-weight: 750; letter-spacing: -.5px; color: #18313b; margin-left: 10px; }
+.brand-wordmark small { display: block; font-size: 10px; font-weight: 500; color: #71877d; letter-spacing: 0; margin-top: 2px; }
+.header-logo-img { height: 38px; width: 38px; max-width: none; padding: 2px; border-radius: 10px; box-shadow: none; }
+.dashboard-intro { padding: 12px 2px 20px; }
+.dashboard-intro .eyebrow { color: #627c70; font-size: 11px; font-weight: 650; margin: 0 0 12px; letter-spacing: .3px; }
+.dashboard-intro h1 { font-size: clamp(26px, 7vw, 34px); letter-spacing: -1.1px; line-height: 1.14; font-weight: 700; color: #18313b; margin: 0 0 9px; }
+.dashboard-intro > p:last-child { color: #6d8078; font-size: 13px; margin: 0; line-height: 1.6; }
+.quick-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 26px; }
+.quick-actions a { display: grid; grid-template-columns: 40px 1fr; align-items: center; column-gap: 10px; padding: 15px 12px; background: white; border: 1px solid #e3e8f0; border-radius: 16px; text-decoration: none; color: #18313b; min-height: 78px; }
+.quick-icon { grid-row: span 2; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: #eaf3f7; color: #125875; font-size: 21px; }
+.quick-icon.warm { background: #fff4ed; color: #c84d10; }
+.quick-icon.violet { background: #f0edfa; color: #7b62a4; }
+.quick-icon.blue { background: #eaf2fb; color: #417c9f; }
+.quick-actions strong { font-size: 12px; font-weight: 650; }
+.quick-actions small { font-size: 10px; color: #71857b; line-height: 1.5; }
+.bio-card { border-color: #e3e8f0; border-radius: 20px; box-shadow: 0 4px 18px #173d4604; }
+.bio-avatar-wrap { border: 2px solid #d9e9de; box-shadow: none; }
+.news-card { box-shadow: none; border: 1px solid #e3e8f0; border-radius: 18px; }
+.bday-card { box-shadow: none; }
+.section-title, .news-title-txt { color: #18313b; letter-spacing: -.3px; }
+@media (min-width: 760px) { .quick-actions { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 350px) { .quick-actions a { padding: 12px 8px; column-gap: 7px; grid-template-columns: 32px 1fr; } .quick-icon { width: 32px; height: 36px; } .quick-actions small { font-size: 9px; } }
+.campus-links { display: grid; gap: 1px; background: #e3e8f0; border: 1px solid #e3e8f0; border-radius: 16px; overflow: hidden; margin: 0 0 26px; }
+.campus-links a { display: flex; align-items: center; gap: 14px; padding: 15px 16px; background: #fff; text-decoration: none; color: #18313b; }
+.campus-links a > ion-icon { font-size: 21px; color: #567b6b; }
+.campus-links a > ion-icon:last-child { margin-left: auto; font-size: 16px; }
+.campus-links strong, .campus-links small { display: block; }
+.campus-links strong { font-size: 13px; font-weight: 650; }
+.campus-links small { font-size: 11px; color: #71857b; margin-top: 4px; }

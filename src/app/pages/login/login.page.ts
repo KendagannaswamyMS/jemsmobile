@@ -32,6 +32,7 @@ export class LoginPage {
   }
 
   setMode(mode: LoginMode) {
+    if (this.isLoading) return;
     this.mode = mode;
     const usernameCtrl = this.form.get('username')!;
     if (mode === 'student') {
@@ -77,11 +78,14 @@ export class LoginPage {
       },
       error: async (err) => {
         this.isLoading = false;
-        console.error('[Login Error] status:', err?.status, 'name:', err?.name, 'message:', err?.message, 'error:', err?.error);
         const isTimeout = err?.name === 'TimeoutError';
         const msg = isTimeout
           ? 'Server is not responding. Please check your connection.'
-          : (err?.error?.message || err?.message || 'Invalid credentials. Please try again.');
+          : err?.status === 0
+            ? 'Cannot connect to JEMS. Check your internet connection and try again.'
+            : err?.status >= 500
+              ? 'JEMS is temporarily unavailable. Please try again shortly.'
+              : (err?.error?.message || err?.message || 'Invalid credentials. Please try again.');
         const toast = await this.toastCtrl.create({ message: msg, duration: 3000, color: 'danger', position: 'top' });
         toast.present();
       }

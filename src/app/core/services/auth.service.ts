@@ -24,9 +24,9 @@ export class AuthService {
       UserauthPassword: password
     }).pipe(
       tap(res => {
-        console.log('[AuthService.login] raw response:', JSON.stringify(res));
-        if (!res) throw new Error('Empty response from server');
-        if (res?.message && !res?.token) throw new Error(res.message);
+        if (!res?.token || typeof res.token !== 'string') {
+          throw new Error(res?.message || 'The server did not return a valid session. Please try again.');
+        }
         
         const base: CurrentUser = {
           token: res.token || '',
@@ -48,7 +48,7 @@ export class AuthService {
           params: { UserEmailOfficial: email }
         }).subscribe({
           next: (u) => {
-            if (!u || !this.currentUser$.value) return;
+            if (!u || this.currentUser$.value?.token !== base.token) return;
             const sal = (u.salutation || '').trim();
             const fn = (u.userFName || u.firstName || '').trim();
             const mn = (u.userMname || u.middleName || '').trim();
@@ -67,7 +67,7 @@ export class AuthService {
               departmentName: u.primaryRole?.departmentName || '',
               designation: u.registration?.designationName || u.primaryRole?.roleTypeName || '',
               profilePic: u.userProfilepic || '',
-              menus: this.mapMenus(u.menus) || base.menus || []
+              menus: Array.isArray(u.menus) ? this.mapMenus(u.menus) : base.menus
             };
             this.storage.setJson(this.USER_KEY, enriched);
             this.currentUser$.next(enriched);
@@ -89,12 +89,15 @@ export class AuthService {
     return this.http.post<any>(`${environment.apiUrl}studentauth/login`, payload).pipe(
       catchError((err) => {
         // Fallback endpoint if studentauth/login returns status error
-        if (err?.status === 404 || err?.status === 405) {
+        if ((err?.status === 404 && !err?.error?.code && !err?.error?.message) || err?.status === 405) {
           return this.http.post<any>(`${environment.apiUrl}student/login`, payload);
         }
         throw err;
       }),
       tap(res => {
+        if (!res?.token || typeof res.token !== 'string') {
+          throw new Error(res?.message || 'The server did not return a valid session. Please try again.');
+        }
         if (res) {
           const fn = (res.firstName || res.studentName || cleanSrNumber).trim();
           const mn = (res.middleName || '').trim();
@@ -127,7 +130,7 @@ export class AuthService {
             this.http.get<any>(`${environment.apiUrl}studentadmission/getstudentbasicprofile/${user.userId}`).subscribe({
               next: (profile) => {
                 const pic = this.resolvePicUrl(profile?.profilePic);
-                if (!pic || !this.currentUser$.value) return;
+                if (!pic || this.currentUser$.value?.token !== user.token) return;
                 const enriched: CurrentUser = { ...this.currentUser$.value, profilePic: pic };
                 this.storage.setJson(this.USER_KEY, enriched);
                 this.currentUser$.next(enriched);

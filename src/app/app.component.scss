@@ -192,3 +192,10 @@ $accent:  #F26622;
   }
 }
 
+
+.menu-header { background: #0d3d50; padding: 24px 20px; }
+.menu-header::before { display: none; }
+.brand-badge { border: 0; background: transparent; box-shadow: none; padding: 0; }
+.menu-avatar-wrap { border-color: #9fc2b4; box-shadow: none; }
+.menu-body { --background: #fff; }
+

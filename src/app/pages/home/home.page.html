@@ -5,11 +5,33 @@
     </ion-buttons>
     <div class="header-brand">
       <img src="assets/images/JEMS_LOGO.png" alt="JEMS Logo" class="header-logo-img" />
+      <span class="brand-wordmark">JEMS <small>Your campus, connected</small></span>
     </div>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
+
+  <section class="dashboard-intro">
+    <p class="eyebrow">{{ todayDateLabel }} · {{ isStudent ? 'Student Portal' : 'Faculty & Staff' }}</p>
+    <h1>Welcome{{ user?.firstName ? ', ' + user?.firstName : ' to JEMS' }}.</h1>
+    <p>{{ isStudent ? 'Your academics and campus updates, in one place.' : 'Your teaching, attendance and campus day, in one place.' }}</p>
+  </section>
+
+  <nav class="quick-actions" aria-label="Campus shortcuts">
+    <a routerLink="/tabs/timetable"><span class="quick-icon"><ion-icon name="calendar-outline"></ion-icon></span><strong>My timetable</strong><small>Plan your day</small></a>
+    <a *ngIf="!isStudent" routerLink="/tabs/attendance"><span class="quick-icon warm"><ion-icon name="checkbox-outline"></ion-icon></span><strong>Attendance</strong><small>Mark a class</small></a>
+    <a *ngIf="isStudent" routerLink="/tabs/notices"><span class="quick-icon warm"><ion-icon name="notifications-outline"></ion-icon></span><strong>Notices</strong><small>Stay up to date</small></a>
+    <a *ngIf="!isStudent" routerLink="/tabs/leave"><span class="quick-icon violet"><ion-icon name="document-text-outline"></ion-icon></span><strong>My leave</strong><small>Requests & balance</small></a>
+    <a *ngIf="isStudent" routerLink="/tabs/my-clubs"><span class="quick-icon violet"><ion-icon name="people-outline"></ion-icon></span><strong>My clubs</strong><small>Find your people</small></a>
+    <a routerLink="/tabs/campus-wifi"><span class="quick-icon blue"><ion-icon name="wifi-outline"></ion-icon></span><strong>Campus WiFi</strong><small>Get connected</small></a>
+  </nav>
+
+  <section class="campus-links" aria-label="Explore campus">
+    <a routerLink="/tabs/events"><ion-icon name="megaphone-outline"></ion-icon><span><strong>Around campus</strong><small>Events & university updates</small></span><ion-icon name="chevron-forward-outline"></ion-icon></a>
+    <a *ngIf="!isStudent" routerLink="/tabs/dept-master"><ion-icon name="people-outline"></ion-icon><span><strong>Staff directory</strong><small>Find your colleagues</small></span><ion-icon name="chevron-forward-outline"></ion-icon></a>
+    <a *ngIf="isStudent" routerLink="/tabs/clubs"><ion-icon name="people-outline"></ion-icon><span><strong>Discover clubs</strong><small>Explore your interests</small></span><ion-icon name="chevron-forward-outline"></ion-icon></a>
+  </section>
 
   <!-- ── Student Welcome Card ──────────────────────── -->
   <div class="bio-card" *ngIf="isStudent">
