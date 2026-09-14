@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#125875</color>
+    <!--
+      White, not the brand teal (#125875): the JEMS wordmark is itself dark teal and
+      orange, so on a teal plate the "JEMS" letters lost nearly all contrast. The logo
+      is drawn on white everywhere else in the product, so the icon matches it.
+    -->
+    <color name="ic_launcher_background">#FFFFFF</color>
 </resources>

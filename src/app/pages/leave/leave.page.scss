@@ -121,6 +121,101 @@ $accent:  #F26622;
   .required {
     color: #ef4444;
   }
+
+  .optional-hint {
+    color: #94a3b8;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+}
+
+// Inline advisory shown under a field (missing attachment, unreachable staff list,
+// an approval level that is not yet actionable).
+.field-warning {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #b45309;
+  line-height: 1.4;
+
+  ion-icon {
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+}
+
+// ── Attachment Upload ─────────────────────────────────────────────
+.upload-wrap {
+  position: relative;
+
+  .file-input {
+    position: absolute;
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    z-index: -1;
+  }
+
+  .file-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 48px;
+    border: 1.5px dashed #cbd5e1;
+    border-radius: 14px;
+    background: #f8fafc;
+    font-size: 13px;
+    font-weight: 700;
+    color: $primary;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    ion-icon {
+      font-size: 20px;
+    }
+
+    &:active {
+      background: #eef2f7;
+    }
+  }
+
+  &.upload-required .file-label {
+    border-color: #fbbf24;
+    background: #fffbeb;
+  }
+}
+
+.file-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+
+  ion-icon {
+    font-size: 18px;
+    color: #059669;
+    flex-shrink: 0;
+  }
+
+  .file-name {
+    flex: 1;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #065f46;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .input-wrap, .select-wrap {
@@ -508,6 +603,33 @@ $accent:  #F26622;
   font-weight: 600;
   border-top: 1px solid #f1f5f9;
   padding-top: 8px;
+
+  .attach-icon {
+    font-size: 13px;
+    vertical-align: -2px;
+    margin-left: 4px;
+    color: #64748b;
+  }
+}
+
+// Where a request currently sits in the multi-level approval chain.
+.approval-trail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #475569;
+
+  ion-icon {
+    font-size: 14px;
+    color: $primary;
+    flex-shrink: 0;
+  }
 }
 
 // ── Balances Grid Cards ───────────────────────────────────────────
@@ -601,6 +723,24 @@ $accent:  #F26622;
     height: 100%;
     border-radius: 10px;
     transition: width 0.4s ease;
+  }
+}
+
+.balance-footnote {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 11px;
+  font-weight: 600;
+
+  .pending-note {
+    color: #b45309;
+  }
+
+  .entitlement-note {
+    color: #94a3b8;
   }
 }
 

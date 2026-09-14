@@ -37,6 +37,10 @@
 
 <ion-content class="ion-padding">
 
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content pullingText="Pull to sync with JEMS" refreshingSpinner="crescent"></ion-refresher-content>
+  </ion-refresher>
+
   <!-- ── 1. APPLY LEAVE FORM TAB ──────────────────────────── -->
   <div *ngIf="selectedSegment === 'apply'" class="tab-content">
     <div class="card-box form-card">
@@ -50,12 +54,16 @@
         <label class="input-label">Leave Type <span class="required">*</span></label>
         <div class="select-wrap">
           <ion-icon name="briefcase-outline" class="field-icon"></ion-icon>
-          <ion-select [(ngModel)]="selectedLeaveTypeId" placeholder="Select Leave Type" interface="action-sheet" class="custom-select">
+          <ion-select [(ngModel)]="selectedLeaveTypeId" (ionChange)="onLeaveTypeChange()" placeholder="Select Leave Type" interface="action-sheet" class="custom-select">
             <ion-select-option *ngFor="let t of leaveTypes" [value]="t.leaveTypeId">
               {{ t.leaveName }} ({{ t.leaveCode }})
             </ion-select-option>
           </ion-select>
         </div>
+        <p class="field-warning" *ngIf="leaveTypes.length === 0">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          No leave types available for your profile. Contact HR if this looks wrong.
+        </p>
       </div>
 
       <!-- Substitute Staff Selection (MANDATORY) -->
@@ -71,6 +79,10 @@
           </ion-button>
           <ion-icon name="chevron-down-outline" class="dropdown-chevron" *ngIf="!selectedSubstituteUserId"></ion-icon>
         </div>
+        <p class="field-warning" *ngIf="substituteLoadFailed">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          Staff list could not be loaded. Pull down to retry — leave cannot be applied without a substitute.
+        </p>
       </div>
 
       <!-- Date Pickers Grid -->
@@ -93,7 +105,7 @@
       </div>
 
       <!-- Half Day Toggle -->
-      <div class="toggle-card">
+      <div class="toggle-card" *ngIf="isHalfDayAllowed">
         <div class="toggle-info">
           <span class="toggle-title">Half Day Leave</span>
           <span class="toggle-subtitle">Apply for half day session (0.5 day)</span>
@@ -101,14 +113,11 @@
         <ion-toggle [(ngModel)]="isHalfDay" (ionChange)="onHalfDayToggle()" color="primary"></ion-toggle>
       </div>
 
-      <div class="form-group" *ngIf="isHalfDay">
-        <label class="input-label">Session</label>
-        <ion-segment [(ngModel)]="halfDaySession" mode="ios" class="session-segment">
-          <ion-segment-button value="FN">
-            <ion-label>Forenoon (FN)</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="AN">
-            <ion-label>Afternoon (AN)</ion-label>
+      <div class="form-group" *ngIf="isHalfDay && halfDaySessions.length > 0">
+        <label class="input-label">Session <span class="required">*</span></label>
+        <ion-segment [(ngModel)]="selectedHalfDaySessionId" mode="ios" class="session-segment">
+          <ion-segment-button *ngFor="let s of halfDaySessions" [value]="s.sessionId">
+            <ion-label>{{ s.sessionName }}</ion-label>
           </ion-segment-button>
         </ion-segment>
       </div>
@@ -134,6 +143,36 @@
         </div>
       </div>
 
+      <!-- Supporting Document (mandatory for Earned Leave / Special Leave) -->
+      <div class="form-group">
+        <label class="input-label">
+          Supporting Document (PDF)
+          <span class="required" *ngIf="isAttachmentRequired">*</span>
+          <span class="optional-hint" *ngIf="!isAttachmentRequired">(optional)</span>
+        </label>
+
+        <div class="upload-wrap" [class.upload-required]="isAttachmentRequired && !selectedFile">
+          <input type="file" id="leaveAttachment" accept="application/pdf" (change)="onFileSelected($event)" class="file-input" />
+          <label for="leaveAttachment" class="file-label">
+            <ion-icon name="cloud-upload-outline"></ion-icon>
+            <span>{{ selectedFile ? 'Change PDF' : 'Choose PDF file' }}</span>
+          </label>
+        </div>
+
+        <div class="file-chip" *ngIf="selectedFile">
+          <ion-icon name="document-attach-outline"></ion-icon>
+          <span class="file-name">{{ selectedFile.name }}</span>
+          <ion-button fill="clear" size="small" class="clear-btn" (click)="clearSelectedFile()">
+            <ion-icon name="close-circle" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
+
+        <p class="field-warning" *ngIf="isAttachmentRequired && !selectedFile">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          A PDF attachment is mandatory for {{ getSelectedLeaveTypeName() }} (max 1 MB).
+        </p>
+      </div>
+
       <!-- Action Button -->
       <button class="submit-btn" (click)="submitLeaveApplication()">
         <span>Submit Leave Application</span>
@@ -152,7 +191,15 @@
             <span class="leave-type-title">{{ app.leaveTypeName }}</span>
           </div>
           <span class="status-chip" [class.approved]="app.status === 'APPROVED'" [class.pending]="app.status === 'PENDING'" [class.rejected]="app.status === 'REJECTED'" [class.cancelled]="app.status === 'CANCELLED'">
-            {{ app.status }}
+            {{ app.statusText }}
+          </span>
+        </div>
+
+        <div class="approval-trail" *ngIf="app.approvalProgress || app.currentApproverName">
+          <ion-icon name="git-branch-outline"></ion-icon>
+          <span>
+            {{ app.approvalProgress }}
+            <span *ngIf="app.currentApproverName"> • with {{ app.currentApproverName }}</span>
           </span>
         </div>
 
@@ -171,7 +218,10 @@
         </p>
 
         <div class="history-footer">
-          <span class="applied-date">Applied on {{ app.appliedDate }}</span>
+          <span class="applied-date">
+            Applied on {{ app.appliedDate }}
+            <ion-icon name="document-attach-outline" class="attach-icon" *ngIf="app.hasAttachment"></ion-icon>
+          </span>
           <span class="app-id">ID #{{ app.applicationId }}</span>
         </div>
       </div>
@@ -216,7 +266,16 @@
           <span class="reason-txt">{{ p.reason }}</span>
         </div>
 
-        <div class="approval-actions">
+        <div class="approval-trail" *ngIf="p.approvalProgress || p.daysPending > 0">
+          <ion-icon name="git-branch-outline"></ion-icon>
+          <span>
+            {{ p.approvalProgress }}
+            <span *ngIf="p.daysPending > 0"> • pending {{ p.daysPending }} day(s)</span>
+            <span *ngIf="p.isCancellationRequest"> • cancellation request</span>
+          </span>
+        </div>
+
+        <div class="approval-actions" *ngIf="p.canApprove; else awaitingLevel">
           <button class="action-btn reject-btn" (click)="rejectLeaveRequest(p)">
             <ion-icon name="close-circle-outline"></ion-icon>
             <span>Reject</span>
@@ -226,6 +285,13 @@
             <span>Approve</span>
           </button>
         </div>
+
+        <ng-template #awaitingLevel>
+          <p class="field-warning">
+            <ion-icon name="time-outline"></ion-icon>
+            Waiting on an earlier approval level — you cannot action this yet.
+          </p>
+        </ng-template>
       </div>
     </div>
 
@@ -240,7 +306,7 @@
 
   <!-- ── 4. LEAVE BALANCES TAB ──────────────────────────── -->
   <div *ngIf="selectedSegment === 'balances'" class="tab-content">
-    <div class="balance-grid">
+    <div class="balance-grid" *ngIf="leaveBalances.length > 0; else noBalances">
       <div class="balance-card" *ngFor="let b of leaveBalances" [style.border-top-color]="b.color">
         <div class="balance-header">
           <span class="balance-code" [style.background]="b.color">{{ b.leaveCode }}</span>
@@ -250,7 +316,7 @@
         <div class="balance-stats">
           <div class="stat-col">
             <span class="stat-num color-balance">{{ b.balance }}</span>
-            <span class="stat-lbl">Remaining</span>
+            <span class="stat-lbl">Available</span>
           </div>
           <div class="stat-divider"></div>
           <div class="stat-col">
@@ -260,15 +326,30 @@
           <div class="stat-divider"></div>
           <div class="stat-col">
             <span class="stat-num color-alloc">{{ b.allocated }}</span>
-            <span class="stat-lbl">Total</span>
+            <span class="stat-lbl">Credited</span>
           </div>
         </div>
 
         <div class="progress-bar-wrap">
-          <div class="progress-fill" [style.width.%]="(b.balance / b.allocated) * 100" [style.background]="b.color"></div>
+          <div class="progress-fill" [style.width.%]="b.allocated > 0 ? (b.balance / b.allocated) * 100 : 0" [style.background]="b.color"></div>
+        </div>
+
+        <div class="balance-footnote">
+          <span *ngIf="b.pending > 0" class="pending-note">{{ b.pending }} day(s) awaiting approval</span>
+          <span *ngIf="b.entitlement !== null" class="entitlement-note">Annual entitlement: {{ b.entitlement }}</span>
         </div>
       </div>
     </div>
+
+    <ng-template #noBalances>
+      <div class="empty-state">
+        <ion-icon name="pie-chart-outline" class="empty-icon"></ion-icon>
+        <p class="empty-title">{{ balancesLoaded ? 'No Leave Balances Found' : 'Loading Balances…' }}</p>
+        <p class="empty-sub" *ngIf="balancesLoaded">
+          JEMS has no leave balance record for you in this academic year yet. Contact HR to have your opening balance credited.
+        </p>
+      </div>
+    </ng-template>
   </div>
 
 </ion-content>

@@ -11,8 +11,19 @@ import { environment } from 'src/environments/environment';
 export interface StaffNewsMember {
   name: string;
   designation: string;
+  /** Tblusermaster.UserId — the profile picture is resolved from this. */
+  userId?: number;
   avatar?: string;
 }
+
+/**
+ * Staff profile pictures are served as absolute URLs off the JEMS archive host and
+ * follow a per-user folder convention, e.g.
+ *   https://jems.jssstuniv.in/archivefilestorage/userprofilepics/278/profile_278.jpg
+ * The extension varies per upload (.jpg / .png), so a URL is never constructed from
+ * an id — it is taken from Tblusermaster.UserProfilepic as stored.
+ */
+const STAFF_PROFILE_PIC_BASE = 'https://jems.jssstuniv.in/archivefilestorage/userprofilepics';
 
 export interface StaffNewsItem {
   id: number;
@@ -63,7 +74,8 @@ export class HomePage implements OnInit, OnDestroy {
         {
           name: 'Dr. Santhosh Chidangil',
           designation: 'Professor',
-          avatar: ''
+          userId: 678,
+          avatar: `${STAFF_PROFILE_PIC_BASE}/678/profile_678.jpg`
         }
       ]
     },
@@ -78,12 +90,14 @@ export class HomePage implements OnInit, OnDestroy {
         {
           name: 'Dr. C S. Karthik',
           designation: 'Associate Professor',
-          avatar: ''
+          userId: 27,
+          avatar: `${STAFF_PROFILE_PIC_BASE}/27/profile_27.jpg`
         },
         {
           name: 'Dr. SHIVAPRASAD K S',
           designation: 'Assistant Professor',
-          avatar: ''
+          userId: 278,
+          avatar: `${STAFF_PROFILE_PIC_BASE}/278/profile_278.jpg`
         }
       ]
     },
@@ -96,9 +110,10 @@ export class HomePage implements OnInit, OnDestroy {
       bannerImg: '',
       staffList: [
         {
-          name: 'Dr. Mahanand B',
+          name: 'Dr. Mahanand B S',
           designation: 'Professor',
-          avatar: ''
+          userId: 312,
+          avatar: `${STAFF_PROFILE_PIC_BASE}/312/profile_312.jpg`
         }
       ]
     },
@@ -111,9 +126,10 @@ export class HomePage implements OnInit, OnDestroy {
       bannerImg: '',
       staffList: [
         {
-          name: 'Dr. S. Reddy K.',
+          name: 'Dr. P. S. Reddy K.',
           designation: 'Professor',
-          avatar: ''
+          userId: 398,
+          avatar: `${STAFF_PROFILE_PIC_BASE}/398/profile_398.jpg`
         }
       ]
     }
@@ -311,7 +327,11 @@ export class HomePage implements OnInit, OnDestroy {
       staffList: [
         {
           name: this.newAchievement.staffName,
-          designation: this.newAchievement.designation || 'Faculty Member'
+          designation: this.newAchievement.designation || 'Faculty Member',
+          // The form is prefilled with the signed-in staff member, so their own picture
+          // applies unless they retyped the name as somebody else.
+          userId: this.isOwnAchievement() ? this.user?.userId : undefined,
+          avatar: this.isOwnAchievement() ? (this.user?.profilePic || '') : ''
         }
       ]
     };
@@ -334,6 +354,15 @@ export class HomePage implements OnInit, OnDestroy {
 
   closeStaffNewsDetail() {
     this.selectedNewsItem = null;
+  }
+
+  /** True when the achievement form still names the signed-in user (the prefilled default). */
+  private isOwnAchievement(): boolean {
+    const u = this.user;
+    if (!u) return false;
+    const normalise = (s: string) => (s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    const ownName = normalise([u.firstName || u.name, u.lastName].filter(Boolean).join(' '));
+    return !!ownName && ownName === normalise(this.newAchievement.staffName);
   }
 
   getStaffInitials(name: string): string {

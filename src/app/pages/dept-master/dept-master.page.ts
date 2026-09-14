@@ -17,6 +17,22 @@ export class DeptMasterPage implements OnInit {
   selectedDept = '';
   searchText = '';
 
+  // Department picker
+  departments: string[] = [];
+  visibleDepartments: string[] = [];
+  private deptCounts: Record<string, number> = {};
+  deptPickerOpen = false;
+  private _deptSearch = '';
+
+  get deptSearch() { return this._deptSearch; }
+  set deptSearch(v: string) {
+    this._deptSearch = v;
+    const q = v.trim().toLowerCase();
+    this.visibleDepartments = q
+      ? this.departments.filter(d => d.toLowerCase().includes(q))
+      : this.departments;
+  }
+
   // Search overlay
   searchOpen = false;
 
@@ -36,17 +52,31 @@ export class DeptMasterPage implements OnInit {
       `${environment.apiUrl}DashboardDep/GetUserMasterForDept`,
       { departmentId: [-1], designationId: -1, EmptypeID: -1, StaffTypeId: -1 }
     ).subscribe({
-      next: res => { this.allStaff = res || []; this.loading = false; },
+      next: res => { this.allStaff = res || []; this.buildDepartments(); this.loading = false; },
       error: () => { this.loading = false; }
     });
   }
 
-  get departments(): string[] {
-    const seen = new Set<string>();
-    return this.allStaff
-      .map(s => s.departmentName)
-      .filter(d => d && !seen.has(d) && !!seen.add(d))
-      .sort();
+  /** Build the sorted department list + per-department staff counts once per load. */
+  private buildDepartments() {
+    const counts: Record<string, number> = {};
+    for (const s of this.allStaff) {
+      const d = s.departmentName?.trim();
+      if (d) counts[d] = (counts[d] || 0) + 1;
+    }
+    this.deptCounts = counts;
+    this.departments = Object.keys(counts).sort((a, b) => a.localeCompare(b));
+    this.deptSearch = this._deptSearch;   // refresh the filtered view
+  }
+
+  deptCount(d: string): number { return this.deptCounts[d] || 0; }
+
+  openDeptPicker() { this.deptSearch = ''; this.deptPickerOpen = true; }
+  closeDeptPicker() { this.deptPickerOpen = false; }
+
+  pickDept(d: string) {
+    this.selectedDept = d;
+    this.deptPickerOpen = false;
   }
 
   get searchResults(): DeptStaff[] {

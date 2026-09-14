@@ -13,14 +13,11 @@
 <ion-content class="ion-padding">
 
   <!-- ── Department filter ─────────────────────────── -->
-  <div class="dept-select-wrap">
+  <button type="button" class="dept-select-wrap" (click)="openDeptPicker()">
     <ion-icon name="business-outline" class="dept-icon"></ion-icon>
-    <select class="dept-select" [(ngModel)]="selectedDept">
-      <option value="">All Departments</option>
-      <option *ngFor="let d of departments" [value]="d">{{ d }}</option>
-    </select>
+    <span class="dept-select-value">{{ selectedDept || 'All Departments' }}</span>
     <ion-icon name="chevron-down-outline" class="select-caret"></ion-icon>
-  </div>
+  </button>
 
   <!-- Count pill -->
   <p class="result-count" *ngIf="!loading">
@@ -84,6 +81,50 @@
   </div>
 
 </ion-content>
+
+<!-- ── Department Picker Sheet ────────────────────── -->
+<div class="dept-overlay" *ngIf="deptPickerOpen" (click)="closeDeptPicker()">
+  <div class="dept-sheet" (click)="$event.stopPropagation()">
+
+    <div class="sheet-handle"></div>
+
+    <div class="dept-sheet-head">
+      <h3>Select Department</h3>
+      <button class="sheet-close-inline" (click)="closeDeptPicker()">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </div>
+
+    <div class="dept-search-bar">
+      <ion-icon name="search-outline"></ion-icon>
+      <input class="dept-search-input" type="text" placeholder="Filter departments…"
+        [(ngModel)]="deptSearch" />
+      <button *ngIf="deptSearch" class="dept-search-clear" (click)="deptSearch=''">
+        <ion-icon name="close-circle"></ion-icon>
+      </button>
+    </div>
+
+    <div class="dept-options">
+      <button type="button" class="dept-option" [class.selected]="!selectedDept"
+        (click)="pickDept('')">
+        <span class="dept-option-label">All Departments</span>
+        <span class="dept-option-count">{{ allStaff.length }}</span>
+        <ion-icon name="checkmark-outline" class="dept-option-check" *ngIf="!selectedDept"></ion-icon>
+      </button>
+
+      <button type="button" class="dept-option" *ngFor="let d of visibleDepartments"
+        [class.selected]="d === selectedDept" (click)="pickDept(d)">
+        <span class="dept-option-label">{{ d }}</span>
+        <span class="dept-option-count">{{ deptCount(d) }}</span>
+        <ion-icon name="checkmark-outline" class="dept-option-check" *ngIf="d === selectedDept"></ion-icon>
+      </button>
+
+      <div class="dept-empty" *ngIf="deptSearch && visibleDepartments.length === 0">
+        No department matches "{{ deptSearch }}"
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ── Search Overlay ─────────────────────────────── -->
 <div class="search-overlay" *ngIf="searchOpen" (click)="closeSearch()">
