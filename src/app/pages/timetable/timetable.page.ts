@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { filter, take, switchMap } from 'rxjs/operators';
-import { forkJoin } from 'rxjs';
+import { filter, take } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth.service';
+import { AcademicService } from '../../core/services/academic.service';
 import { TimetableSession, SessionWeek, TimetableSlot, DayGroup } from '../../models/timetable.model';
 import { environment } from 'src/environments/environment';
 
@@ -23,59 +23,93 @@ export class TimetablePage implements OnInit {
   selectedWeek: SessionWeek | null = null;
   dayGroups: DayGroup[] = [];
 
+  isStudent = false;
   private sessionId = 0;
   private userId = 0;
 
-  constructor(private authService: AuthService, private http: HttpClient, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private academicService: AcademicService,
+    private http: HttpClient,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     this.authService.user$.pipe(filter(u => !!u), take(1)).subscribe(u => {
       this.userId = u!.userId;
+      this.isStudent = this.authService.isStudent();
       this.bootstrap();
     });
   }
 
   private bootstrap() {
-    // 1. Get sessions → find current
-    this.http.get<TimetableSession[]>(`${environment.apiUrl}univesitymaster/getsessions`)
-      .subscribe({
-        next: sessions => {
-          const cur = sessions.find(s => s.iscurrentsession) || sessions[0];
-          this.sessionId = cur.sessionslnum;
-          // 2. Get weeks for that session
-          this.http.get<SessionWeek[]>(`${environment.apiUrl}Timetable/session/${this.sessionId}/weeks`)
-            .subscribe({
-              next: weeks => {
-                this.weeks = weeks;
-                // 3. Default to current week
-                const today = new Date();
-                const cur = weeks.find(w => {
-                  const s = new Date(w.weekStartDate);
-                  const e = new Date(w.weekEndDate);
-                  return today >= s && today <= e;
-                }) || weeks[0];
-                this.selectedWeek = cur;
-                this.loadTimetable(cur.weekNumber);
-              },
-              error: () => { this.loading = false; this.error = true; }
-            });
-        },
-        error: () => { this.loading = false; this.error = true; }
-      });
+    this.academicService.getSessions().subscribe({
+      next: sessions => {
+        const cur = sessions.find(s => s.iscurrentsession) || sessions[0];
+        if (!cur) {
+          this.loading = false;
+          this.error = true;
+          return;
+        }
+        this.sessionId = cur.sessionslnum;
+        this.academicService.getSessionWeeks(this.sessionId).subscribe({
+          next: weeks => {
+            this.weeks = weeks || [];
+            const today = new Date();
+            const curWeek = this.weeks.find(w => {
+              const s = new Date(w.weekStartDate);
+              const e = new Date(w.weekEndDate);
+              return today >= s && today <= e;
+            }) || this.weeks[0];
+            this.selectedWeek = curWeek || null;
+            if (curWeek) {
+              this.loadTimetable(curWeek.weekNumber);
+            } else {
+              this.loading = false;
+            }
+          },
+          error: () => { this.loading = false; this.error = true; }
+        });
+      },
+      error: () => { this.loading = false; this.error = true; }
+    });
   }
 
   loadTimetable(weekNumber: number) {
     this.loading = true;
-    this.http.get<TimetableSlot[]>(
-      `${environment.apiUrl}FacultyWorkload/gettimetable/${this.userId}/${this.sessionId}`,
-      { params: { weekNumber: weekNumber.toString() } }
-    ).subscribe({
-      next: slots => {
-        this.dayGroups = this.groupByDay(slots || [], this.selectedWeek!);
-        this.loading = false;
-      },
-      error: () => { this.loading = false; this.error = true; }
-    });
+    this.error = false;
+
+    if (this.isStudent) {
+      this.academicService.getStudentTimetable(this.userId, this.sessionId, weekNumber).subscribe({
+        next: (res) => {
+          const rawSlots: any[] = res?.slots ?? (Array.isArray(res) ? res : []);
+          const normalized: TimetableSlot[] = rawSlots.map((s, idx) => ({
+            timetableslotslnum: s.timetableSlotSlnum || s.slotId || s.timetableslotslnum || idx + 1,
+            dayofweek: Number(s.dayOfWeek ?? s.dayofweek ?? 1),
+            starttime: (s.startTime ?? s.starttime ?? '').substring(0, 5),
+            endtime: (s.endTime ?? s.endtime ?? '').substring(0, 5),
+            courseName: s.subjectName ?? s.courseTitle ?? s.courseName ?? 'Subject',
+            courseCode: s.subjectCode ?? s.courseCode ?? '',
+            activitytype: s.activityType ?? s.activitytype ?? 'Theory',
+            roomnumber: s.roomNumber ?? s.roomnumber ?? s.room ?? 'TBD',
+            isShared: !!s.isShared,
+            sharedWith: s.sharedWith || [],
+            subjectslnum: s.subjectSlnum ?? s.subjectslnum
+          }));
+          this.dayGroups = this.groupByDay(normalized, this.selectedWeek!);
+          this.loading = false;
+        },
+        error: () => { this.loading = false; this.error = true; }
+      });
+    } else {
+      this.academicService.getFacultyTimetable(this.userId, this.sessionId, weekNumber).subscribe({
+        next: slots => {
+          this.dayGroups = this.groupByDay(slots || [], this.selectedWeek!);
+          this.loading = false;
+        },
+        error: () => { this.loading = false; this.error = true; }
+      });
+    }
   }
 
   private groupByDay(slots: TimetableSlot[], week: SessionWeek): DayGroup[] {
@@ -125,6 +159,7 @@ export class TimetablePage implements OnInit {
   }
 
   openAttendance(slot: TimetableSlot) {
+    if (this.isStudent) return;
     this.router.navigate(['/tabs/attendance'], {
       queryParams: {
         sessionId:    this.sessionId,

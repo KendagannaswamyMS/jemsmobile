@@ -19,16 +19,18 @@
           {{ initials }}
         </div>
       </div>
-      <p class="menu-salutation">{{ user?.salutation }}</p>
+      <p class="menu-salutation" *ngIf="user?.salutation">{{ user?.salutation }}</p>
       <h2 class="menu-name">{{ user?.firstName }} {{ user?.middleName }} {{ user?.lastName }}</h2>
-      <p class="menu-role">{{ user?.designation || user?.role || '' }}</p>
+      <p class="menu-role" *ngIf="isStudent">Student {{ user?.usn ? '· ' + user?.usn : '' }}</p>
+      <p class="menu-role" *ngIf="!isStudent">{{ user?.designation || user?.role || '' }}</p>
       <p class="menu-dept" *ngIf="user?.departmentName">{{ user!.departmentName }}</p>
     </div>
 
     <!-- ── Nav Items ───────────────────────────────── -->
     <ion-content class="menu-body">
-      <ion-list lines="none" class="menu-list">
 
+      <!-- Staff Navigation List -->
+      <ion-list lines="none" class="menu-list" *ngIf="!isStudent">
         <ion-item button (click)="navigate('/tabs/home')" class="menu-item"
           routerLink="/tabs/home" routerLinkActive="active-item">
           <ion-icon name="home-outline" slot="start"></ion-icon>
@@ -41,19 +43,19 @@
           <ion-label>Timetable</ion-label>
         </ion-item>
 
-        <ion-item *ngIf="!isStudent" button (click)="navigate('/tabs/attendance')" class="menu-item"
+        <ion-item button (click)="navigate('/tabs/attendance')" class="menu-item"
           routerLink="/tabs/attendance" routerLinkActive="active-item">
           <ion-icon name="checkbox-outline" slot="start"></ion-icon>
           <ion-label>Mark Attendance</ion-label>
         </ion-item>
 
-        <ion-item *ngIf="!isStudent" button (click)="navigate('/tabs/monthly-attendance')" class="menu-item"
+        <ion-item button (click)="navigate('/tabs/monthly-attendance')" class="menu-item"
           routerLink="/tabs/monthly-attendance" routerLinkActive="active-item">
           <ion-icon name="calendar-outline" slot="start"></ion-icon>
           <ion-label>Monthly Attendance</ion-label>
         </ion-item>
 
-        <ion-item *ngIf="!isStudent" button (click)="navigate('/tabs/leave')" class="menu-item"
+        <ion-item button (click)="navigate('/tabs/leave')" class="menu-item"
           routerLink="/tabs/leave" routerLinkActive="active-item">
           <ion-icon name="document-text-outline" slot="start"></ion-icon>
           <ion-label>Leave Management</ion-label>
@@ -71,31 +73,174 @@
           <ion-label>Events</ion-label>
         </ion-item>
 
-        <ion-item *ngIf="isStudent" button (click)="navigate('/tabs/notices')" class="menu-item"
-          routerLink="/tabs/notices" routerLinkActive="active-item">
-          <ion-icon name="notifications-outline" slot="start"></ion-icon>
-          <ion-label>Notices</ion-label>
-        </ion-item>
-
-        <ion-item *ngIf="isStudent" button (click)="navigate('/tabs/clubs')" class="menu-item"
-          routerLink="/tabs/clubs" routerLinkActive="active-item">
-          <ion-icon name="people-circle-outline" slot="start"></ion-icon>
-          <ion-label>Clubs</ion-label>
-        </ion-item>
-
-        <ion-item *ngIf="isStudent" button (click)="navigate('/tabs/my-clubs')" class="menu-item"
-          routerLink="/tabs/my-clubs" routerLinkActive="active-item">
-          <ion-icon name="ribbon-outline" slot="start"></ion-icon>
-          <ion-label>My Clubs</ion-label>
-        </ion-item>
-
-        <ion-item *ngIf="!isStudent" button (click)="navigate('/tabs/dept-master')" class="menu-item"
+        <ion-item button (click)="navigate('/tabs/dept-master')" class="menu-item"
           routerLink="/tabs/dept-master" routerLinkActive="active-item">
           <ion-icon name="people-outline" slot="start"></ion-icon>
           <ion-label>Department Master</ion-label>
         </ion-item>
+      </ion-list>
+
+      <!-- Student Navigation List (Matching exact design) -->
+      <ion-list lines="none" class="menu-list student-menu-list" *ngIf="isStudent">
+
+        <!-- 1. Dashboard -->
+        <ion-item button (click)="navigate('/tabs/student/dashboard')" class="menu-item student-item"
+          routerLink="/tabs/student/dashboard" routerLinkActive="active-item">
+          <ion-icon name="grid-outline" slot="start" class="menu-icon"></ion-icon>
+          <ion-label class="menu-label">Dashboard</ion-label>
+        </ion-item>
+
+        <!-- 2. My Profile -->
+        <ion-item button (click)="navigate('/tabs/student/profile')" class="menu-item student-item"
+          routerLink="/tabs/student/profile" routerLinkActive="active-item">
+          <ion-icon name="person-outline" slot="start" class="menu-icon"></ion-icon>
+          <ion-label class="menu-label">My Profile</ion-label>
+        </ion-item>
+
+        <!-- 3. Academic (Accordion) -->
+        <div class="menu-accordion-group">
+          <ion-item button (click)="toggleSection('academic')" class="menu-item student-item accordion-header"
+            [class.expanded]="isExpanded('academic')">
+            <ion-icon name="school-outline" slot="start" class="menu-icon"></ion-icon>
+            <ion-label class="menu-label font-semibold">Academic</ion-label>
+            <ion-icon [name]="isExpanded('academic') ? 'chevron-up-outline' : 'chevron-down-outline'" slot="end" class="arrow-icon"></ion-icon>
+          </ion-item>
+          <div class="accordion-sub-items" *ngIf="isExpanded('academic')">
+            <ion-item button (click)="navigate('/tabs/student/timetable')" class="sub-item">
+              <ion-icon name="calendar-outline" slot="start"></ion-icon>
+              <ion-label>Timetable</ion-label>
+            </ion-item>
+            <ion-item button (click)="navigate('/tabs/student/dashboard')" class="sub-item">
+              <ion-icon name="stats-chart-outline" slot="start"></ion-icon>
+              <ion-label>Attendance Overview</ion-label>
+            </ion-item>
+            <ion-item button (click)="navigate('/tabs/student/dashboard')" class="sub-item">
+              <ion-icon name="book-outline" slot="start"></ion-icon>
+              <ion-label>Course Syllabus</ion-label>
+            </ion-item>
+          </div>
+        </div>
+
+        <!-- 4. Examination (Accordion) -->
+        <div class="menu-accordion-group">
+          <ion-item button (click)="toggleSection('examination')" class="menu-item student-item accordion-header"
+            [class.expanded]="isExpanded('examination')">
+            <ion-icon name="clipboard-outline" slot="start" class="menu-icon"></ion-icon>
+            <ion-label class="menu-label font-semibold">Examination</ion-label>
+            <ion-icon [name]="isExpanded('examination') ? 'chevron-up-outline' : 'chevron-down-outline'" slot="end" class="arrow-icon"></ion-icon>
+          </ion-item>
+          <div class="accordion-sub-items" *ngIf="isExpanded('examination')">
+            <ion-item button (click)="navigate('/tabs/student/dashboard')" class="sub-item">
+              <ion-icon name="calendar-clear-outline" slot="start"></ion-icon>
+              <ion-label>Exam Schedule</ion-label>
+            </ion-item>
+            <ion-item button (click)="navigate('/tabs/student/dashboard')" class="sub-item">
+              <ion-icon name="ribbon-outline" slot="start"></ion-icon>
+              <ion-label>Results & Marks</ion-label>
+            </ion-item>
+            <ion-item button (click)="navigate('/tabs/student/dashboard')" class="sub-item">
+              <ion-icon name="card-outline" slot="start"></ion-icon>
+              <ion-label>Hall Ticket</ion-label>
+            </ion-item>
+          </div>
+        </div>
+
+        <!-- 5. Mentoring (Accordion) -->
+        <div class="menu-accordion-group">
+          <ion-item button (click)="toggleSection('mentoring')" class="menu-item student-item accordion-header"
+            [class.expanded]="isExpanded('mentoring')">
+            <ion-icon name="people-outline" slot="start" class="menu-icon"></ion-icon>
+            <ion-label class="menu-label font-semibold">Mentoring</ion-label>
+            <ion-icon [name]="isExpanded('mentoring') ? 'chevron-up-outline' : 'chevron-down-outline'" slot="end" class="arrow-icon"></ion-icon>
+          </ion-item>
+          <div class="accordion-sub-items" *ngIf="isExpanded('mentoring')">
+            <ion-item button (click)="navigate('/tabs/student/dashboard')" class="sub-item">
+              <ion-icon name="person-circle-outline" slot="start"></ion-icon>
+              <ion-label>Mentor Details</ion-label>
+            </ion-item>
+            <ion-item button (click)="navigate('/tabs/student/feedback')" class="sub-item">
+              <ion-icon name="chatbox-ellipses-outline" slot="start"></ion-icon>
+              <ion-label>Feedback & Meetings</ion-label>
+            </ion-item>
+          </div>
+        </div>
+
+        <!-- 6. Placement (Accordion) -->
+        <div class="menu-accordion-group">
+          <ion-item button (click)="toggleSection('placement')" class="menu-item student-item accordion-header"
+            [class.expanded]="isExpanded('placement')">
+            <ion-icon name="briefcase-outline" slot="start" class="menu-icon"></ion-icon>
+            <ion-label class="menu-label font-semibold">Placement</ion-label>
+            <ion-icon [name]="isExpanded('placement') ? 'chevron-up-outline' : 'chevron-down-outline'" slot="end" class="arrow-icon"></ion-icon>
+          </ion-item>
+          <div class="accordion-sub-items" *ngIf="isExpanded('placement')">
+            <ion-item button (click)="navigate('/tabs/student/dashboard')" class="sub-item">
+              <ion-icon name="business-outline" slot="start"></ion-icon>
+              <ion-label>Placement Drives</ion-label>
+            </ion-item>
+            <ion-item button (click)="navigate('/tabs/student/dashboard')" class="sub-item">
+              <ion-icon name="document-text-outline" slot="start"></ion-icon>
+              <ion-label>Applications</ion-label>
+            </ion-item>
+          </div>
+        </div>
+
+        <!-- 7. Campus WiFi -->
+        <ion-item button (click)="navigate('/tabs/student/campus-wifi')" class="menu-item student-item"
+          routerLink="/tabs/student/campus-wifi" routerLinkActive="active-item">
+          <ion-icon name="wifi-outline" slot="start" class="menu-icon"></ion-icon>
+          <ion-label class="menu-label">Campus WiFi</ion-label>
+        </ion-item>
+
+        <!-- 8. Events / Notices -->
+        <ion-item button (click)="navigate('/tabs/student/notices')" class="menu-item student-item"
+          routerLink="/tabs/student/notices" routerLinkActive="active-item">
+          <ion-icon name="megaphone-outline" slot="start" class="menu-icon"></ion-icon>
+          <ion-label class="menu-label">Events & Notices</ion-label>
+        </ion-item>
+
+        <!-- 9. Finance (Accordion) -->
+        <div class="menu-accordion-group">
+          <ion-item button (click)="toggleSection('finance')" class="menu-item student-item accordion-header"
+            [class.expanded]="isExpanded('finance')">
+            <ion-icon name="wallet-outline" slot="start" class="menu-icon"></ion-icon>
+            <ion-label class="menu-label font-semibold">Finance</ion-label>
+            <ion-icon [name]="isExpanded('finance') ? 'chevron-up-outline' : 'chevron-down-outline'" slot="end" class="arrow-icon"></ion-icon>
+          </ion-item>
+          <div class="accordion-sub-items" *ngIf="isExpanded('finance')">
+            <ion-item button (click)="navigate('/tabs/student/dashboard')" class="sub-item">
+              <ion-icon name="cash-outline" slot="start"></ion-icon>
+              <ion-label>Fee Payment</ion-label>
+            </ion-item>
+            <ion-item button (click)="navigate('/tabs/student/dashboard')" class="sub-item">
+              <ion-icon name="receipt-outline" slot="start"></ion-icon>
+              <ion-label>Receipts</ion-label>
+            </ion-item>
+          </div>
+        </div>
+
+        <!-- 10. Clubs (Accordion) -->
+        <div class="menu-accordion-group">
+          <ion-item button (click)="toggleSection('clubs')" class="menu-item student-item accordion-header"
+            [class.expanded]="isExpanded('clubs')">
+            <ion-icon name="people-circle-outline" slot="start" class="menu-icon"></ion-icon>
+            <ion-label class="menu-label font-semibold">Clubs</ion-label>
+            <ion-icon [name]="isExpanded('clubs') ? 'chevron-up-outline' : 'chevron-down-outline'" slot="end" class="arrow-icon"></ion-icon>
+          </ion-item>
+          <div class="accordion-sub-items" *ngIf="isExpanded('clubs')">
+            <ion-item button (click)="navigate('/tabs/student/clubs/my-clubs')" class="sub-item">
+              <ion-icon name="color-palette-outline" slot="start"></ion-icon>
+              <ion-label>My Clubs</ion-label>
+            </ion-item>
+            <ion-item button (click)="navigate('/tabs/student/clubs')" class="sub-item">
+              <ion-icon name="trophy-outline" slot="start"></ion-icon>
+              <ion-label>Club Directory</ion-label>
+            </ion-item>
+          </div>
+        </div>
 
       </ion-list>
+
     </ion-content>
 
     <!-- ── Sign Out ────────────────────────────────── -->

@@ -1,6 +1,8 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { TabsPage } from './tabs.page';
+import { StaffGuard } from '../core/guards/staff.guard';
+import { DocRequestOnlyGuard } from '../core/guards/doc-request-only.guard';
 
 const routes: Routes = [
   {
@@ -12,20 +14,95 @@ const routes: Routes = [
         loadChildren: () => import('../pages/home/home.module').then(m => m.HomePageModule)
       },
       {
+        path: 'student/dashboard',
+        loadChildren: () => import('../pages/home/home.module').then(m => m.HomePageModule),
+        canActivate: [DocRequestOnlyGuard]
+      },
+      {
+        path: 'student/doc-request',
+        loadChildren: () => import('../pages/doc-request/doc-request.module').then(m => m.DocRequestPageModule)
+      },
+      {
+        path: 'student/profile',
+        loadChildren: () => import('../pages/home/home.module').then(m => m.HomePageModule)
+      },
+      {
+        path: 'student/timetable',
+        loadChildren: () => import('../pages/timetable/timetable.module').then(m => m.TimetablePageModule),
+        canActivate: [DocRequestOnlyGuard]
+      },
+      {
+        path: 'student/subjects',
+        loadChildren: () => import('../pages/subjects/subjects.module').then(m => m.SubjectsPageModule),
+        canActivate: [DocRequestOnlyGuard]
+      },
+      {
+        path: 'student/marks',
+        loadChildren: () => import('../pages/marks/marks.module').then(m => m.MarksPageModule),
+        canActivate: [DocRequestOnlyGuard]
+      },
+      {
+        path: 'subjects',
+        loadChildren: () => import('../pages/subjects/subjects.module').then(m => m.SubjectsPageModule),
+        canActivate: [DocRequestOnlyGuard]
+      },
+      {
+        path: 'marks',
+        loadChildren: () => import('../pages/marks/marks.module').then(m => m.MarksPageModule),
+        canActivate: [DocRequestOnlyGuard]
+      },
+      {
+        path: 'student/fees',
+        loadChildren: () => import('../pages/fees/fees.module').then(m => m.FeesPageModule),
+        canActivate: [DocRequestOnlyGuard]
+      },
+      {
+        path: 'fees',
+        loadChildren: () => import('../pages/fees/fees.module').then(m => m.FeesPageModule),
+        canActivate: [DocRequestOnlyGuard]
+      },
+      {
+        path: 'student/feedback',
+        loadChildren: () => import('../pages/home/home.module').then(m => m.HomePageModule),
+        canActivate: [DocRequestOnlyGuard]
+      },
+      {
+        path: 'student/notices',
+        loadChildren: () => import('../pages/events/events.module').then(m => m.EventsPageModule)
+      },
+      {
+        path: 'student/campus-wifi',
+        loadChildren: () => import('../pages/campus-wifi/campus-wifi.module').then(m => m.CampusWifiPageModule)
+      },
+      {
+        path: 'student/clubs',
+        loadChildren: () => import('../pages/home/home.module').then(m => m.HomePageModule),
+        canActivate: [DocRequestOnlyGuard]
+      },
+      {
+        path: 'student/clubs/my-clubs',
+        loadChildren: () => import('../pages/home/home.module').then(m => m.HomePageModule),
+        canActivate: [DocRequestOnlyGuard]
+      },
+      {
         path: 'timetable',
-        loadChildren: () => import('../pages/timetable/timetable.module').then(m => m.TimetablePageModule)
+        loadChildren: () => import('../pages/timetable/timetable.module').then(m => m.TimetablePageModule),
+        canActivate: [DocRequestOnlyGuard]
       },
       {
         path: 'attendance',
-        loadChildren: () => import('../pages/attendance/attendance.module').then(m => m.AttendancePageModule)
+        loadChildren: () => import('../pages/attendance/attendance.module').then(m => m.AttendancePageModule),
+        canActivate: [StaffGuard]
       },
       {
         path: 'monthly-attendance',
-        loadChildren: () => import('../pages/monthly-attendance/monthly-attendance.module').then(m => m.MonthlyAttendancePageModule)
+        loadChildren: () => import('../pages/monthly-attendance/monthly-attendance.module').then(m => m.MonthlyAttendancePageModule),
+        canActivate: [StaffGuard]
       },
       {
         path: 'leave',
-        loadChildren: () => import('../pages/leave/leave.module').then(m => m.LeavePageModule)
+        loadChildren: () => import('../pages/leave/leave.module').then(m => m.LeavePageModule),
+        canActivate: [StaffGuard]
       },
       {
         path: 'campus-wifi',
@@ -37,19 +114,9 @@ const routes: Routes = [
       },
       {
         path: 'dept-master',
-        loadChildren: () => import('../pages/dept-master/dept-master.module').then(m => m.DeptMasterPageModule)
-      },
-      {
-        path: 'clubs',
-        loadChildren: () => import('../pages/clubs/clubs.module').then(m => m.ClubsPageModule)
-      },
-      {
-        path: 'my-clubs',
-        loadChildren: () => import('../pages/my-clubs/my-clubs.module').then(m => m.MyClubsPageModule)
-      },
-      {
-        path: 'notices',
-        loadChildren: () => import('../pages/notices/notices.module').then(m => m.NoticesPageModule)
+        loadChildren: () => import('../pages/dept-master/dept-master.module').then(m => m.DeptMasterPageModule),
+        canActivate: [StaffGuard],
+        data: { roles: ['HOD', 'Admin'] }
       },
       {
         path: '',

@@ -5,112 +5,247 @@
     </ion-buttons>
     <div class="header-brand">
       <img src="assets/images/JEMS_LOGO.png" alt="JEMS Logo" class="header-logo-img" />
-      <span class="brand-wordmark">JEMS <small>Your campus, connected</small></span>
+      <span class="header-title">JEMS</span>
     </div>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content class="ion-padding dashboard-content">
 
-  <section class="dashboard-intro">
-    <p class="eyebrow">{{ todayDateLabel }} · {{ isStudent ? 'Student Portal' : 'Faculty & Staff' }}</p>
-    <h1>Welcome{{ user?.firstName ? ', ' + user?.firstName : ' to JEMS' }}.</h1>
-    <p>{{ isStudent ? 'Your academics and campus updates, in one place.' : 'Your teaching, attendance and campus day, in one place.' }}</p>
-  </section>
+  <!-- ════════════════════════════════════════════════════════════════════ -->
+  <!-- ── STUDENT DASHBOARD ─────────────────────────────────────────────── -->
+  <!-- ════════════════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="isStudent; else staffDashboard">
+    <div class="student-dashboard">
 
-  <nav class="quick-actions" aria-label="Campus shortcuts">
-    <a routerLink="/tabs/timetable"><span class="quick-icon"><ion-icon name="calendar-outline"></ion-icon></span><strong>My timetable</strong><small>Plan your day</small></a>
-    <a *ngIf="!isStudent" routerLink="/tabs/attendance"><span class="quick-icon warm"><ion-icon name="checkbox-outline"></ion-icon></span><strong>Attendance</strong><small>Mark a class</small></a>
-    <a *ngIf="isStudent" routerLink="/tabs/notices"><span class="quick-icon warm"><ion-icon name="notifications-outline"></ion-icon></span><strong>Notices</strong><small>Stay up to date</small></a>
-    <a *ngIf="!isStudent" routerLink="/tabs/leave"><span class="quick-icon violet"><ion-icon name="document-text-outline"></ion-icon></span><strong>My leave</strong><small>Requests & balance</small></a>
-    <a *ngIf="isStudent" routerLink="/tabs/my-clubs"><span class="quick-icon violet"><ion-icon name="people-outline"></ion-icon></span><strong>My clubs</strong><small>Find your people</small></a>
-    <a routerLink="/tabs/campus-wifi"><span class="quick-icon blue"><ion-icon name="wifi-outline"></ion-icon></span><strong>Campus WiFi</strong><small>Get connected</small></a>
-  </nav>
-
-  <section class="campus-links" aria-label="Explore campus">
-    <a routerLink="/tabs/events"><ion-icon name="megaphone-outline"></ion-icon><span><strong>Around campus</strong><small>Events & university updates</small></span><ion-icon name="chevron-forward-outline"></ion-icon></a>
-    <a *ngIf="!isStudent" routerLink="/tabs/dept-master"><ion-icon name="people-outline"></ion-icon><span><strong>Staff directory</strong><small>Find your colleagues</small></span><ion-icon name="chevron-forward-outline"></ion-icon></a>
-    <a *ngIf="isStudent" routerLink="/tabs/clubs"><ion-icon name="people-outline"></ion-icon><span><strong>Discover clubs</strong><small>Explore your interests</small></span><ion-icon name="chevron-forward-outline"></ion-icon></a>
-  </section>
-
-  <!-- ── Student Welcome Card ──────────────────────── -->
-  <div class="bio-card" *ngIf="isStudent">
-    <div class="bio-profile">
-      <div class="bio-avatar-wrap">
-        <img *ngIf="user?.profilePic" [src]="user!.profilePic" class="bio-avatar-img" alt="" />
-        <div *ngIf="!user?.profilePic" class="bio-avatar-fallback">
-          {{ (user?.firstName?.[0] || '') + (user?.lastName?.[0] || '') | uppercase }}
-        </div>
-      </div>
-      <div class="bio-profile-info">
-        <h3 class="bio-name">
-          Welcome, {{ user?.firstName }} {{ user?.lastName }}
-        </h3>
-        <p class="bio-emp" *ngIf="user?.departmentName">{{ user!.departmentName }}</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── Student Clubs ──────────────────────────────── -->
-  <div class="bday-section" *ngIf="isStudent && clubs.length > 0">
-    <div class="section-header">
-      <span class="section-icon">👥</span>
-      <h3 class="section-title">Student Clubs</h3>
-    </div>
-    <div class="bday-scroll">
-      <div class="bday-card club-card" *ngFor="let c of clubs">
-        <div class="bday-avatar-wrap club-avatar-wrap">
-          <img *ngIf="c.logopath" [src]="c.logopath" class="bday-avatar-img" alt="" />
-          <div *ngIf="!c.logopath" class="bday-avatar-fallback club-bg">
-            <ion-icon name="people-outline"></ion-icon>
-          </div>
-        </div>
-        <p class="bday-name">{{ c.clubname }}</p>
-        <p class="club-coord" *ngIf="c.facultyCoordinatorName">{{ c.facultyCoordinatorName }}</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── Club Events ────────────────────────────────── -->
-  <div class="news-section" *ngIf="isStudent && clubEvents.length > 0">
-    <div class="news-header">
-      <div class="news-header-title">
-        <span class="news-trophy">🎉</span>
-        <h3 class="news-title-txt">Club Events</h3>
-      </div>
-      <span class="section-badge joiner-badge">{{ clubEvents.length }} Upcoming</span>
-    </div>
-
-    <div class="news-scroll">
-      <div class="news-card" *ngFor="let e of clubEvents">
-        <div class="news-banner-box">
-          <img *ngIf="e.posterpath" [src]="e.posterpath" class="news-banner-img" alt="" />
-          <div class="news-banner-fallback" *ngIf="!e.posterpath">
-            <div class="fallback-branding">
-              <span class="jss-logo-badge">{{ e.clubname || 'CLUB' }}</span>
+      <!-- ── Student Welcome Banner ── -->
+      <div class="std-banner">
+        <div class="banner-top">
+          <div class="std-avatar-wrap" (click)="openStudentProfile()">
+            <img *ngIf="user?.profilePic" [src]="user!.profilePic" class="std-avatar-img" alt="avatar" />
+            <div *ngIf="!user?.profilePic" class="std-avatar-initials">
+              {{ (user?.firstName?.[0] || '') + (user?.lastName?.[0] || 'S') | uppercase }}
             </div>
-            <p class="fallback-heading">{{ e.eventname }}</p>
           </div>
-          <span class="event-date-badge" *ngIf="e.eventdate">
-            <span class="event-date-day">{{ e.eventdate | date:'dd' }}</span>
-            <span class="event-date-mon">{{ e.eventdate | date:'MMM' }}</span>
+          <div class="std-banner-info">
+            <span class="std-role-badge">STUDENT PORTAL</span>
+            <h2 class="std-greeting">Hello, {{ user?.firstName || user?.name || 'Student' }}!</h2>
+            <p class="std-dept" *ngIf="user?.departmentName">{{ user?.departmentName }}</p>
+          </div>
+          <button class="profile-icon-btn" (click)="openStudentProfile()">
+            <ion-icon name="person-circle-outline"></ion-icon>
+          </button>
+        </div>
+
+        <div class="banner-pills" *ngIf="user?.usn || user?.semester">
+          <span class="banner-pill" *ngIf="user?.usn">
+            <ion-icon name="id-card-outline"></ion-icon> USN: {{ user?.usn }}
+          </span>
+          <span class="banner-pill" *ngIf="user?.semester">
+            <ion-icon name="school-outline"></ion-icon> {{ user?.semester }}
           </span>
         </div>
+      </div>
 
-        <div class="news-staff-footer">
-          <h4 class="staff-name">{{ e.eventname }}</h4>
-          <p class="staff-desig">{{ e.clubname }}</p>
-          <div class="event-meta-row">
-            <span *ngIf="e.eventtime"><ion-icon name="time-outline"></ion-icon>{{ e.eventtime }}</span>
-            <span *ngIf="e.venue"><ion-icon name="location-outline"></ion-icon>{{ e.venue }}</span>
+      <!-- ── Alumni / Archive Document-Request Warning Card ── -->
+      <div class="alumni-redirect-card" *ngIf="isDocRequestOnly">
+        <div class="alumni-card-icon">
+          <ion-icon name="document-text-outline"></ion-icon>
+        </div>
+        <div class="alumni-card-text">
+          <h4>Document Request Account</h4>
+          <p>Your account is registered as Alumni / SJCE Archive. You can request degree certificates and transcripts directly.</p>
+        </div>
+        <button class="alumni-card-btn" routerLink="/tabs/student/doc-request">
+          <span>Go to Portal</span>
+          <ion-icon name="arrow-forward-outline"></ion-icon>
+        </button>
+      </div>
+
+      <!-- ── Quick Metrics Row ── -->
+      <div class="metrics-grid">
+        <div class="metric-card bg-emerald">
+          <div class="metric-icon-wrap">
+            <ion-icon name="checkmark-done-circle-outline"></ion-icon>
+          </div>
+          <div class="metric-data">
+            <span class="metric-value">88.5%</span>
+            <span class="metric-label">Attendance</span>
+          </div>
+        </div>
+
+        <div class="metric-card bg-blue">
+          <div class="metric-icon-wrap">
+            <ion-icon name="time-outline"></ion-icon>
+          </div>
+          <div class="metric-data">
+            <span class="metric-value">4 Classes</span>
+            <span class="metric-label">Today's Sessions</span>
+          </div>
+        </div>
+
+        <div class="metric-card bg-purple" routerLink="/tabs/campus-wifi">
+          <div class="metric-icon-wrap">
+            <ion-icon name="wifi-outline"></ion-icon>
+          </div>
+          <div class="metric-data">
+            <span class="metric-value">Active</span>
+            <span class="metric-label">Campus WiFi</span>
           </div>
         </div>
       </div>
+
+      <!-- ── Student Quick Shortcuts Grid ── -->
+      <div class="section-title-wrap">
+        <h3 class="std-section-title">Academic & Campus Services</h3>
+      </div>
+
+      <div class="shortcuts-grid">
+        <div class="shortcut-card" routerLink="/tabs/timetable">
+          <div class="shortcut-icon-bg icon-blue">
+            <ion-icon name="calendar-outline"></ion-icon>
+          </div>
+          <span class="shortcut-title">Timetable</span>
+        </div>
+
+        <div class="shortcut-card" routerLink="/tabs/student/doc-request">
+          <div class="shortcut-icon-bg icon-teal">
+            <ion-icon name="document-text-outline"></ion-icon>
+          </div>
+          <span class="shortcut-title">Doc Requests</span>
+        </div>
+
+        <div class="shortcut-card" routerLink="/tabs/campus-wifi">
+          <div class="shortcut-icon-bg icon-cyan">
+            <ion-icon name="wifi-outline"></ion-icon>
+          </div>
+          <span class="shortcut-title">Campus WiFi</span>
+        </div>
+
+        <div class="shortcut-card" routerLink="/tabs/events">
+          <div class="shortcut-icon-bg icon-orange">
+            <ion-icon name="megaphone-outline"></ion-icon>
+          </div>
+          <span class="shortcut-title">Events</span>
+        </div>
+
+        <div class="shortcut-card" (click)="openStudentProfile()">
+          <div class="shortcut-icon-bg icon-indigo">
+            <ion-icon name="person-outline"></ion-icon>
+          </div>
+          <span class="shortcut-title">My Profile</span>
+        </div>
+
+        <div class="shortcut-card" routerLink="/tabs/student/marks">
+          <div class="shortcut-icon-bg icon-emerald">
+            <ion-icon name="clipboard-outline"></ion-icon>
+          </div>
+          <span class="shortcut-title">Examination</span>
+        </div>
+
+        <div class="shortcut-card" routerLink="/tabs/student/subjects">
+          <div class="shortcut-icon-bg icon-pink">
+            <ion-icon name="book-outline"></ion-icon>
+          </div>
+          <span class="shortcut-title">My Subjects</span>
+        </div>
+
+        <div class="shortcut-card" routerLink="/tabs/student/fees">
+          <div class="shortcut-icon-bg icon-amber">
+            <ion-icon name="wallet-outline"></ion-icon>
+          </div>
+          <span class="shortcut-title">Fees & Dues</span>
+        </div>
+      </div>
+
+      <!-- ── Next Class Card (Real Live / Upcoming) ── -->
+      <div class="next-class-card" *ngIf="!studentScheduleLoading && studentNextClass">
+        <div class="nc-header">
+          <span class="nc-badge" [class.live]="studentNextClass.status === 'now'">
+            <ion-icon [name]="studentNextClass.status === 'now' ? 'radio-button-on-outline' : 'time-outline'"></ion-icon>
+            {{ studentNextClass.status === 'now' ? 'LIVE NOW' : 'NEXT UP' }}
+          </span>
+          <span class="nc-time">{{ studentNextClass.time }} - {{ studentNextClass.end }}</span>
+        </div>
+        <h3 class="nc-title">{{ studentNextClass.title }}</h3>
+        <div class="nc-footer">
+          <span class="nc-meta" *ngIf="studentNextClass.room">
+            <ion-icon name="location-outline"></ion-icon> {{ studentNextClass.room }}
+          </span>
+          <span class="nc-meta" *ngIf="studentNextClass.faculty">
+            <ion-icon name="person-outline"></ion-icon> {{ studentNextClass.faculty }}
+          </span>
+        </div>
+      </div>
+
+      <!-- ── Today's Schedule Card ── -->
+      <div class="section-title-wrap">
+        <h3 class="std-section-title">Today's Timetable</h3>
+        <button class="view-all-btn" routerLink="/tabs/timetable">View Full</button>
+      </div>
+
+      <!-- Loading skeleton -->
+      <div class="schedule-skeleton" *ngIf="studentScheduleLoading">
+        <ion-skeleton-text animated style="width: 100%; height: 64px; border-radius: 12px; margin-bottom: 8px;"></ion-skeleton-text>
+        <ion-skeleton-text animated style="width: 100%; height: 64px; border-radius: 12px;"></ion-skeleton-text>
+      </div>
+
+      <!-- Error State -->
+      <div class="schedule-error" *ngIf="!studentScheduleLoading && studentScheduleError">
+        <ion-icon name="cloud-offline-outline"></ion-icon>
+        <p>Could not load today's schedule</p>
+        <button class="schedule-retry-btn" (click)="loadStudentSchedule()">Retry</button>
+      </div>
+
+      <!-- Empty State -->
+      <div class="schedule-empty" *ngIf="!studentScheduleLoading && !studentScheduleError && studentTodayClasses.length === 0">
+        <ion-icon name="calendar-clear-outline"></ion-icon>
+        <p>No classes scheduled today</p>
+      </div>
+
+      <!-- Schedule List -->
+      <div class="schedule-list" *ngIf="!studentScheduleLoading && !studentScheduleError && studentTodayClasses.length > 0">
+        <div class="schedule-item" *ngFor="let cls of studentTodayClasses" [class.cls-now]="cls.status === 'now'" [class.cls-done]="cls.status === 'done'">
+          <div class="schedule-time">
+            <span class="time-start">{{ cls.time }}</span>
+            <span class="time-end">{{ cls.end }}</span>
+          </div>
+          <div class="schedule-pill" [class.pill-live]="cls.status === 'now'" [class.pill-done]="cls.status === 'done'"></div>
+          <div class="schedule-details">
+            <div class="sub-row">
+              <h4 class="subject-name">{{ cls.title }}</h4>
+              <span class="cls-status-pill status-{{ cls.status }}">{{ cls.status | uppercase }}</span>
+            </div>
+            <p class="subject-meta">
+              <span *ngIf="cls.room"><ion-icon name="location-outline"></ion-icon> {{ cls.room }}</span>
+              <span *ngIf="cls.faculty">· {{ cls.faculty }}</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Campus WiFi Quick Card ── -->
+      <div class="wifi-banner-card" routerLink="/tabs/campus-wifi">
+        <div class="wifi-banner-icon">
+          <ion-icon name="wifi-outline"></ion-icon>
+        </div>
+        <div class="wifi-banner-text">
+          <h4>Campus WiFi Service</h4>
+          <p>Change password & manage logged in devices</p>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="wifi-arrow"></ion-icon>
+      </div>
+
     </div>
-  </div>
+  </ng-container>
+
+  <!-- ════════════════════════════════════════════════════════════════════ -->
+  <!-- ── STAFF DASHBOARD ──────────────────────────────────────────────── -->
+  <!-- ════════════════════════════════════════════════════════════════════ -->
+  <ng-template #staffDashboard>
 
   <!-- ── Biometric Card ──────────────────────────── -->
-  <div class="bio-card" *ngIf="!isStudent && !bioLoading && biometric">
+  <div class="bio-card" *ngIf="!bioLoading && biometric && !bioFailed">
 
     <!-- Profile row -->
     <div class="bio-profile">
@@ -123,10 +258,14 @@
         </div>
       </div>
       <div class="bio-profile-info">
+        <div class="role-badge-row">
+          <span class="staff-role-badge badge-{{ roleBadge.toLowerCase() }}">{{ roleBadge }}</span>
+          <span class="bio-emp">Emp # {{ biometric.useremployeecode }}</span>
+        </div>
         <h3 class="bio-name">
           {{ biometric.salutationName }} {{ biometric.userFName }} {{ biometric.userMname }} {{ biometric.userLName }}
         </h3>
-        <p class="bio-emp">Emp # {{ biometric.useremployeecode }}</p>
+        <p class="bio-dept" *ngIf="user?.departmentName">{{ user?.departmentName }}</p>
       </div>
     </div>
 
@@ -168,54 +307,352 @@
       </div>
     </div>
     <ng-template #noPunch>
-      <p class="no-punch">No punch recorded today</p>
+      <div class="empty-punch-box">
+        <ion-icon name="time-outline"></ion-icon>
+        <p class="no-punch">No punch recorded today yet</p>
+      </div>
     </ng-template>
 
   </div>
 
+  <!-- Failed State Card -->
+  <div class="bio-error-card" *ngIf="!bioLoading && bioFailed">
+    <div class="bio-error-content">
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+      <div class="bio-error-text">
+        <h4>Biometric Logs Unavailable</h4>
+        <p>Could not load today's punch data from the server.</p>
+      </div>
+    </div>
+    <button class="retry-btn" (click)="retryBiometric()">
+      <ion-icon name="refresh-outline"></ion-icon>
+      <span>Retry</span>
+    </button>
+  </div>
+
   <!-- Loading skeleton -->
-  <div class="bio-skeleton" *ngIf="!isStudent && bioLoading">
+  <div class="bio-skeleton" *ngIf="bioLoading">
     <ion-skeleton-text animated style="width:60%;height:14px;border-radius:6px;margin-bottom:8px"></ion-skeleton-text>
     <ion-skeleton-text animated style="width:100%;height:80px;border-radius:12px"></ion-skeleton-text>
   </div>
 
-  <!-- ── 🏆 University Staff in News ──────────────────────────── -->
-  <div class="news-section" *ngIf="!isStudent">
-    <div class="news-header">
-      <div class="news-header-title">
-        <span class="news-trophy">🏆</span>
-        <h3 class="news-title-txt">University Staff in News</h3>
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- ── STAFF ROLE-SPECIFIC SHORTCUTS ────────────────────────────── -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+
+  <!-- ── CASE 1: HOD Shortcuts ── -->
+  <ng-container *ngIf="isHod">
+    <div class="section-title-wrap staff-shortcuts-title">
+      <h3 class="std-section-title">Department Leadership</h3>
+    </div>
+    <div class="shortcuts-grid">
+      <div class="shortcut-card" routerLink="/tabs/dept-master">
+        <div class="shortcut-icon-bg icon-purple">
+          <ion-icon name="people-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">Dept Staff</span>
+      </div>
+      <div class="shortcut-card" routerLink="/tabs/timetable">
+        <div class="shortcut-icon-bg icon-blue">
+          <ion-icon name="calendar-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">Timetable</span>
+      </div>
+      <div class="shortcut-card" routerLink="/tabs/leave">
+        <div class="shortcut-icon-bg icon-emerald">
+          <ion-icon name="checkmark-done-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">Approvals</span>
+      </div>
+      <div class="shortcut-card" routerLink="/tabs/attendance">
+        <div class="shortcut-icon-bg icon-orange">
+          <ion-icon name="checkbox-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">Mark Attend.</span>
+      </div>
+      <div class="shortcut-card" routerLink="/tabs/monthly-attendance">
+        <div class="shortcut-icon-bg icon-cyan">
+          <ion-icon name="bar-chart-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">Monthly Logs</span>
+      </div>
+      <div class="shortcut-card" routerLink="/tabs/campus-wifi">
+        <div class="shortcut-icon-bg icon-pink">
+          <ion-icon name="wifi-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">Campus WiFi</span>
+      </div>
+      <div class="shortcut-card" routerLink="/tabs/events">
+        <div class="shortcut-icon-bg icon-amber">
+          <ion-icon name="megaphone-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">Events</span>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ── CASE 2: Faculty (Teaching) Shortcuts ── -->
+  <ng-container *ngIf="isFaculty && !isHod">
+    <div class="section-title-wrap staff-shortcuts-title">
+      <h3 class="std-section-title">Faculty Academic Services</h3>
+    </div>
+    <div class="shortcuts-grid">
+      <div class="shortcut-card" routerLink="/tabs/timetable">
+        <div class="shortcut-icon-bg icon-blue">
+          <ion-icon name="calendar-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">My Classes</span>
+      </div>
+      <div class="shortcut-card" routerLink="/tabs/attendance">
+        <div class="shortcut-icon-bg icon-orange">
+          <ion-icon name="checkbox-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">Mark Attend.</span>
+      </div>
+      <div class="shortcut-card" routerLink="/tabs/leave">
+        <div class="shortcut-icon-bg icon-emerald">
+          <ion-icon name="calendar-clear-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">Apply Leave</span>
+      </div>
+      <div class="shortcut-card" routerLink="/tabs/monthly-attendance">
+        <div class="shortcut-icon-bg icon-cyan">
+          <ion-icon name="bar-chart-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">Monthly Logs</span>
+      </div>
+      <div class="shortcut-card" routerLink="/tabs/campus-wifi">
+        <div class="shortcut-icon-bg icon-pink">
+          <ion-icon name="wifi-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">Campus WiFi</span>
+      </div>
+      <div class="shortcut-card" routerLink="/tabs/events">
+        <div class="shortcut-icon-bg icon-amber">
+          <ion-icon name="megaphone-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">Events</span>
       </div>
     </div>
 
-    <div class="news-scroll">
-      <div class="news-card" *ngFor="let item of staffNewsList" (click)="openStaffNewsDetail(item)">
-        <!-- Banner Box -->
-        <div class="news-banner-box">
-          <img *ngIf="item.bannerImg && !item.imgError" [src]="item.bannerImg" (error)="item.imgError = true" class="news-banner-img" alt="" />
-          <div class="news-banner-fallback" *ngIf="!item.bannerImg || item.imgError">
-            <div class="fallback-branding">
-              <span class="jss-logo-badge">JSS STU</span>
-              <span class="congrats-txt">Congratulations!</span>
-            </div>
-            <p class="fallback-heading">{{ item.title }}</p>
+    <!-- ── Faculty Next Lecture Card ── -->
+    <div class="next-class-card faculty-nc-card" *ngIf="!facultyScheduleLoading && facultyNextClass">
+      <div class="nc-header">
+        <span class="nc-badge" [class.live]="facultyNextClass.status === 'now'">
+          <ion-icon [name]="facultyNextClass.status === 'now' ? 'radio-button-on-outline' : 'time-outline'"></ion-icon>
+          {{ facultyNextClass.status === 'now' ? 'TEACHING NOW' : 'NEXT LECTURE' }}
+        </span>
+        <span class="nc-time">{{ facultyNextClass.time }} - {{ facultyNextClass.end }}</span>
+      </div>
+      <h3 class="nc-title">{{ facultyNextClass.title }}</h3>
+      <div class="nc-footer">
+        <span class="nc-meta" *ngIf="facultyNextClass.room">
+          <ion-icon name="location-outline"></ion-icon> Room {{ facultyNextClass.room }}
+        </span>
+        <span class="nc-meta" *ngIf="facultyNextClass.activityType">
+          <ion-icon name="school-outline"></ion-icon> {{ facultyNextClass.activityType }}
+        </span>
+      </div>
+      <!-- Direct 1-Tap Attendance Button -->
+      <div class="nc-action-row">
+        <button class="nc-mark-btn" routerLink="/tabs/attendance">
+          <ion-icon name="checkbox-outline"></ion-icon>
+          <span>Mark Class Attendance</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Faculty Today's Classes List ── -->
+    <div class="section-title-wrap staff-schedule-wrap" *ngIf="!facultyScheduleLoading && facultyTodayClasses.length > 0">
+      <h3 class="std-section-title">Today's Teaching Sessions</h3>
+      <button class="view-all-btn" routerLink="/tabs/timetable">View Full</button>
+    </div>
+
+    <div class="schedule-list" *ngIf="!facultyScheduleLoading && facultyTodayClasses.length > 0">
+      <div class="schedule-item" *ngFor="let cls of facultyTodayClasses" [class.cls-now]="cls.status === 'now'" [class.cls-done]="cls.status === 'done'">
+        <div class="schedule-time">
+          <span class="time-start">{{ cls.time }}</span>
+          <span class="time-end">{{ cls.end }}</span>
+        </div>
+        <div class="schedule-pill" [class.pill-live]="cls.status === 'now'" [class.pill-done]="cls.status === 'done'"></div>
+        <div class="schedule-details">
+          <div class="sub-row">
+            <h4 class="subject-name">{{ cls.title }}</h4>
+            <span class="cls-status-pill status-{{ cls.status }}">{{ cls.status | uppercase }}</span>
           </div>
-          <span class="news-cat-chip">{{ item.category || 'Achievement' }}</span>
+          <p class="subject-meta">
+            <span *ngIf="cls.room"><ion-icon name="location-outline"></ion-icon> Room {{ cls.room }}</span>
+            <span *ngIf="cls.activityType">· {{ cls.activityType }}</span>
+          </p>
+        </div>
+        <div class="schedule-action">
+          <button class="class-mark-btn" routerLink="/tabs/attendance" title="Mark Attendance">
+            <ion-icon name="checkbox-outline"></ion-icon>
+            <span>Mark</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Faculty & HOD Attention Center ── -->
+    <div class="attention-section" *ngIf="isFaculty || isHod">
+      <div class="section-title-wrap">
+        <h3 class="std-section-title">
+          <ion-icon name="notifications-outline" class="attention-icon"></ion-icon>
+          Attention & Pending Actions
+        </h3>
+        <span class="pending-count-badge" *ngIf="facultyAttention && facultyAttention.totalPendingCount > 0">
+          {{ facultyAttention.totalPendingCount }} PENDING
+        </span>
+      </div>
+
+      <!-- Action Items Cards -->
+      <div class="attention-cards-list" *ngIf="facultyAttention && facultyAttention.totalPendingCount > 0">
+
+        <!-- CIE Marks Pending Card -->
+        <div class="att-action-card card-cie" *ngFor="let item of facultyAttention.cieItems">
+          <div class="aac-left">
+            <div class="aac-icon">
+              <ion-icon name="clipboard-outline"></ion-icon>
+            </div>
+            <div class="aac-meta">
+              <div class="aac-badge-row">
+                <span class="aac-type">CIE MARKS</span>
+                <span class="aac-urgency urgency-{{ item.urgency }}">
+                  {{ item.urgency === 'overdue' ? 'OVERDUE' : item.urgency === 'due_soon' ? 'DUE SOON' : 'PENDING' }}
+                </span>
+              </div>
+              <h4 class="aac-title">{{ item.subjectName }} ({{ item.subjectCode }})</h4>
+              <p class="aac-sub">Class: {{ item.className }} · {{ item.pendingCount }} Students Pending</p>
+              <p class="aac-deadline" *ngIf="item.lastDate">
+                <ion-icon name="calendar-outline"></ion-icon> Last Date: {{ item.lastDate | date:'dd MMM yyyy' }}
+              </p>
+            </div>
+          </div>
         </div>
 
-        <!-- Staff Meta Footer -->
-        <div class="news-staff-footer">
-          <div class="news-staff-item" *ngFor="let staff of item.staffList">
-            <div class="staff-avatar">
-              <img *ngIf="staff.avatar" [src]="staff.avatar" (error)="staff.avatar = ''" alt="" />
-              <div *ngIf="!staff.avatar" class="staff-avatar-fallback">{{ getStaffInitials(staff.name) }}</div>
+        <!-- QPS Invites Pending Card -->
+        <div class="att-action-card card-qps" *ngFor="let qp of facultyAttention.qpsItems">
+          <div class="aac-left">
+            <div class="aac-icon">
+              <ion-icon name="document-text-outline"></ion-icon>
             </div>
-            <div class="staff-info">
-              <h4 class="staff-name">{{ staff.name }}</h4>
-              <p class="staff-desig">{{ staff.designation }}</p>
+            <div class="aac-meta">
+              <div class="aac-badge-row">
+                <span class="aac-type">QP SETTING</span>
+                <span class="aac-urgency urgency-due_soon">{{ qp.qpsStatusName || 'ACTION REQUIRED' }}</span>
+              </div>
+              <h4 class="aac-title">{{ qp.subjectCodeTitle }}</h4>
+              <p class="aac-sub">Course Code: {{ qp.subjectCodeName }} <span *ngIf="qp.renumerationName">· {{ qp.renumerationName }}</span></p>
             </div>
           </div>
         </div>
+
+        <!-- HOD Leave Approval Card -->
+        <div class="att-action-card card-leave" *ngFor="let lv of facultyAttention.leaveItems" routerLink="/tabs/leave">
+          <div class="aac-left">
+            <div class="aac-icon">
+              <ion-icon name="person-outline"></ion-icon>
+            </div>
+            <div class="aac-meta">
+              <div class="aac-badge-row">
+                <span class="aac-type">LEAVE APPROVAL</span>
+                <span class="aac-urgency urgency-due_soon">AWAITING DECISION</span>
+              </div>
+              <h4 class="aac-title">{{ lv.employeeName }} ({{ lv.employeeCode }})</h4>
+              <p class="aac-sub">{{ lv.leaveTypeName }} · {{ lv.totalDays }} day(s) ({{ lv.fromDate }} to {{ lv.toDate }})</p>
+              <p class="aac-reason" *ngIf="lv.reason">"{{ lv.reason }}"</p>
+            </div>
+          </div>
+          <button class="aac-action-btn" routerLink="/tabs/leave">
+            <span>Review</span>
+            <ion-icon name="arrow-forward-outline"></ion-icon>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- All Clear State -->
+      <div class="attention-all-clear" *ngIf="facultyAttention && facultyAttention.totalPendingCount === 0">
+        <div class="aac-check-icon">
+          <ion-icon name="checkmark-done-circle"></ion-icon>
+        </div>
+        <div class="aac-clear-text">
+          <h4>All Caught Up!</h4>
+          <p>No pending CIE marks, QP setting invites, or department leave approvals requiring action.</p>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ── CASE 3: Non-Teaching Staff Shortcuts ── -->
+  <ng-container *ngIf="isNonTeaching && !isHod && !isFaculty">
+    <div class="section-title-wrap staff-shortcuts-title">
+      <h3 class="std-section-title">Staff Services</h3>
+    </div>
+    <div class="shortcuts-grid">
+      <div class="shortcut-card" routerLink="/tabs/attendance">
+        <div class="shortcut-icon-bg icon-orange">
+          <ion-icon name="finger-print-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">Daily Punch</span>
+      </div>
+      <div class="shortcut-card" routerLink="/tabs/monthly-attendance">
+        <div class="shortcut-icon-bg icon-cyan">
+          <ion-icon name="bar-chart-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">Monthly Logs</span>
+      </div>
+      <div class="shortcut-card" routerLink="/tabs/leave">
+        <div class="shortcut-icon-bg icon-emerald">
+          <ion-icon name="calendar-clear-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">Apply Leave</span>
+      </div>
+      <div class="shortcut-card" routerLink="/tabs/campus-wifi">
+        <div class="shortcut-icon-bg icon-pink">
+          <ion-icon name="wifi-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">Campus WiFi</span>
+      </div>
+      <div class="shortcut-card" routerLink="/tabs/events">
+        <div class="shortcut-icon-bg icon-amber">
+          <ion-icon name="megaphone-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">Events</span>
+      </div>
+    </div>
+  </ng-container>
+
+
+  <!-- ── Birthdays ───────────────────────────────── -->
+  <div class="bday-section" *ngIf="todayBirthdays.length > 0 || tomorrowBirthdays.length > 0">
+    <div class="section-header">
+      <span class="section-icon">🎂</span>
+      <h3 class="section-title">Birthdays</h3>
+      <span class="section-badge today-badge" *ngIf="todayBirthdays.length > 0">{{ todayBirthdays.length }} today</span>
+      <span class="section-badge tomorrow-badge" *ngIf="tomorrowBirthdays.length > 0">{{ tomorrowBirthdays.length }} tmrw</span>
+    </div>
+    <div class="bday-scroll">
+      <!-- Today — full colour -->
+      <div class="bday-card" *ngFor="let b of todayBirthdays">
+        <div class="bday-avatar-wrap" (click)="openPopup(b)">
+          <img *ngIf="b.userProfilepic" [src]="b.userProfilepic" class="bday-avatar-img"
+            (error)="$any($event.target).style.display='none'" alt="" />
+          <div *ngIf="!b.userProfilepic" class="bday-avatar-fallback today-bg">{{ initials(b) }}</div>
+          <span class="bday-cake-badge">🎂</span>
+        </div>
+        <p class="bday-name">{{ b.userFName }}</p>
+      </div>
+      <!-- Tomorrow — grayed -->
+      <div class="bday-card bday-tmrw" *ngFor="let b of tomorrowBirthdays">
+        <div class="bday-avatar-wrap" (click)="openPopup(b)">
+          <img *ngIf="b.userProfilepic" [src]="b.userProfilepic" class="bday-avatar-img"
+            (error)="$any($event.target).style.display='none'" alt="" />
+          <div *ngIf="!b.userProfilepic" class="bday-avatar-fallback tomorrow-bg">{{ initials(b) }}</div>
+          <span class="bday-cake-badge">🎁</span>
+        </div>
+        <p class="bday-name">{{ b.userFName }}</p>
       </div>
     </div>
   </div>
@@ -240,42 +677,71 @@
     </div>
   </div>
 
+  </ng-template>
+
 </ion-content>
 
-<!-- ── Staff News Detail Modal ────────────────────── -->
-<div class="popup-overlay" *ngIf="selectedNewsItem" (click)="closeStaffNewsDetail()">
-  <div class="popup-card news-detail-popup" (click)="$event.stopPropagation()">
-    <button class="popup-close" (click)="closeStaffNewsDetail()">
+<!-- ── Student Profile Popup Modal ─────────────────── -->
+<div class="popup-overlay" *ngIf="showStudentProfileModal" (click)="closeStudentProfile()">
+  <div class="popup-card std-popup-card" (click)="$event.stopPropagation()">
+    <button class="popup-close" (click)="closeStudentProfile()">
       <ion-icon name="close-outline"></ion-icon>
     </button>
-    <div class="news-popup-banner">
-      <img *ngIf="selectedNewsItem.bannerImg && !selectedNewsItem.imgError" [src]="selectedNewsItem.bannerImg" class="popup-banner-img" alt="" />
-      <div class="popup-banner-fallback" *ngIf="!selectedNewsItem.bannerImg || selectedNewsItem.imgError">
-        <div class="banner-brand-tag">
-          <img src="assets/images/JEMS_LOGO.png" class="banner-jems-logo" alt="" />
-          <span>JSS STU</span>
-        </div>
-        <span class="banner-trophy-icon">🏆</span>
+    <div class="popup-avatar-wrap">
+      <img *ngIf="user?.profilePic" [src]="user!.profilePic" class="popup-avatar-img" alt="profile" />
+      <div *ngIf="!user?.profilePic" class="popup-avatar-fallback std-avatar-bg">
+        {{ (user?.firstName?.[0] || '') + (user?.lastName?.[0] || 'S') | uppercase }}
+      </div>
+      <span class="popup-cake">🎓</span>
+    </div>
+    <h2 class="popup-name">{{ user?.firstName }} {{ user?.middleName }} {{ user?.lastName }}</h2>
+    <p class="popup-gender">{{ user?.departmentName }}</p>
+
+    <div class="popup-details">
+      <div class="popup-detail-row" *ngIf="user?.usn">
+        <ion-icon name="id-card-outline"></ion-icon>
+        <span>USN: <strong>{{ user?.usn }}</strong></span>
+      </div>
+      <div class="popup-detail-row" *ngIf="user?.email">
+        <ion-icon name="mail-outline"></ion-icon>
+        <span>{{ user?.email }}</span>
+      </div>
+      <div class="popup-detail-row" *ngIf="user?.role">
+        <ion-icon name="person-outline"></ion-icon>
+        <span>Role: {{ user?.role }}</span>
       </div>
     </div>
-    <div class="news-popup-body">
-      <span class="news-cat-chip popup-chip">{{ selectedNewsItem.category || 'Achievement' }}</span>
-      <h2 class="popup-news-title">{{ selectedNewsItem.title }}</h2>
-      <p class="popup-news-detail" *ngIf="selectedNewsItem.detail">{{ selectedNewsItem.detail }}</p>
+  </div>
+</div>
 
-      <div class="news-popup-staff-section">
-        <h4 class="popup-staff-header">Featured Faculty / Staff</h4>
-        <div class="popup-staff-row" *ngFor="let staff of selectedNewsItem.staffList">
-          <div class="staff-avatar">
-            <img *ngIf="staff.avatar" [src]="staff.avatar" (error)="staff.avatar = ''" alt="" />
-            <div *ngIf="!staff.avatar" class="staff-avatar-fallback">{{ getStaffInitials(staff.name) }}</div>
-          </div>
-          <div class="staff-info">
-            <h4 class="staff-name">{{ staff.name }}</h4>
-            <p class="staff-desig">{{ staff.designation }}</p>
-          </div>
-        </div>
+<!-- ── Birthday Popup ──────────────────────────────── -->
+<div class="popup-overlay" *ngIf="selectedUser" (click)="closePopup()">
+  <div class="popup-card" (click)="$event.stopPropagation()">
+    <button class="popup-close" (click)="closePopup()">
+      <ion-icon name="close-outline"></ion-icon>
+    </button>
+    <div class="popup-avatar-wrap">
+      <img *ngIf="selectedUser.userProfilepic && !selectedImgError"
+        [src]="selectedUser.userProfilepic" class="popup-avatar-img"
+        (error)="selectedImgError = true" alt="profile" />
+      <div *ngIf="!selectedUser.userProfilepic || selectedImgError" class="popup-avatar-fallback">
+        {{ initials(selectedUser) }}
       </div>
+      <span class="popup-cake">🎂</span>
+    </div>
+    <h2 class="popup-name">{{ fullName(selectedUser) }}</h2>
+    <p class="popup-gender">{{ selectedUser.userGender }}</p>
+    <div class="popup-details">
+      <div class="popup-detail-row" *ngIf="selectedUser.userEmailOfficial">
+        <ion-icon name="mail-outline"></ion-icon>
+        <span>{{ selectedUser.userEmailOfficial }}</span>
+      </div>
+      <a class="popup-detail-row popup-dial" *ngIf="selectedUser.userMobileNumber"
+        [href]="'tel:' + selectedUser.userMobileNumber" (click)="$event.stopPropagation()">
+        <ion-icon name="call-outline"></ion-icon>
+        <span>{{ selectedUser.userMobileNumber }}</span>
+        <ion-icon name="chevron-forward-outline" class="dial-arrow"></ion-icon>
+      </a>
     </div>
   </div>
 </div>

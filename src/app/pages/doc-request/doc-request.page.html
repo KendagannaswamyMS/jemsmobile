@@ -1,0 +1,247 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Document Services</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="authService.logout()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="doc-content ion-padding">
+
+  <!-- ── Alumni / Document-Only Notice Banner ── -->
+  <div class="alumni-banner">
+    <div class="banner-badge-row">
+      <span class="alumni-tag">
+        <ion-icon name="ribbon-outline"></ion-icon>
+        {{ user?.isAutonomousArchive ? 'SJCE ARCHIVE' : user?.isAlumni ? 'ALUMNI PORTAL' : 'DOCUMENT PORTAL' }}
+      </span>
+      <span class="usn-tag" *ngIf="user?.usn || user?.srNumber">
+        {{ user?.usn || user?.srNumber }}
+      </span>
+    </div>
+    <h2 class="alumni-title">Hello, {{ user?.firstName || user?.name || 'Alumnus' }}</h2>
+    <p class="alumni-desc">
+      Official academic certificate, provisional degree, and transcript requests issued directly by the Examination Cell.
+    </p>
+  </div>
+
+  <!-- ── Segment Selector ── -->
+  <div class="segment-wrap">
+    <ion-segment [(ngModel)]="activeSegment" mode="ios">
+      <ion-segment-button value="catalog">
+        <ion-icon name="document-text-outline"></ion-icon>
+        <ion-label>Request Documents</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="track">
+        <ion-icon name="search-outline"></ion-icon>
+        <ion-label>Track Application</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- ── TAB 1: Document Catalog ───────────────────────────────────── -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <div *ngIf="activeSegment === 'catalog'" class="catalog-section">
+
+    <div class="section-heading">
+      <h3>Available Certificates & Records</h3>
+      <span class="doc-count">{{ catalog.length }} Documents</span>
+    </div>
+
+    <div class="catalog-grid">
+      <div class="doc-card" *ngFor="let doc of catalog">
+        <div class="doc-card-header">
+          <span class="doc-category-badge">{{ doc.category }}</span>
+          <span class="doc-fee">₹{{ doc.feePerCopy }} <small>/ copy</small></span>
+        </div>
+
+        <h4 class="doc-name">{{ doc.name }}</h4>
+
+        <div class="doc-meta-row">
+          <span class="meta-item">
+            <ion-icon name="time-outline"></ion-icon>
+            {{ doc.deliveryEstimate }}
+          </span>
+          <span class="meta-item">
+            <ion-icon name="code-working-outline"></ion-icon>
+            {{ doc.code }}
+          </span>
+        </div>
+
+        <div class="doc-reqs">
+          <p class="req-title">Prerequisites:</p>
+          <ul class="req-list">
+            <li *ngFor="let req of doc.requirements">{{ req }}</li>
+          </ul>
+        </div>
+
+        <button class="apply-doc-btn" (click)="openApplyModal(doc)">
+          <span>Apply Now</span>
+          <ion-icon name="arrow-forward-outline"></ion-icon>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- ── TAB 2: Application Tracker ────────────────────────────────── -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <div *ngIf="activeSegment === 'track'" class="track-section">
+
+    <div class="search-box">
+      <ion-icon name="search-outline" class="search-icon"></ion-icon>
+      <input type="text" [(ngModel)]="searchTrackingId" placeholder="Enter Ref ID e.g. JST-DOC-2026-8841"
+        (keyup.enter)="trackApplication()" />
+      <button class="track-btn" (click)="trackApplication()">Track</button>
+    </div>
+
+    <!-- Tracking Result -->
+    <div *ngIf="hasTracked && searchedRecord" class="tracker-card">
+      <div class="tracker-header">
+        <div>
+          <span class="ref-label">Reference ID</span>
+          <h4 class="ref-val">{{ searchedRecord.trackingId }}</h4>
+        </div>
+        <span class="status-pill status-{{ searchedRecord.status.toLowerCase() }}">
+          {{ searchedRecord.status }}
+        </span>
+      </div>
+
+      <div class="tracker-body">
+        <p class="track-doc-name">{{ searchedRecord.docName }}</p>
+        <div class="track-meta">
+          <span>Submitted: {{ searchedRecord.requestedOn }}</span>
+          <span>Delivery: {{ searchedRecord.deliveryMode }}</span>
+          <span>Total: ₹{{ searchedRecord.totalFee }}</span>
+        </div>
+
+        <!-- Stepper -->
+        <div class="stepper">
+          <div class="step step-done">
+            <div class="step-dot"><ion-icon name="checkmark-outline"></ion-icon></div>
+            <span class="step-label">Submitted</span>
+          </div>
+          <div class="step-line" [class.line-done]="searchedRecord.status !== 'Submitted'"></div>
+
+          <div class="step" [class.step-done]="searchedRecord.status === 'Verification' || searchedRecord.status === 'Prepared' || searchedRecord.status === 'Dispatched' || searchedRecord.status === 'Delivered'">
+            <div class="step-dot"><ion-icon name="checkmark-outline"></ion-icon></div>
+            <span class="step-label">Verification</span>
+          </div>
+          <div class="step-line" [class.line-done]="searchedRecord.status === 'Prepared' || searchedRecord.status === 'Dispatched' || searchedRecord.status === 'Delivered'"></div>
+
+          <div class="step" [class.step-done]="searchedRecord.status === 'Prepared' || searchedRecord.status === 'Dispatched' || searchedRecord.status === 'Delivered'">
+            <div class="step-dot"><ion-icon name="checkmark-outline"></ion-icon></div>
+            <span class="step-label">Prepared</span>
+          </div>
+          <div class="step-line" [class.line-done]="searchedRecord.status === 'Dispatched' || searchedRecord.status === 'Delivered'"></div>
+
+          <div class="step" [class.step-done]="searchedRecord.status === 'Dispatched' || searchedRecord.status === 'Delivered'">
+            <div class="step-dot"><ion-icon name="checkmark-outline"></ion-icon></div>
+            <span class="step-label">Dispatched</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty search result -->
+    <div *ngIf="hasTracked && !searchedRecord" class="empty-track-state">
+      <div class="empty-icon-wrap">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+      </div>
+      <h4>No Record Found</h4>
+      <p>No document application found matching "{{ searchTrackingId }}". Please check your reference number.</p>
+    </div>
+
+    <!-- Active Applications List -->
+    <div class="recent-requests" *ngIf="myRequests.length > 0">
+      <h3 class="recent-title">My Recent Applications</h3>
+      <div class="recent-card" *ngFor="let r of myRequests">
+        <div class="recent-top">
+          <span class="recent-ref">{{ r.trackingId }}</span>
+          <span class="status-pill status-{{ r.status.toLowerCase() }}">{{ r.status }}</span>
+        </div>
+        <h4 class="recent-name">{{ r.docName }}</h4>
+        <div class="recent-meta">
+          <span>{{ r.requestedOn }}</span>
+          <span>{{ r.copies }} copy(s)</span>
+          <span>₹{{ r.totalFee }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- ── MODAL: Apply for Document ─────────────────────────────────── -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" *ngIf="selectedDoc" (click)="closeApplyModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <span class="apply-code">{{ selectedDoc.code }}</span>
+          <h3 class="apply-title">{{ selectedDoc.name }}</h3>
+        </div>
+        <button class="modal-close" (click)="closeApplyModal()">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Quantity counter -->
+        <div class="field-row">
+          <span class="field-label">Number of Copies:</span>
+          <div class="counter-box">
+            <button class="counter-btn" (click)="decrementCopies()">-</button>
+            <span class="counter-val">{{ copiesCount }}</span>
+            <button class="counter-btn" (click)="incrementCopies()">+</button>
+          </div>
+        </div>
+
+        <!-- Delivery mode toggle -->
+        <div class="field-group">
+          <label class="field-label">Delivery Mode:</label>
+          <div class="mode-options">
+            <button class="mode-opt-btn" [class.opt-active]="deliveryMode === 'Courier'" (click)="deliveryMode = 'Courier'">
+              <ion-icon name="paper-plane-outline"></ion-icon>
+              <span>Postal Courier (+₹{{ courierFee }})</span>
+            </button>
+            <button class="mode-opt-btn" [class.opt-active]="deliveryMode === 'Counter Collection'" (click)="deliveryMode = 'Counter Collection'">
+              <ion-icon name="business-outline"></ion-icon>
+              <span>Counter Collection (Free)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Pricing Breakdown -->
+        <div class="price-breakdown">
+          <div class="price-row">
+            <span>Certificate Fee ({{ copiesCount }}x ₹{{ selectedDoc.feePerCopy }}):</span>
+            <span>₹{{ selectedDoc.feePerCopy * copiesCount }}</span>
+          </div>
+          <div class="price-row" *ngIf="deliveryMode === 'Courier'">
+            <span>Shipping / Postal Handling:</span>
+            <span>₹{{ courierFee }}</span>
+          </div>
+          <div class="price-row total-row">
+            <span>Estimated Total:</span>
+            <span class="total-amt">₹{{ estimatedTotal }}</span>
+          </div>
+        </div>
+
+        <button class="submit-apply-btn" [disabled]="isSubmitting" (click)="submitDocRequest()">
+          <span *ngIf="isSubmitting" class="btn-spinner"></span>
+          <span *ngIf="!isSubmitting">Confirm & Submit Request</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</ion-content>

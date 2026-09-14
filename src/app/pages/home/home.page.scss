@@ -9,22 +9,24 @@ $tmrw-col:  #457b9d;
 .header-brand {
   display: flex;
   align-items: center;
-  padding-left: 4px;
+  gap: 10px;
+  padding-left: 8px;
 }
 
 .header-logo-img {
-  height: 38px;
-  width: auto;
-  max-width: 140px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
-  border-radius: 12px;
-  background: #ffffff;
-  padding: 4px 10px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-  display: block;
+  border-radius: 6px;
 }
 
-
+.header-title {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
 
 // ── Biometric Widget Card ──────────────────────────────────────────────────
 .bio-card {
@@ -79,6 +81,28 @@ $tmrw-col:  #457b9d;
 .bio-profile-info {
   flex: 1;
 
+  .role-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .staff-role-badge {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+
+    &.badge-hod { background: #fdf4ff; color: #a21caf; border: 1px solid #f0abfc; }
+    &.badge-faculty { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    &.badge-staff { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    &.badge-admin { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+    &.badge-employee { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+  }
+
   .bio-name {
     font-size: 15px;
     font-weight: 800;
@@ -87,8 +111,15 @@ $tmrw-col:  #457b9d;
     font-family: 'Plus Jakarta Sans', sans-serif;
   }
 
+  .bio-dept {
+    font-size: 11.5px;
+    color: $primary;
+    font-weight: 600;
+    margin: 0 0 2px;
+  }
+
   .bio-emp {
-    font-size: 12px;
+    font-size: 11.5px;
     color: #64748b;
     font-weight: 600;
     margin: 0;
@@ -183,13 +214,84 @@ $tmrw-col:  #457b9d;
   flex-shrink: 0;
 }
 
-.no-punch {
-  text-align: center;
-  font-size: 13px;
-  font-weight: 600;
+.empty-punch-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 12px;
   color: #64748b;
-  padding: 8px 0 4px;
-  margin: 0;
+
+  ion-icon { font-size: 18px; color: #94a3b8; }
+  .no-punch {
+    font-size: 13px;
+    font-weight: 600;
+    margin: 0;
+    padding: 0;
+    color: #64748b;
+  }
+}
+
+.bio-error-card {
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 18px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  .bio-error-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    ion-icon {
+      font-size: 26px;
+      color: #e11d48;
+      flex-shrink: 0;
+    }
+  }
+
+  .bio-error-text {
+    h4 {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #9f1239;
+      margin: 0 0 2px;
+    }
+
+    p {
+      font-size: 11.5px;
+      color: #be123c;
+      margin: 0;
+    }
+  }
+
+  .retry-btn {
+    background: #e11d48;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+
+    ion-icon { font-size: 14px; }
+  }
+}
+
+.staff-shortcuts-title {
+  margin-top: 20px;
 }
 
 @keyframes pulse {
@@ -296,83 +398,6 @@ $tmrw-col:  #457b9d;
 .bday-card.bday-tmrw {
   opacity: 0.55;
   filter: grayscale(0.4);
-}
-
-// ── Student Clubs ────────────────────────────────────────────────────────
-.club-card { width: 84px; }
-
-.club-avatar-wrap {
-  border-radius: 18px;
-  border-color: $primary;
-  box-shadow: 0 4px 14px rgba(18, 88, 117, 0.2);
-}
-
-.bday-avatar-fallback.club-bg {
-  background: linear-gradient(135deg, $primary 0%, #17688b 100%);
-  border-radius: 18px;
-
-  ion-icon { font-size: 24px; }
-}
-
-.club-coord {
-  font-size: 10.5px;
-  color: #94a3b8;
-  font-weight: 600;
-  margin: 2px 0 0;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 100%;
-}
-
-// ── Club Events ───────────────────────────────────────────────────────────
-.event-date-badge {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background: #ffffff;
-  border-radius: 10px;
-  padding: 4px 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  line-height: 1.1;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-
-  .event-date-day {
-    font-size: 14px;
-    font-weight: 800;
-    color: $primary;
-  }
-
-  .event-date-mon {
-    font-size: 9px;
-    font-weight: 700;
-    color: $accent;
-    text-transform: uppercase;
-  }
-}
-
-.event-meta-row {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-top: 6px;
-
-  span {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 11px;
-    color: #64748b;
-    font-weight: 600;
-  }
-
-  ion-icon {
-    font-size: 13px;
-    color: $accent;
-  }
 }
 
 .bday-name {
@@ -524,371 +549,855 @@ $tmrw-col:  #457b9d;
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes popIn  { from { opacity: 0; transform: scale(0.88); } to { opacity: 1; transform: scale(1); } }
-popup-wish-btn {
-  width: 100%; height: 44px; border: none; border-radius: 12px;
-  background: $primary; color: #fff; font-size: 14px; font-weight: 600;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  cursor: pointer; border-bottom: 3px solid $accent;
-  ion-icon { font-size: 18px; }
-  &:active { opacity: 0.85; }
+
+// ── Student Dashboard Styling ─────────────────────────────────────────────
+.dashboard-content {
+  --background: #f8fafc;
 }
 
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes popIn  { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
-
-// ── 🏆 University Staff in News Section Styles ─────────────────────────────
-.news-section {
-  margin-bottom: 24px;
+.student-dashboard {
+  padding-bottom: 24px;
 }
 
-.news-header {
+.std-banner {
+  background: linear-gradient(135deg, #0d4259 0%, #125875 60%, #1a7499 100%);
+  border-radius: 24px;
+  padding: 20px;
+  color: #ffffff;
+  box-shadow: 0 12px 32px rgba(18, 88, 117, 0.2);
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(242, 102, 34, 0.25) 0%, transparent 70%);
+  }
+
+  .banner-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .std-avatar-wrap {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    border: 2.5px solid #F26622;
+    overflow: hidden;
+    flex-shrink: 0;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(242, 102, 34, 0.3);
+  }
+
+  .std-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .std-avatar-initials {
+    width: 100%;
+    height: 100%;
+    background: #0d4259;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+  }
+
+  .std-banner-info {
+    flex: 1;
+  }
+
+  .std-role-badge {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    background: rgba(242, 102, 34, 0.25);
+    color: #ffd8c4;
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-bottom: 4px;
+  }
+
+  .std-greeting {
+    font-size: 18px;
+    font-weight: 800;
+    margin: 0 0 2px;
+    line-height: 1.2;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  .std-dept {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.75);
+    margin: 0;
+  }
+
+  .profile-icon-btn {
+    background: rgba(255, 255, 255, 0.12);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: #ffffff;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .banner-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+
+    .banner-pill {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(8px);
+      padding: 4px 12px;
+      border-radius: 14px;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      ion-icon { font-size: 14px; color: #F26622; }
+    }
+  }
+}
+
+// ── Metrics Grid ──────────────────────────────────────────────────────────
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+
+  .metric-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 12px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+
+    .metric-icon-wrap {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+
+      ion-icon { font-size: 20px; }
+    }
+
+    &.bg-emerald {
+      .metric-icon-wrap { background: #d1fae5; ion-icon { color: #059669; } }
+    }
+    &.bg-blue {
+      .metric-icon-wrap { background: #dbeafe; ion-icon { color: #2563eb; } }
+    }
+    &.bg-purple {
+      .metric-icon-wrap { background: #f3e8ff; ion-icon { color: #9333ea; } }
+    }
+
+    .metric-value {
+      font-size: 13px;
+      font-weight: 800;
+      color: #0f172a;
+      display: block;
+      line-height: 1.2;
+    }
+    .metric-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #64748b;
+      margin-top: 2px;
+    }
+  }
+}
+
+// ── Section Title ─────────────────────────────────────────────────────────
+.section-title-wrap {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 14px;
-}
+  margin-bottom: 12px;
 
-.news-header-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  .news-trophy { font-size: 22px; }
-  .news-title-txt {
-    font-size: 16px;
+  .std-section-title {
+    font-size: 15px;
     font-weight: 800;
-    color: $primary;
+    color: #125875;
     margin: 0;
     font-family: 'Plus Jakarta Sans', sans-serif;
   }
-}
 
-
-
-.news-scroll {
-  display: flex;
-  gap: 16px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-  scroll-snap-type: x mandatory;
-  &::-webkit-scrollbar { display: none; }
-}
-
-.news-card {
-  flex: 0 0 260px;
-  scroll-snap-align: start;
-  background: #ffffff;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow:
-    0 8px 24px rgba(18, 88, 117, 0.07),
-    0 1px 4px rgba(0, 0, 0, 0.03);
-  border: 1px solid rgba(18, 88, 117, 0.08);
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-
-  &:active {
-    transform: scale(0.98);
+  .view-all-btn {
+    background: transparent;
+    border: none;
+    color: #F26622;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
   }
 }
 
-.news-banner-box {
-  position: relative;
-  height: 125px;
-  background: linear-gradient(135deg, #125875 0%, #1e7599 100%);
-  overflow: hidden;
+// ── Shortcuts Grid ────────────────────────────────────────────────────────
+.shortcuts-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+
+  .shortcut-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 12px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(18, 88, 117, 0.06);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:active {
+      transform: scale(0.95);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .shortcut-icon-bg {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+
+      ion-icon { font-size: 22px; }
+
+      &.icon-blue   { background: #eff6ff; ion-icon { color: #2563eb; } }
+      &.icon-cyan   { background: #ecfeff; ion-icon { color: #0891b2; } }
+      &.icon-orange { background: #fff7ed; ion-icon { color: #ea580c; } }
+      &.icon-indigo { background: #eef2ff; ion-icon { color: #4f46e5; } }
+      &.icon-emerald{ background: #ecfdf5; ion-icon { color: #059669; } }
+      &.icon-pink   { background: #fdf2f8; ion-icon { color: #db2777; } }
+      &.icon-teal   { background: #f0fdfa; ion-icon { color: #0d9488; } }
+      &.icon-amber  { background: #fffbeb; ion-icon { color: #d97706; } }
+    }
+
+    .shortcut-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #334155;
+      line-height: 1.2;
+    }
+  }
 }
 
-.news-banner-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.news-banner-fallback {
-  width: 100%;
-  height: 100%;
-  padding: 14px;
+// ── Schedule List ─────────────────────────────────────────────────────────
+.schedule-list {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  background: linear-gradient(135deg, #0f4c66 0%, #18688c 100%);
-  color: #ffffff;
+  gap: 10px;
+  margin-bottom: 24px;
 
-  .fallback-branding {
+  .schedule-item {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 14px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 12px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(18, 88, 117, 0.06);
+
+    .schedule-time {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      min-width: 68px;
+
+      .time-start {
+        font-size: 12px;
+        font-weight: 800;
+        color: #0f172a;
+      }
+      .time-end {
+        font-size: 10px;
+        font-weight: 600;
+        color: #94a3b8;
+      }
+    }
+
+    .schedule-pill {
+      width: 4px;
+      height: 36px;
+      border-radius: 4px;
+      flex-shrink: 0;
+
+      &.pill-lecture { background: #2563eb; }
+      &.pill-lab     { background: #059669; }
+    }
+
+    .schedule-details {
+      flex: 1;
+
+      .subject-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 4px;
+      }
+
+      .subject-meta {
+        font-size: 11px;
+        color: #64748b;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        ion-icon { font-size: 13px; color: #125875; }
+      }
+
+      .sub-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+      }
+
+      .cls-status-pill {
+        font-size: 9.5px;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 4px;
+
+        &.status-now {
+          background: #fef3c7;
+          color: #b45309;
+        }
+        &.status-done {
+          background: #f1f5f9;
+          color: #94a3b8;
+        }
+        &.status-upcoming {
+          background: #eff6ff;
+          color: #1d4ed8;
+        }
+      }
+    }
+
+    &.cls-now {
+      border: 1.5px solid #f59e0b;
+      background: #fffdfa;
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.12);
+    }
+
+    &.cls-done {
+      opacity: 0.65;
+    }
+  }
+
+  .schedule-pill {
+    &.pill-live {
+      background: #f59e0b !important;
+      animation: pulse 2s infinite;
+    }
+    &.pill-done {
+      background: #94a3b8 !important;
+    }
+  }
+}
+
+// ── Next Class Highlight Card ─────────────────────────────────────────────
+.next-class-card {
+  background: linear-gradient(135deg, #0d4259 0%, #125875 100%);
+  border-radius: 18px;
+  padding: 16px;
+  color: #ffffff;
+  margin-bottom: 18px;
+  box-shadow: 0 6px 20px rgba(18, 88, 117, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  &.faculty-nc-card {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
+  }
+
+  .nc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .nc-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+
+    ion-icon { font-size: 12px; }
+
+    &.live {
+      background: #f59e0b;
+      color: #78350f;
+      animation: pulse 1.8s infinite;
+    }
+  }
+
+  .nc-time {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .nc-title {
+    margin: 0 0 10px;
+    font-size: 16px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.3;
+  }
+
+  .nc-footer {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+
+    .nc-meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+
+      ion-icon { font-size: 14px; }
+    }
+  }
+}
+
+.schedule-empty, .schedule-error {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 24px;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 20px;
+  color: #64748b;
+
+  ion-icon {
+    font-size: 28px;
+    color: #94a3b8;
     margin-bottom: 6px;
   }
 
-  .jss-logo-badge {
-    font-size: 10px;
-    font-weight: 900;
-    background: #F26622;
+  p {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .schedule-retry-btn {
+    margin-top: 10px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    background: #125875;
+    color: #fff;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+}
+
+.staff-schedule-wrap {
+  margin-top: 20px;
+}
+
+// ── WiFi Banner Card ──────────────────────────────────────────────────────
+.wifi-banner-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+  border: 1.5px solid #bae6fd;
+  border-radius: 20px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.1);
+  cursor: pointer;
+
+  .wifi-banner-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: #0284c7;
     color: #ffffff;
-    padding: 2px 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .wifi-banner-text {
+    flex: 1;
+
+    h4 {
+      font-size: 14px;
+      font-weight: 800;
+      color: #0369a1;
+      margin: 0 0 2px;
+    }
+    p {
+      font-size: 11px;
+      color: #64748b;
+      margin: 0;
+    }
+  }
+
+  .wifi-arrow {
+    font-size: 18px;
+    color: #0284c7;
+  }
+}
+
+// ── Alumni Redirect Card ──────────────────────────────────────────────────
+.alumni-redirect-card {
+  background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+  border: 1.5px solid #5eead4;
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 6px 20px rgba(13, 148, 136, 0.12);
+
+  .alumni-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: #0d9488;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .alumni-card-text {
+    flex: 1;
+
+    h4 {
+      font-size: 14px;
+      font-weight: 800;
+      color: #0f766e;
+      margin: 0 0 3px;
+    }
+
+    p {
+      font-size: 11.5px;
+      color: #115e59;
+      margin: 0;
+      line-height: 1.4;
+    }
+  }
+
+  .alumni-card-btn {
+    background: #0d9488;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(13, 148, 136, 0.25);
+  }
+}
+
+// ── Direct 1-Tap Attendance Buttons ─────────────────────────────────────────
+.nc-action-row {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+
+  .nc-mark-btn {
+    width: 100%;
+    background: #ffffff;
+    color: $primary;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+    ion-icon {
+      font-size: 17px;
+      color: $accent;
+    }
+  }
+}
+
+.schedule-action {
+  margin-left: 8px;
+
+  .class-mark-btn {
+    background: #eff6ff;
+    color: $primary;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+
+    ion-icon {
+      font-size: 14px;
+      color: $accent;
+    }
+  }
+}
+
+// ── Faculty & HOD Attention Action Center ───────────────────────────────────
+.attention-section {
+  margin-top: 24px;
+  margin-bottom: 20px;
+
+  .attention-icon {
+    font-size: 18px;
+    color: $accent;
+    margin-right: 4px;
+  }
+
+  .pending-count-badge {
+    font-size: 10px;
+    font-weight: 800;
+    color: #b91c1c;
+    background: #fee2e2;
+    padding: 2px 8px;
     border-radius: 6px;
     letter-spacing: 0.5px;
   }
 
-  .congrats-txt {
-    font-size: 11px;
-    font-weight: 700;
-    color: #fffcdb;
+  .attention-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
   }
 
-  .fallback-heading {
-    font-size: 12px;
-    font-weight: 800;
-    line-height: 1.3;
-    margin: 0;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-}
+  .att-action-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
 
-.news-cat-chip {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(4px);
-  color: #ffffff;
-  font-size: 9.5px;
-  font-weight: 800;
-  padding: 3px 8px;
-  border-radius: 12px;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-
-  &.popup-chip {
-    position: static;
-    display: inline-block;
-    background: rgba(242, 102, 34, 0.12);
-    color: #F26622;
-    margin-bottom: 8px;
-  }
-}
-
-.news-staff-footer {
-  padding: 12px 14px;
-  background: #ffffff;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.news-staff-item, .popup-staff-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  .staff-avatar {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    overflow: hidden;
-    flex-shrink: 0;
-    border: 1.5px solid rgba(18, 88, 117, 0.15);
-    background: #e2e8f0;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .staff-avatar-fallback {
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #125875 0%, #17688b 100%);
-      color: #ffffff;
+    .aac-left {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 800;
-    }
-  }
+      align-items: flex-start;
+      gap: 12px;
+      flex: 1;
 
-  .staff-info {
-    flex: 1;
-    overflow: hidden;
-
-    .staff-name {
-      font-size: 12.5px;
-      font-weight: 800;
-      color: #125875;
-      margin: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .staff-desig {
-      font-size: 11px;
-      color: #64748b;
-      font-weight: 600;
-      margin: 2px 0 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
-}
-
-// ── Modals & Popups ────────────────────────────────────────────────────────
-.news-detail-popup {
-  padding: 0 !important;
-  overflow: hidden !important;
-  max-width: 340px !important;
-  width: 90% !important;
-  border-radius: 24px !important;
-
-  .popup-close {
-    z-index: 10;
-    top: 12px;
-    right: 12px;
-    background: rgba(15, 23, 42, 0.5);
-    backdrop-filter: blur(4px);
-    ion-icon { color: #ffffff; }
-  }
-
-  .news-popup-banner {
-    height: 130px;
-    position: relative;
-    background: linear-gradient(135deg, #125875 0%, #17688b 100%);
-    overflow: hidden;
-
-    .popup-banner-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .popup-banner-fallback {
-      padding: 16px;
-      color: #ffffff;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      background: linear-gradient(135deg, #0f4c66 0%, #18688c 100%);
-      box-sizing: border-box;
-
-      .banner-brand-tag {
+      .aac-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
         display: flex;
         align-items: center;
-        gap: 6px;
-        background: rgba(255, 255, 255, 0.15);
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 800;
-        letter-spacing: 0.5px;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
+      }
 
-        .banner-jems-logo {
-          height: 18px;
-          border-radius: 4px;
-          background: #fff;
-          padding: 1px 4px;
+      .aac-meta {
+        flex: 1;
+
+        .aac-badge-row {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          margin-bottom: 3px;
+
+          .aac-type {
+            font-size: 9px;
+            font-weight: 800;
+            color: #64748b;
+            background: #f1f5f9;
+            padding: 1px 6px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+          }
+
+          .aac-urgency {
+            font-size: 9px;
+            font-weight: 800;
+            padding: 1px 6px;
+            border-radius: 4px;
+
+            &.urgency-overdue {
+              background: #fee2e2;
+              color: #dc2626;
+            }
+            &.urgency-due_soon {
+              background: #fef3c7;
+              color: #d97706;
+            }
+            &.urgency-normal {
+              background: #e0f2fe;
+              color: #0284c7;
+            }
+          }
+        }
+
+        .aac-title {
+          font-size: 13.5px;
+          font-weight: 700;
+          color: #0f172a;
+          margin: 0 0 3px;
+        }
+
+        .aac-sub {
+          font-size: 11.5px;
+          color: #64748b;
+          margin: 0;
+        }
+
+        .aac-deadline {
+          font-size: 11px;
+          color: #b91c1c;
+          font-weight: 600;
+          margin: 4px 0 0;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+
+          ion-icon { font-size: 13px; }
+        }
+
+        .aac-reason {
+          font-size: 11.5px;
+          color: #475569;
+          font-style: italic;
+          margin: 4px 0 0;
         }
       }
+    }
 
-      .banner-trophy-icon {
-        font-size: 32px;
+    &.card-cie .aac-icon { background: #eff6ff; color: #1d4ed8; }
+    &.card-qps .aac-icon { background: #fdf4ff; color: #a21caf; }
+    &.card-leave .aac-icon { background: #ecfdf5; color: #059669; }
+
+    .aac-action-btn {
+      background: #f1f5f9;
+      color: $primary;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 11.5px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+  }
+
+  .attention-all-clear {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+
+    .aac-check-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #ecfdf5;
+      color: #059669;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+
+    .aac-clear-text {
+      h4 {
+        margin: 0 0 3px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #0f172a;
       }
-    }
-  }
-
-  .news-popup-body {
-    padding: 18px 20px 22px;
-    text-align: center;
-
-    .popup-chip {
-      display: inline-block;
-      background: rgba(242, 102, 34, 0.12);
-      color: #F26622;
-      font-size: 10px;
-      font-weight: 800;
-      padding: 3px 10px;
-      border-radius: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-    }
-
-    .popup-news-title {
-      font-size: 15px;
-      font-weight: 800;
-      color: #125875;
-      margin: 0 0 8px;
-      line-height: 1.35;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-
-    .popup-news-detail {
-      font-size: 12.5px;
-      color: #475569;
-      line-height: 1.45;
-      margin: 0 0 16px;
-    }
-  }
-
-  .news-popup-staff-section {
-    border-top: 1px solid #f1f5f9;
-    padding-top: 14px;
-    text-align: left;
-
-    .popup-staff-header {
-      font-size: 10.5px;
-      font-weight: 800;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin: 0 0 10px;
-      text-align: center;
+      p {
+        margin: 0;
+        font-size: 11.5px;
+        color: #64748b;
+        line-height: 1.4;
+      }
     }
   }
 }
 
 
 
-/* Dashboard: clear hierarchy and direct access to daily tasks. */
-.brand-wordmark { font-size: 18px; font-weight: 750; letter-spacing: -.5px; color: #18313b; margin-left: 10px; }
-.brand-wordmark small { display: block; font-size: 10px; font-weight: 500; color: #71877d; letter-spacing: 0; margin-top: 2px; }
-.header-logo-img { height: 38px; width: 38px; max-width: none; padding: 2px; border-radius: 10px; box-shadow: none; }
-.dashboard-intro { padding: 12px 2px 20px; }
-.dashboard-intro .eyebrow { color: #627c70; font-size: 11px; font-weight: 650; margin: 0 0 12px; letter-spacing: .3px; }
-.dashboard-intro h1 { font-size: clamp(26px, 7vw, 34px); letter-spacing: -1.1px; line-height: 1.14; font-weight: 700; color: #18313b; margin: 0 0 9px; }
-.dashboard-intro > p:last-child { color: #6d8078; font-size: 13px; margin: 0; line-height: 1.6; }
-.quick-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 26px; }
-.quick-actions a { display: grid; grid-template-columns: 40px 1fr; align-items: center; column-gap: 10px; padding: 15px 12px; background: white; border: 1px solid #e3e8f0; border-radius: 16px; text-decoration: none; color: #18313b; min-height: 78px; }
-.quick-icon { grid-row: span 2; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: #eaf3f7; color: #125875; font-size: 21px; }
-.quick-icon.warm { background: #fff4ed; color: #c84d10; }
-.quick-icon.violet { background: #f0edfa; color: #7b62a4; }
-.quick-icon.blue { background: #eaf2fb; color: #417c9f; }
-.quick-actions strong { font-size: 12px; font-weight: 650; }
-.quick-actions small { font-size: 10px; color: #71857b; line-height: 1.5; }
-.bio-card { border-color: #e3e8f0; border-radius: 20px; box-shadow: 0 4px 18px #173d4604; }
-.bio-avatar-wrap { border: 2px solid #d9e9de; box-shadow: none; }
-.news-card { box-shadow: none; border: 1px solid #e3e8f0; border-radius: 18px; }
-.bday-card { box-shadow: none; }
-.section-title, .news-title-txt { color: #18313b; letter-spacing: -.3px; }
-@media (min-width: 760px) { .quick-actions { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-@media (max-width: 350px) { .quick-actions a { padding: 12px 8px; column-gap: 7px; grid-template-columns: 32px 1fr; } .quick-icon { width: 32px; height: 36px; } .quick-actions small { font-size: 9px; } }
-.campus-links { display: grid; gap: 1px; background: #e3e8f0; border: 1px solid #e3e8f0; border-radius: 16px; overflow: hidden; margin: 0 0 26px; }
-.campus-links a { display: flex; align-items: center; gap: 14px; padding: 15px 16px; background: #fff; text-decoration: none; color: #18313b; }
-.campus-links a > ion-icon { font-size: 21px; color: #567b6b; }
-.campus-links a > ion-icon:last-child { margin-left: auto; font-size: 16px; }
-.campus-links strong, .campus-links small { display: block; }
-.campus-links strong { font-size: 13px; font-weight: 650; }
-.campus-links small { font-size: 11px; color: #71857b; margin-top: 4px; }

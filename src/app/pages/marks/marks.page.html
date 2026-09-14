@@ -1,0 +1,168 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Examination & Marks</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding marks-content">
+
+  <ion-refresher slot="fixed" (ionRefresh)="loadMarks($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Session Selector -->
+  <div class="session-picker-card" *ngIf="sessions.length > 0">
+    <div class="picker-icon">
+      <ion-icon name="calendar-outline"></ion-icon>
+    </div>
+    <div class="picker-body">
+      <span class="picker-label">Academic Session</span>
+      <ion-select
+        [value]="selectedSessionId"
+        (ionChange)="onSessionChange($event)"
+        interface="action-sheet"
+        placeholder="Select Session"
+        class="custom-session-select">
+        <ion-select-option *ngFor="let s of sessions" [value]="s.sessionslnum">
+          {{ s.sessionname }} {{ s.iscurrentsession ? '· (Current)' : '' }}
+        </ion-select-option>
+      </ion-select>
+    </div>
+  </div>
+
+  <!-- Overall Performance Banner -->
+  <div class="performance-card" *ngIf="!isLoading && !error && subjects.length > 0 && overallPercentage !== null">
+    <div class="perf-top">
+      <div>
+        <span class="perf-eyebrow">SESSION SUMMARY</span>
+        <h2 class="perf-score">{{ overallPercentage }}%</h2>
+      </div>
+      <div class="grade-badge" [style.background]="getGrade(overallPercentage).color">
+        <span>{{ getGrade(overallPercentage).text }}</span>
+      </div>
+    </div>
+
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" [style.width.%]="overallPercentage"></div>
+    </div>
+
+    <div class="perf-footer">
+      <div class="perf-metric">
+        <span class="metric-label">Marks Scored</span>
+        <span class="metric-val"><strong>{{ grandTotalObtained }}</strong> / {{ grandTotalMax }}</span>
+      </div>
+      <div class="perf-metric text-right">
+        <span class="metric-label">Assessed Courses</span>
+        <span class="metric-val"><strong>{{ subjects.length }}</strong> Subjects</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Degree Programme Requirements Note -->
+  <div class="degree-note-card" *ngIf="!isLoading && !error">
+    <ion-icon name="school-outline" class="note-icon"></ion-icon>
+    <div class="note-text">
+      <h4>Degree Programme Requirements</h4>
+      <p>Total credits required for graduation: <strong>{{ totalCreditsRequired }} Credits</strong> (based on registered academic curriculum).</p>
+    </div>
+  </div>
+
+  <!-- Loading Skeletons -->
+  <div class="skeleton-list" *ngIf="isLoading">
+    <div class="skeleton-card" *ngFor="let _ of [1, 2, 3]">
+      <ion-skeleton-text animated style="width: 40%; height: 20px; border-radius: 6px; margin-bottom: 8px;"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 75%; height: 16px; border-radius: 4px; margin-bottom: 12px;"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 100%; height: 60px; border-radius: 8px;"></ion-skeleton-text>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="state-card error-card" *ngIf="!isLoading && error">
+    <div class="state-icon-wrap error-icon">
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+    </div>
+    <h3>Unable to Load Marks</h3>
+    <p>{{ errorMessage }}</p>
+    <button class="action-btn" (click)="loadMarks()">
+      <ion-icon name="refresh-outline"></ion-icon>
+      <span>Retry</span>
+    </button>
+  </div>
+
+  <!-- Empty State -->
+  <div class="state-card empty-card" *ngIf="!isLoading && !error && subjects.length === 0">
+    <div class="state-icon-wrap empty-icon">
+      <ion-icon name="clipboard-outline"></ion-icon>
+    </div>
+    <h3>No Assessment Records</h3>
+    <p>Marks and evaluation components for {{ selectedSessionName || 'this session' }} have not been released yet.</p>
+  </div>
+
+  <!-- Subject Marks Accordion List -->
+  <div class="subjects-accordion-list" *ngIf="!isLoading && !error && subjects.length > 0">
+    <div class="subject-panel" *ngFor="let s of subjects">
+
+      <!-- Panel Header -->
+      <div class="panel-header" (click)="toggleSubject(s)">
+        <div class="panel-title-wrap">
+          <span class="sub-code">{{ s.subjectCode }}</span>
+          <h4 class="sub-name">{{ s.subjectName }}</h4>
+        </div>
+
+        <div class="panel-meta-wrap">
+          <span class="score-pill" [ngClass]="getPercentageBadgeClass(s.overallPercentage)" *ngIf="s.overallPercentage !== null">
+            {{ s.overallPercentage }}%
+          </span>
+          <span class="score-pill badge-neutral" *ngIf="s.overallPercentage === null">
+            N/A
+          </span>
+          <ion-icon
+            [name]="s.panelOpen ? 'chevron-up-outline' : 'chevron-down-outline'"
+            class="toggle-chevron">
+          </ion-icon>
+        </div>
+      </div>
+
+      <!-- Panel Body (Assessments) -->
+      <div class="panel-body" *ngIf="s.panelOpen">
+        <div class="assessment-total-row">
+          <span>Total Scored: <strong>{{ s.totalObtained }}</strong> / {{ s.totalMax }}</span>
+          <span class="quiz-count">{{ s.quizzes.length }} {{ s.quizzes.length === 1 ? 'assessment' : 'assessments' }}</span>
+        </div>
+
+        <div class="assessments-list" *ngIf="s.quizzes.length > 0">
+          <div class="assessment-item" *ngFor="let q of s.quizzes">
+            <div class="quiz-indicator">
+              <span class="quiz-index">#{{ q.index }}</span>
+            </div>
+            <div class="quiz-details">
+              <h5 class="quiz-title">{{ q.quizTitle }}</h5>
+              <div class="quiz-sub">
+                <span class="quiz-type">{{ q.questionType }}</span>
+                <span class="quiz-date" *ngIf="q.startedAt">· {{ q.startedAt | date:'dd MMM yyyy' }}</span>
+              </div>
+            </div>
+            <div class="quiz-score">
+              <span class="score-numbers">
+                <strong *ngIf="q.marksObtained !== null">{{ q.marksObtained }}</strong>
+                <span *ngIf="q.marksObtained === null">—</span> / {{ q.totalMarks }}
+              </span>
+              <span class="quiz-pct-pill" [ngClass]="getPercentageBadgeClass(q.percentage)" *ngIf="q.percentage !== null">
+                {{ q.percentage }}%
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="no-assessments-msg" *ngIf="s.quizzes.length === 0">
+          <p>No individual tests or quizzes recorded for this course.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</ion-content>

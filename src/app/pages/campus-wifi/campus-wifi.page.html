@@ -26,6 +26,13 @@
         {{ isOffCampus ? 'Off-Campus' : 'Connected' }}
       </span>
     </div>
+
+    <div class="captive-portal-btn-wrap">
+      <button class="portal-btn" (click)="openCaptivePortal()">
+        <ion-icon name="open-outline"></ion-icon>
+        <span>Open Sophos Captive Portal (172.16.16.16:8090)</span>
+      </button>
+    </div>
   </div>
 
   <!-- ── 2. CHANGE / SET WIFI PASSWORD CARD ──────────────────────────── -->

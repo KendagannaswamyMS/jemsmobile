@@ -1,0 +1,158 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Enrolled Subjects</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding subjects-content">
+
+  <ion-refresher slot="fixed" (ionRefresh)="loadSubjects($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Summary Stats Row -->
+  <div class="summary-grid" *ngIf="!isLoading && !error && subjects.length > 0">
+    <div class="stat-card stat-blue">
+      <div class="stat-icon">
+        <ion-icon name="book-outline"></ion-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ subjects.length }}</span>
+        <span class="stat-label">Subjects</span>
+      </div>
+    </div>
+
+    <div class="stat-card stat-emerald">
+      <div class="stat-icon">
+        <ion-icon name="ribbon-outline"></ion-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ totalCredits }}</span>
+        <span class="stat-label">Total Credits</span>
+      </div>
+    </div>
+
+    <div class="stat-card stat-purple">
+      <div class="stat-icon">
+        <ion-icon name="easel-outline"></ion-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ theoryCount }}</span>
+        <span class="stat-label">Theory</span>
+      </div>
+    </div>
+
+    <div class="stat-card stat-amber">
+      <div class="stat-icon">
+        <ion-icon name="hardware-chip-outline"></ion-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ labCount }}</span>
+        <span class="stat-label">Labs</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search and Filters -->
+  <div class="filter-section" *ngIf="!isLoading && !error && subjects.length > 0">
+    <ion-searchbar
+      placeholder="Search by subject name, code, faculty..."
+      (ionInput)="onSearch($event)"
+      [debounce]="250"
+      class="custom-searchbar">
+    </ion-searchbar>
+
+    <div class="pills-scroll">
+      <button class="filter-pill" [class.active]="selectedFilter === 'all'" (click)="setFilter('all')">
+        All ({{ subjects.length }})
+      </button>
+      <button class="filter-pill" [class.active]="selectedFilter === 'theory'" (click)="setFilter('theory')">
+        Theory ({{ theoryCount }})
+      </button>
+      <button class="filter-pill" [class.active]="selectedFilter === 'lab'" (click)="setFilter('lab')">
+        Labs ({{ labCount }})
+      </button>
+      <button class="filter-pill" [class.active]="selectedFilter === 'core'" (click)="setFilter('core')">
+        Core
+      </button>
+      <button class="filter-pill" [class.active]="selectedFilter === 'elective'" (click)="setFilter('elective')">
+        Electives
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading Skeletons -->
+  <div class="skeleton-list" *ngIf="isLoading">
+    <div class="subject-card skeleton-card" *ngFor="let _ of [1, 2, 3, 4]">
+      <ion-skeleton-text animated style="width: 35%; height: 16px; border-radius: 4px; margin-bottom: 8px;"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 80%; height: 20px; border-radius: 4px; margin-bottom: 12px;"></ion-skeleton-text>
+      <ion-skeleton-text animated style="width: 50%; height: 14px; border-radius: 4px;"></ion-skeleton-text>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="state-card error-card" *ngIf="!isLoading && error">
+    <div class="state-icon-wrap error-icon">
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+    </div>
+    <h3>Unable to Load Subjects</h3>
+    <p>{{ errorMessage }}</p>
+    <button class="action-btn" (click)="loadSubjects()">
+      <ion-icon name="refresh-outline"></ion-icon>
+      <span>Try Again</span>
+    </button>
+  </div>
+
+  <!-- Empty State -->
+  <div class="state-card empty-card" *ngIf="!isLoading && !error && filteredSubjects.length === 0">
+    <div class="state-icon-wrap empty-icon">
+      <ion-icon name="school-outline"></ion-icon>
+    </div>
+    <h3>No Subjects Found</h3>
+    <p *ngIf="searchQuery.trim()">No subjects matched "{{ searchQuery }}". Try adjusting your search.</p>
+    <p *ngIf="!searchQuery.trim()">No enrolled subjects registered for the active semester yet.</p>
+  </div>
+
+  <!-- Subjects List -->
+  <div class="subjects-list" *ngIf="!isLoading && !error && filteredSubjects.length > 0">
+    <div class="subject-card" *ngFor="let s of filteredSubjects">
+      <div class="card-top">
+        <div class="badge-group">
+          <span class="code-badge">{{ s.code }}</span>
+          <span class="type-badge" [ngClass]="getSubjectBadgeClass(s.subjectType)">{{ s.subjectType }}</span>
+        </div>
+        <div class="credits-badge">
+          <ion-icon name="ribbon-outline"></ion-icon>
+          <span>{{ s.credits }} Credits</span>
+        </div>
+      </div>
+
+      <h3 class="subject-name">{{ s.name }}</h3>
+
+      <div class="card-meta">
+        <div class="meta-item">
+          <ion-icon name="person-circle-outline"></ion-icon>
+          <span>{{ s.faculty }}</span>
+        </div>
+        <div class="meta-item" *ngIf="s.department">
+          <ion-icon name="business-outline"></ion-icon>
+          <span>{{ s.department }}</span>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <span class="status-pill status-{{ s.status.toLowerCase() }}">
+          <span class="status-dot"></span> {{ s.status }}
+        </span>
+        <button class="view-details-btn" routerLink="/tabs/timetable">
+          <span>Timetable</span>
+          <ion-icon name="arrow-forward-outline"></ion-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</ion-content>

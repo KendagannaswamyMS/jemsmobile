@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../core/services/auth.service';
 
 @Component({
@@ -7,10 +7,14 @@ import { AuthService } from '../core/services/auth.service';
   styleUrls: ['tabs.page.scss'],
   standalone: false
 })
-export class TabsPage {
+export class TabsPage implements OnInit {
+  isStudent = false;
+
   constructor(private authService: AuthService) {}
 
-  get isStudent(): boolean {
-    return this.authService.isStudent();
+  ngOnInit() {
+    this.authService.user$.subscribe(() => {
+      this.isStudent = this.authService.isStudent();
+    });
   }
 }

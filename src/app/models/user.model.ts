@@ -23,4 +23,23 @@ export interface CurrentUser {
   designation?: string;
   profilePic?: string;
   menus?: MenuItem[];
+  usn?: string;
+  srNumber?: string;
+  program?: string;
+  semester?: string;
+  regNumber?: string;
+  isHod?: boolean;
+  isFaculty?: boolean;
+  isNonTeaching?: boolean;
+  employeeRoles?: any[];
+  employeeCode?: string;
+  isFirstLogin?: boolean;
+  isAlumni?: boolean;
+  alumniId?: number | null;
+  isAutonomousArchive?: boolean;
+  autonomousArchiveId?: number | null;
+  isPassedOut?: boolean;
+  isDocRequestOnly?: boolean;
+  totalCreditsRequired?: number;
 }
+

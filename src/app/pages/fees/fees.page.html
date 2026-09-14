@@ -1,0 +1,408 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Fee Details & Receipts</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="loadFeeData()">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <!-- Segment Switcher -->
+  <ion-toolbar color="primary" class="segment-toolbar">
+    <ion-segment [(ngModel)]="selectedSegment" mode="md">
+      <ion-segment-button value="demands">
+        <ion-label>Demands & Dues</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="transactions">
+        <ion-label>Transaction Log</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="fees-content ion-padding">
+  <ion-refresher slot="fixed" (ionRefresh)="loadFeeData($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading Skeletons -->
+  <div class="loader-wrap" *ngIf="loading">
+    <ion-skeleton-text animated style="width: 100%; height: 110px; border-radius: 14px; margin-bottom: 12px;"></ion-skeleton-text>
+    <ion-skeleton-text animated style="width: 100%; height: 180px; border-radius: 14px; margin-bottom: 12px;"></ion-skeleton-text>
+    <ion-skeleton-text animated style="width: 100%; height: 180px; border-radius: 14px;"></ion-skeleton-text>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-wrap" *ngIf="!loading && error">
+    <ion-icon name="cloud-offline-outline"></ion-icon>
+    <h3>Unable to Load Fee Records</h3>
+    <p>Please check your internet connection or try again.</p>
+    <ion-button fill="outline" color="primary" (click)="loadFeeData()">
+      <ion-icon name="reload-outline" slot="start"></ion-icon> Retry
+    </ion-button>
+  </div>
+
+  <ng-container *ngIf="!loading && !error">
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- ── TAB 1: DEMANDS & DUES ─────────────────────────────────────────── -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <div *ngIf="selectedSegment === 'demands'">
+
+      <!-- ── CRITICAL PARITY RULE: NOT ASSESSED / UNAVAILABLE ── -->
+      <!-- Displayed when demands.length === 0. Never claim "₹0 Fully Paid". -->
+      <div class="not-assessed-card" *ngIf="overview?.assessmentState === 'not_assessed'">
+        <div class="na-icon-wrap">
+          <ion-icon name="document-text-outline"></ion-icon>
+        </div>
+        <div class="na-badge">STATUS: NOT ASSESSED</div>
+        <h3 class="na-title">Fee Demand Unavailable</h3>
+        <p class="na-desc">
+          No fee demands have been applied to your student account for the current academic session yet.
+        </p>
+        <div class="na-note">
+          <ion-icon name="information-circle-outline"></ion-icon>
+          <span>Fee demands are assigned by the University Accounts Office based on program admission and scholarship schemes. If you believe this is an error, please reach out to the Finance Desk.</span>
+        </div>
+      </div>
+
+      <!-- ── DEMANDS EXIST: GRAND SUMMARY CARDS ── -->
+      <ng-container *ngIf="overview && overview.demands.length > 0">
+
+        <!-- Old Arrears Banner -->
+        <div class="arrears-banner" *ngIf="overview.outstandingArrears > 0">
+          <div class="arrears-icon-wrap">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+          </div>
+          <div class="arrears-info">
+            <h4>Clear Previous Dues First</h4>
+            <p>
+              You have an outstanding balance of <strong>₹{{ overview.outstandingArrears | number:'1.2-2' }}</strong>
+              carried over from the previous system. Other fee demands stay locked until it is cleared.
+            </p>
+          </div>
+        </div>
+
+        <!-- Metric Summary Cards -->
+        <div class="summary-cards-grid">
+          <div class="summary-card card-demanded">
+            <div class="card-icon-bg">
+              <ion-icon name="receipt-outline"></ion-icon>
+            </div>
+            <div class="card-meta">
+              <span class="card-label">Total Demanded</span>
+              <span class="card-value">₹{{ overview.grandTotalDemand | number:'1.2-2' }}</span>
+            </div>
+          </div>
+
+          <div class="summary-card card-paid">
+            <div class="card-icon-bg">
+              <ion-icon name="checkmark-circle-outline"></ion-icon>
+            </div>
+            <div class="card-meta">
+              <span class="card-label">Total Paid</span>
+              <span class="card-value">₹{{ overview.grandTotalPaid | number:'1.2-2' }}</span>
+            </div>
+          </div>
+
+          <div class="summary-card" [class.card-cleared]="overview.grandBalance <= 0" [class.card-due]="overview.grandBalance > 0">
+            <div class="card-icon-bg">
+              <ion-icon [name]="overview.grandBalance <= 0 ? 'shield-checkmark-outline' : 'time-outline'"></ion-icon>
+            </div>
+            <div class="card-meta">
+              <span class="card-label">Outstanding Balance</span>
+              <span class="card-value">₹{{ overview.grandBalance | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Overall Progress Bar -->
+        <div class="overall-progress-box">
+          <div class="op-header">
+            <span>Overall Payment Progress</span>
+            <span class="op-percent">{{ getOverallPercent() }}%</span>
+          </div>
+          <div class="op-bar-track">
+            <div class="op-bar-fill" [style.width.%]="getOverallPercent()"></div>
+          </div>
+        </div>
+
+        <!-- Section Title -->
+        <div class="section-heading-wrap">
+          <h3 class="section-title">Fee Demands & Ledgers ({{ overview.demands.length }})</h3>
+        </div>
+
+        <!-- Demand Cards Accordion -->
+        <div class="demand-card" *ngFor="let d of overview.demands" [class.is-arrears]="d.isArrears" [class.is-locked]="d.payBlocked">
+
+          <!-- Card Header (Click to Toggle) -->
+          <div class="demand-header" (click)="toggleDemand(d.studentDemandId)">
+            <div class="dh-top-row">
+              <div class="dh-title-group">
+                <span class="dh-badge-arrears" *ngIf="d.isArrears">PAY FIRST</span>
+                <span class="dh-badge-locked" *ngIf="d.payBlocked">
+                  <ion-icon name="lock-closed-outline"></ion-icon> Locked
+                </span>
+                <h4 class="dh-title">{{ d.demandTitle }}</h4>
+                <p class="dh-sub" *ngIf="d.courseName || d.sessionName">
+                  {{ d.courseName }} <span *ngIf="d.courseName && d.sessionName">·</span> {{ d.sessionName }}
+                </p>
+              </div>
+              <div class="dh-status-wrap">
+                <span class="status-pill {{ statusClass(d.paymentStatus) }}">{{ d.paymentStatus }}</span>
+                <ion-icon [name]="isExpanded(d.studentDemandId) ? 'chevron-up-outline' : 'chevron-down-outline'" class="expand-chevron"></ion-icon>
+              </div>
+            </div>
+
+            <!-- Mini Progress -->
+            <div class="dh-progress-row">
+              <div class="dh-track">
+                <div class="dh-fill" [style.width.%]="getDemandPercent(d)"></div>
+              </div>
+              <div class="dh-amounts">
+                <div class="dh-amt-item">
+                  <span class="dh-lbl">Demand</span>
+                  <span class="dh-val">₹{{ d.totalAmount | number:'1.2-2' }}</span>
+                </div>
+                <div class="dh-amt-item amt-paid">
+                  <span class="dh-lbl">Paid</span>
+                  <span class="dh-val">₹{{ d.amountPaid | number:'1.2-2' }}</span>
+                </div>
+                <div class="dh-amt-item amt-bal">
+                  <span class="dh-lbl">Balance</span>
+                  <span class="dh-val">₹{{ d.balanceAmount | number:'1.2-2' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Expanded Body -->
+          <div class="demand-body" *ngIf="isExpanded(d.studentDemandId)">
+
+            <!-- Lock Notice -->
+            <div class="pay-blocked-note" *ngIf="d.payBlocked">
+              <ion-icon name="lock-closed-outline"></ion-icon>
+              <span>{{ d.payBlockedReason || 'Payment is locked until outstanding arrears are cleared.' }}</span>
+            </div>
+
+            <!-- Dates Row -->
+            <div class="dates-meta-row" *ngIf="d.openDate || d.closeDate || d.appliedDate">
+              <div class="date-chip" *ngIf="d.appliedDate">
+                <ion-icon name="calendar-outline"></ion-icon>
+                <span>Applied: {{ d.appliedDate | date:'dd MMM yyyy' }}</span>
+              </div>
+              <div class="date-chip" *ngIf="d.closeDate">
+                <ion-icon name="time-outline"></ion-icon>
+                <span>Due: {{ d.closeDate | date:'dd MMM yyyy' }}</span>
+              </div>
+            </div>
+
+            <!-- Fee Head Breakdown -->
+            <div class="body-section" *ngIf="d.feeHeads && d.feeHeads.length > 0">
+              <h5 class="sub-heading">
+                <ion-icon name="list-outline"></ion-icon> Fee Head Breakdown
+              </h5>
+              <div class="table-responsive">
+                <table class="fee-table">
+                  <thead>
+                    <tr>
+                      <th>Fee Head</th>
+                      <th class="text-right">Original (₹)</th>
+                      <th class="text-right">Applied (₹)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let fh of d.feeHeads">
+                      <td class="head-name">{{ fh.feeHeadName }}</td>
+                      <td class="text-right">₹{{ fh.originalAmount | number:'1.2-2' }}</td>
+                      <td class="text-right font-medium">₹{{ fh.revisedAmount | number:'1.2-2' }}</td>
+                    </tr>
+                    <tr class="total-row">
+                      <td><strong>Total</strong></td>
+                      <td class="text-right"><strong>₹{{ d.totalAmount | number:'1.2-2' }}</strong></td>
+                      <td class="text-right font-bold text-primary"><strong>₹{{ d.totalAmount | number:'1.2-2' }}</strong></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Payment Ledger -->
+            <div class="body-section">
+              <h5 class="sub-heading">
+                <ion-icon name="receipt-outline"></ion-icon> Payment Receipts & Ledger
+              </h5>
+
+              <div class="no-payments-note" *ngIf="!d.payments || d.payments.length === 0">
+                <ion-icon name="information-circle-outline"></ion-icon>
+                <span>No payments recorded for this demand yet.</span>
+              </div>
+
+              <div class="ledger-cards-list" *ngIf="d.payments && d.payments.length > 0">
+                <div class="ledger-item-card" *ngFor="let p of d.payments">
+                  <div class="lic-header">
+                    <div class="lic-meta">
+                      <span class="lic-date">{{ (p.paymentDate || p.createdAt) | date:'dd MMM yyyy, hh:mm a' }}</span>
+                      <span class="lic-challan">Challan: {{ p.challanNo }}</span>
+                    </div>
+                    <span class="status-pill {{ statusClass(p.status) }}">{{ p.status }}</span>
+                  </div>
+
+                  <div class="lic-body">
+                    <div class="lic-row">
+                      <span class="lic-lbl">Payment Mode:</span>
+                      <span class="lic-val">{{ p.paymentModeName || 'Online' }}</span>
+                    </div>
+                    <div class="lic-row" *ngIf="p.receiptNo">
+                      <span class="lic-lbl">Receipt No:</span>
+                      <span class="lic-val font-mono">{{ p.receiptNo }}</span>
+                    </div>
+                    <div class="lic-row" *ngIf="p.gatewayTxnId">
+                      <span class="lic-lbl">Txn Ref:</span>
+                      <span class="lic-val font-mono">{{ p.gatewayTxnId }}</span>
+                    </div>
+                    <div class="lic-row lic-amount-row">
+                      <span class="lic-lbl">Amount Paid:</span>
+                      <span class="lic-amt">₹{{ p.amountPaid | number:'1.2-2' }}</span>
+                    </div>
+                  </div>
+
+                  <div class="lic-footer" *ngIf="p.status === 'Success'">
+                    <button class="view-receipt-btn" (click)="viewReceipt(p, d)">
+                      <ion-icon name="eye-outline"></ion-icon>
+                      <span>View Receipt Voucher</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </div><!-- end demand-body -->
+
+        </div><!-- end demand-card -->
+
+      </ng-container>
+
+    </div><!-- end demands tab -->
+
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- ── TAB 2: TRANSACTIONS LOG ───────────────────────────────────────── -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <div *ngIf="selectedSegment === 'transactions'">
+
+      <div class="empty-txns" *ngIf="transactions.length === 0">
+        <ion-icon name="receipt-outline"></ion-icon>
+        <h4>No Transactions Found</h4>
+        <p>You have not made any payment gateway transactions yet.</p>
+      </div>
+
+      <div class="txn-list" *ngIf="transactions.length > 0">
+        <div class="txn-item-card" *ngFor="let t of transactions">
+          <div class="tic-header">
+            <div class="tic-meta">
+              <span class="tic-date">{{ t.txnDate | date:'dd MMM yyyy, hh:mm a' }}</span>
+              <span class="tic-no">{{ t.merchantTxnNo }}</span>
+            </div>
+            <span class="status-pill {{ statusClass(t.status) }}">{{ t.status }}</span>
+          </div>
+
+          <div class="tic-details">
+            <div class="tic-title" *ngIf="t.demandTitle">
+              <ion-icon name="document-text-outline"></ion-icon>
+              <span>{{ t.demandTitle }}</span>
+            </div>
+            <div class="tic-ref" *ngIf="t.gatewayTxnNo">
+              <span>Gateway Ref: {{ t.gatewayTxnNo }}</span>
+            </div>
+            <div class="tic-amount-wrap">
+              <span class="tic-amt-label">Transaction Amount</span>
+              <span class="tic-amt">₹{{ t.amount | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end transactions tab -->
+
+  </ng-container>
+
+  <!-- ════════════════════════════════════════════════════════════════════ -->
+  <!-- ── RECEIPT DETAIL MODAL ──────────────────────────────────────────── -->
+  <!-- ════════════════════════════════════════════════════════════════════ -->
+  <div class="receipt-modal-backdrop" *ngIf="showReceiptModal">
+    <div class="receipt-modal-card">
+      <div class="rm-header">
+        <div class="rm-brand">
+          <img src="assets/images/JEMS_LOGO.png" alt="Logo" class="rm-logo" />
+          <div class="rm-title-group">
+            <h3>JSS MAHAVIDYAPEETHA</h3>
+            <p>JSS Science and Technology University</p>
+          </div>
+        </div>
+        <button class="rm-close-btn" (click)="closeReceiptModal()">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+      </div>
+
+      <div class="rm-badge-row">
+        <span class="rm-tag">STUDENT FEE RECEIPT</span>
+        <span class="rm-tag-success">PAID</span>
+      </div>
+
+      <div class="rm-body" *ngIf="selectedReceipt">
+        <div class="rm-grid">
+          <div class="rm-item">
+            <span class="rm-label">Receipt Number</span>
+            <span class="rm-value font-mono">{{ selectedReceipt.receiptNo }}</span>
+          </div>
+          <div class="rm-item">
+            <span class="rm-label">Challan / Order #</span>
+            <span class="rm-value font-mono">{{ selectedReceipt.challanNo }}</span>
+          </div>
+          <div class="rm-item">
+            <span class="rm-label">Student Name</span>
+            <span class="rm-value">{{ selectedReceipt.studentName }}</span>
+          </div>
+          <div class="rm-item" *ngIf="selectedReceipt.usn">
+            <span class="rm-label">USN</span>
+            <span class="rm-value font-mono">{{ selectedReceipt.usn }}</span>
+          </div>
+          <div class="rm-item">
+            <span class="rm-label">Payment Date</span>
+            <span class="rm-value">{{ selectedReceipt.paymentDate | date:'dd MMM yyyy, hh:mm a' }}</span>
+          </div>
+          <div class="rm-item">
+            <span class="rm-label">Payment Mode</span>
+            <span class="rm-value">{{ selectedReceipt.paymentModeName }}</span>
+          </div>
+          <div class="rm-item full-width" *ngIf="selectedReceipt.demandTitle">
+            <span class="rm-label">Demand Account</span>
+            <span class="rm-value">{{ selectedReceipt.demandTitle }}</span>
+          </div>
+          <div class="rm-item full-width" *ngIf="selectedReceipt.gatewayTxnId">
+            <span class="rm-label">Transaction Reference</span>
+            <span class="rm-value font-mono">{{ selectedReceipt.gatewayTxnId }}</span>
+          </div>
+        </div>
+
+        <div class="rm-amount-box">
+          <span class="rm-amt-label">Total Amount Paid</span>
+          <span class="rm-amt-val">₹{{ selectedReceipt.amountPaid | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <div class="rm-footer">
+        <ion-button expand="block" color="primary" (click)="closeReceiptModal()">
+          <span>Done</span>
+        </ion-button>
+      </div>
+    </div>
+  </div>
+
+</ion-content>

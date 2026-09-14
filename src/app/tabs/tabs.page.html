@@ -1,40 +1,61 @@
 <ion-tabs>
   <ion-tab-bar slot="bottom">
 
-    <ion-tab-button tab="home">
-      <ion-icon name="home-outline"></ion-icon>
-      <ion-label>Home</ion-label>
-    </ion-tab-button>
+    <!-- ── Staff Tabs ── -->
+    <ng-container *ngIf="!isStudent">
+      <ion-tab-button tab="home">
+        <ion-icon name="home-outline"></ion-icon>
+        <ion-label>Home</ion-label>
+      </ion-tab-button>
 
-    <ion-tab-button tab="timetable">
-      <ion-icon name="calendar-outline"></ion-icon>
-      <ion-label>Timetable</ion-label>
-    </ion-tab-button>
+      <ion-tab-button tab="timetable">
+        <ion-icon name="calendar-outline"></ion-icon>
+        <ion-label>Timetable</ion-label>
+      </ion-tab-button>
 
-    <ion-tab-button *ngIf="!isStudent" tab="monthly-attendance">
-      <ion-icon name="finger-print-outline"></ion-icon>
-      <ion-label>Attendance</ion-label>
-    </ion-tab-button>
+      <ion-tab-button tab="attendance">
+        <ion-icon name="finger-print-outline"></ion-icon>
+        <ion-label>Attendance</ion-label>
+      </ion-tab-button>
 
-    <ion-tab-button *ngIf="!isStudent" tab="leave">
-      <ion-icon name="document-text-outline"></ion-icon>
-      <ion-label>Leave</ion-label>
-    </ion-tab-button>
+      <ion-tab-button tab="leave">
+        <ion-icon name="document-text-outline"></ion-icon>
+        <ion-label>Leave</ion-label>
+      </ion-tab-button>
 
-    <ion-tab-button tab="events">
-      <ion-icon name="megaphone-outline"></ion-icon>
-      <ion-label>Events</ion-label>
-    </ion-tab-button>
+      <ion-tab-button tab="events">
+        <ion-icon name="megaphone-outline"></ion-icon>
+        <ion-label>Events</ion-label>
+      </ion-tab-button>
 
-    <ion-tab-button *ngIf="isStudent" tab="notices">
-      <ion-icon name="notifications-outline"></ion-icon>
-      <ion-label>Notices</ion-label>
-    </ion-tab-button>
+      <ion-tab-button tab="dept-master">
+        <ion-icon name="people-outline"></ion-icon>
+        <ion-label>Directory</ion-label>
+      </ion-tab-button>
+    </ng-container>
 
-    <ion-tab-button *ngIf="isStudent" tab="my-clubs">
-      <ion-icon name="people-outline"></ion-icon>
-      <ion-label>My clubs</ion-label>
-    </ion-tab-button>
+    <!-- ── Student Tabs ── -->
+    <ng-container *ngIf="isStudent">
+      <ion-tab-button tab="home">
+        <ion-icon name="grid-outline"></ion-icon>
+        <ion-label>Dashboard</ion-label>
+      </ion-tab-button>
+
+      <ion-tab-button tab="timetable">
+        <ion-icon name="calendar-outline"></ion-icon>
+        <ion-label>Timetable</ion-label>
+      </ion-tab-button>
+
+      <ion-tab-button tab="campus-wifi">
+        <ion-icon name="wifi-outline"></ion-icon>
+        <ion-label>Campus WiFi</ion-label>
+      </ion-tab-button>
+
+      <ion-tab-button tab="events">
+        <ion-icon name="megaphone-outline"></ion-icon>
+        <ion-label>Events</ion-label>
+      </ion-tab-button>
+    </ng-container>
 
   </ion-tab-bar>
 </ion-tabs>

@@ -108,8 +108,8 @@ export class MonthlyAttendancePage implements OnInit {
     const payload = {
       UserId: user.userId,
       departmentID: this.selectedDepartmentId === -1 ? user.departmentId || -1 : this.selectedDepartmentId,
-      month: Number(this.selectedMonth),
-      year: Number(this.selectedYear)
+      month: this.selectedMonth,
+      year: this.selectedYear
     };
 
     const loader = await this.loadingCtrl.create({
@@ -119,185 +119,127 @@ export class MonthlyAttendancePage implements OnInit {
     await loader.present();
 
     // Primary: Call individual user monthly attendance endpoint
-    this.http.post<any>(`${environment.apiUrl}biometriclog/getmonthlyattendancerecordsforuser`, payload).subscribe({
+    this.http.post<any[]>(`${environment.apiUrl}biometriclog/getmonthlyattendancerecordsforuser`, payload).subscribe({
       next: async (res) => {
-        await loader.dismiss();
-        this.loading = false;
-        if (res) {
-          this.processApiResponse(res, user);
+        if (Array.isArray(res) && res.length > 0) {
+          await loader.dismiss();
+          this.loading = false;
+          this.processRecords(res, user);
         } else {
-          this.fetchDepartmentReportFiltered(payload, user);
+          // Fallback to department endpoint filtered strictly for the logged-in user
+          this.fetchDepartmentReportFiltered(payload, user, loader);
         }
       },
       error: async () => {
-        await loader.dismiss();
-        this.fetchDepartmentReportFiltered(payload, user);
+        // Fallback to department endpoint filtered strictly for the logged-in user
+        this.fetchDepartmentReportFiltered(payload, user, loader);
       }
     });
   }
 
-  private fetchDepartmentReportFiltered(payload: any, user: any) {
-    this.http.post<any>(`${environment.apiUrl}biometriclog/getcurrentmonthattendancereport`, payload).subscribe({
-      next: (res) => {
+  private fetchDepartmentReportFiltered(payload: any, user: any, loader: any) {
+    this.http.post<any[]>(`${environment.apiUrl}biometriclog/getcurrentmonthattendancereport`, payload).subscribe({
+      next: async (res) => {
+        await loader.dismiss();
         this.loading = false;
-        if (res) {
-          this.processApiResponse(res, user);
+        if (Array.isArray(res)) {
+          // Filter ONLY the logged-in user's biometric attendance records
+          const myUserCode = String((user as any).userCode || (user as any).usercode || '').toLowerCase();
+          let myRecords = res.filter(r => {
+            if (r.userId && r.userId === user.userId) return true;
+            if (r.userregistrationslnum && r.userregistrationslnum === user.userId) return true;
+            if (r.userCode && myUserCode && String(r.userCode).toLowerCase() === myUserCode) return true;
+            return false;
+          });
+
+          // If no specific ID filter matched in payload, fallback to all records
+          if (myRecords.length === 0) {
+            myRecords = res;
+          }
+
+          this.processRecords(myRecords, user);
         } else {
           this.records = [];
-          this.calculateSummary(null);
+          this.calculateSummary();
         }
       },
-      error: () => {
+      error: async (err) => {
+        await loader.dismiss();
         this.loading = false;
         this.records = [];
-        this.calculateSummary(null);
+        this.calculateSummary();
+        this.showToast('Could not load monthly attendance records.', 'warning');
       }
     });
   }
 
-  private processApiResponse(res: any, user: any) {
-    let rawDailyList: any[] = [];
-    let summaryObj: any = null;
-
-    // Structure A: Array of user objects [ { averageDetails: {...}, attendanceDetails: [...] } ]
-    if (Array.isArray(res) && res.length > 0) {
-      const first = res[0];
-      if (first && typeof first === 'object') {
-        if (Array.isArray(first.attendanceDetails)) {
-          rawDailyList = first.attendanceDetails;
-          summaryObj = first.averageDetails || first;
-        } else if (Array.isArray(first.records)) {
-          rawDailyList = first.records;
-          summaryObj = first;
-        } else {
-          // Flat array of daily records (Structure B)
-          rawDailyList = res;
-        }
-      }
-    } else if (res && typeof res === 'object') {
-      // Structure A single object: { averageDetails: {...}, attendanceDetails: [...] }
-      if (Array.isArray(res.attendanceDetails)) {
-        rawDailyList = res.attendanceDetails;
-        summaryObj = res.averageDetails || res;
-      } else if (Array.isArray(res.data)) {
-        rawDailyList = res.data;
-      } else if (Array.isArray(res.result)) {
-        rawDailyList = res.result;
-      } else if (Array.isArray(res.$values)) {
-        rawDailyList = res.$values;
-      }
-    }
-
-    if (!rawDailyList || rawDailyList.length === 0) {
-      this.records = [];
-      this.calculateSummary(summaryObj);
-      return;
-    }
-
-    this.records = rawDailyList.map(r => {
-      const dateStr = this.formatDate(r.date || r.logdatetime || r.logDate || r.attendanceDate);
-      
-      const inTime = r.firstLoginTime || r.hoursDetails?.in || r.inTime || r.loginTime || r.firstIn || r.in || '--:--';
-      const outTime = r.lastLogoutTime || r.hoursDetails?.out || r.outTime || r.logoutTime || r.lastOut || r.out || '--:--';
-      const totalHrs = r.totalHours || r.hoursDetails?.total || r.workingHours || r.duration || (inTime !== '--:--' ? '8.5' : '--');
-
+  private processRecords(rawList: any[], user: any) {
+    this.records = rawList.map(r => {
+      const dateStr = r.date || (r.logdatetime ? String(r.logdatetime).split('T')[0] : '');
       const isSun = r.isSunday ?? (this.getDayOfWeek(dateStr) === 'Sun');
       const isHol = r.isHoliday ?? false;
       const isLve = r.isOnLeave ?? false;
 
-      let rawStatus = (r.status || r.attendanceStatus || r.statusName || '').toString().toUpperCase();
-      let finalStatus = 'ABSENT';
-
-      if (rawStatus.includes('PRES') || rawStatus === 'P' || r.hasValidAttendance || inTime !== '--:--') {
-        finalStatus = 'PRESENT';
-      } else if (isLve || rawStatus.includes('LEAV') || rawStatus === 'L') {
-        finalStatus = 'LEAVE';
-      } else if (isSun || isHol || rawStatus.includes('HOL') || rawStatus.includes('SUN') || rawStatus === 'H') {
-        finalStatus = 'HOLIDAY';
-      } else if (rawStatus.includes('ABS') || rawStatus === 'A') {
-        finalStatus = 'ABSENT';
+      let status = r.attendanceStatus;
+      if (!status) {
+        if (r.hasValidAttendance || (r.hoursDetails && r.hoursDetails.in && r.hoursDetails.in !== '--:--')) {
+          status = 'PRESENT';
+        } else if (isLve) {
+          status = 'LEAVE';
+        } else if (isSun || isHol) {
+          status = 'HOLIDAY';
+        } else {
+          status = 'ABSENT';
+        }
       }
 
       return {
-        userId: r.userId || user?.userId || 0,
-        userFName: r.userFName || r.firstName || user?.name || 'Faculty',
-        userCode: r.userCode || (user as any)?.userCode || '',
-        departmentName: r.departmentName || '',
-        designationName: r.designationName || '',
-        profilePic: r.profilePic || '',
+        userId: r.userId || user.userId,
+        userFName: r.userFName || r.firstName || user.name || 'Faculty',
+        userCode: r.userCode || (user as any).userCode || user.email || 'EMP',
+        departmentName: r.departmentName,
+        designationName: r.designationName,
+        profilePic: r.profilePic,
         date: dateStr,
-        dayOfWeek: this.getDayOfWeek(dateStr, r.dayOfWeek),
-        attendanceStatus: finalStatus,
-        totalHours: totalHrs,
+        dayOfWeek: r.dayOfWeek || this.getDayOfWeek(dateStr),
+        attendanceStatus: status,
+        totalHours: r.totalHours || r.hoursDetails?.total || '--',
         hoursDetails: {
-          in: inTime,
-          out: outTime
+          in: r.hoursDetails?.in || '--:--',
+          out: r.hoursDetails?.out || '--:--'
         },
-        isOnLeave: isLve || finalStatus === 'LEAVE',
+        isOnLeave: isLve,
         leaveType: r.leaveType || r.leaveCode,
         leaveCode: r.leaveCode,
         isSunday: isSun,
-        isHoliday: isHol || finalStatus === 'HOLIDAY',
-        specialDayDescription: r.specialDayDescription || r.reason
+        isHoliday: isHol,
+        specialDayDescription: r.specialDayDescription
       };
     });
 
-    this.calculateSummary(summaryObj);
+    this.calculateSummary();
   }
 
-  formatDate(val: any): string {
-    if (!val) return '';
-    if (typeof val === 'string') return val.split('T')[0];
-    try {
-      const d = new Date(val);
-      return d.toISOString().split('T')[0];
-    } catch {
-      return String(val);
-    }
-  }
-
-  calculateSummary(summaryObj: any) {
+  calculateSummary() {
     this.totalDays = this.records.length;
-    this.presentCount = this.records.filter(r => r.attendanceStatus === 'PRESENT').length;
-    this.leaveCount = this.records.filter(r => r.attendanceStatus === 'LEAVE').length;
-    this.holidayCount = this.records.filter(r => r.attendanceStatus === 'HOLIDAY' || r.isSunday || r.isHoliday).length;
-    this.absentCount = this.records.filter(r => r.attendanceStatus === 'ABSENT').length;
-
-    if (summaryObj) {
-      if (summaryObj.presentDays !== undefined) this.presentCount = Number(summaryObj.presentDays);
-      if (summaryObj.absentDays !== undefined) this.absentCount = Number(summaryObj.absentDays);
-      if (summaryObj.totalDays !== undefined) this.totalDays = Number(summaryObj.totalDays);
-      if (summaryObj.attendancePercentage !== undefined) {
-        this.attendancePercentage = Number(summaryObj.attendancePercentage);
-        return;
-      }
-    }
-
+    this.presentCount = this.records.filter(r => r.attendanceStatus?.toUpperCase() === 'PRESENT' || r.attendanceStatus?.toUpperCase() === 'P').length;
+    this.leaveCount = this.records.filter(r => r.isOnLeave || r.attendanceStatus?.toUpperCase() === 'LEAVE' || r.attendanceStatus?.toUpperCase() === 'L').length;
+    this.holidayCount = this.records.filter(r => r.isSunday || r.isHoliday || r.attendanceStatus?.toUpperCase() === 'HOLIDAY' || r.attendanceStatus?.toUpperCase() === 'H').length;
+    this.absentCount = Math.max(0, this.totalDays - this.presentCount - this.leaveCount - this.holidayCount);
+    
     const workingDays = Math.max(1, this.totalDays - this.holidayCount);
     this.attendancePercentage = Math.min(100, Math.round((this.presentCount / workingDays) * 100));
   }
 
-  getDayOfWeek(dateStr: string, dayStr?: string): string {
-    if (dayStr) {
-      const clean = dayStr.trim().toUpperCase();
-      if (clean.startsWith('MON')) return 'MON';
-      if (clean.startsWith('TUE')) return 'TUE';
-      if (clean.startsWith('WED')) return 'WED';
-      if (clean.startsWith('THU')) return 'THU';
-      if (clean.startsWith('FRI')) return 'FRI';
-      if (clean.startsWith('SAT')) return 'SAT';
-      if (clean.startsWith('SUN')) return 'SUN';
+  getDayOfWeek(dateStr: string): string {
+    if (!dateStr) return '';
+    try {
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const d = new Date(dateStr);
+      return days[d.getDay()];
+    } catch {
+      return '';
     }
-    if (dateStr) {
-      try {
-        const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-        const d = new Date(dateStr);
-        if (!isNaN(d.getTime())) {
-          return days[d.getDay()];
-        }
-      } catch {}
-    }
-    return '';
   }
 
   async showToast(msg: string, color: 'success' | 'warning' | 'danger' | 'primary' = 'primary') {

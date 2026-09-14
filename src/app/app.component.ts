@@ -13,6 +13,7 @@ import { CurrentUser } from './models/user.model';
 export class AppComponent implements OnInit {
   user: CurrentUser | null = null;
   imgError = false;
+  expandedSections: { [key: string]: boolean } = {};
 
   constructor(
     private authService: AuthService,
@@ -27,6 +28,10 @@ export class AppComponent implements OnInit {
     });
   }
 
+  get isStudent(): boolean {
+    return this.authService.isStudent();
+  }
+
   get displayName(): string {
     const { salutation, firstName, middleName, lastName } = this.user || {};
     return [salutation, firstName, middleName, lastName].filter(Boolean).join(' ') || this.user?.name || '';
@@ -38,12 +43,16 @@ export class AppComponent implements OnInit {
     return ((fn[0] || '') + (ln[0] || '')).toUpperCase() || 'U';
   }
 
-  onImgError() {
-    this.imgError = true;
+  toggleSection(section: string) {
+    this.expandedSections[section] = !this.expandedSections[section];
   }
 
-  get isStudent(): boolean {
-    return this.authService.isStudent();
+  isExpanded(section: string): boolean {
+    return !!this.expandedSections[section];
+  }
+
+  onImgError() {
+    this.imgError = true;
   }
 
   close() {

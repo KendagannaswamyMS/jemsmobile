@@ -38,162 +38,29 @@ $accent:  #F26622;
 .dept-select-wrap {
   display: flex;
   align-items: center;
-  gap: 8px;
-  width: 100%;
+  gap: 6px;
   background: #fff;
   border: 1.5px solid rgba(18,88,117,0.2);
   border-radius: 12px;
   padding: 0 10px;
-  height: 40px;
+  height: 38px;
   margin-bottom: 10px;
-  text-align: left;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  &:active { background: rgba(18,88,117,0.04); }
 
-  .dept-icon    { font-size: 15px; color: $accent; flex-shrink: 0; }
+  .dept-icon   { font-size: 15px; color: $accent; flex-shrink: 0; }
   .select-caret { font-size: 12px; color: #8a9ea6; flex-shrink: 0; }
 }
 
-.dept-select-value {
+.dept-select {
   flex: 1;
-  min-width: 0;
-  font-size: 13px;
-  font-weight: 600;
-  color: $primary;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-// ── Department Picker Sheet ───────────────────────────────────────────────────
-.dept-overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 10002;
-  display: flex; align-items: flex-end;
-  animation: fadeIn 0.18s ease;
-}
-
-.dept-sheet {
-  width: 100%;
-  max-height: 78vh;
-  background: #fff;
-  border-radius: 24px 24px 0 0;
-  display: flex; flex-direction: column;
-  overflow: hidden;
-  animation: slideUp 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);
-}
-
-.dept-sheet-head {
-  display: flex;
-  align-items: center;
-  padding: 8px 14px 10px 18px;
-
-  h3 {
-    flex: 1;
-    margin: 0;
-    font-size: 15px;
-    font-weight: 800;
-    color: #1a2a30;
-  }
-}
-
-.sheet-close-inline {
-  width: 30px; height: 30px;
-  border: none; background: #f0f4f6; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; flex-shrink: 0;
-  ion-icon { font-size: 18px; color: #5a7a8a; }
-}
-
-.dept-search-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 16px 8px;
-  padding: 0 10px;
-  height: 38px;
-  border-radius: 12px;
-  background: #f2f6f8;
-
-  > ion-icon { font-size: 16px; color: #8a9ea6; flex-shrink: 0; }
-
-  .dept-search-clear {
-    border: none; background: none; padding: 0; cursor: pointer;
-    ion-icon { font-size: 18px; color: #b0c0c8; }
-  }
-}
-
-.dept-search-input {
-  flex: 1;
-  min-width: 0;
-  border: none; outline: none;
+  border: none;
+  outline: none;
   background: transparent;
   font-size: 13px;
-  color: #1a2a30;
-  &::placeholder { color: #aabbc4; }
-}
-
-.dept-options {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 0 10px calc(20px + env(safe-area-inset-bottom));
-}
-
-.dept-option {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  border: none;
-  background: none;
-  text-align: left;
-  padding: 11px 10px;
-  border-radius: 12px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  &:active { background: rgba(18,88,117,0.06); }
-
-  &.selected {
-    background: rgba(18,88,117,0.08);
-    .dept-option-label { color: $primary; font-weight: 700; }
-  }
-}
-
-.dept-option-label {
-  flex: 1;
-  min-width: 0;
-  font-size: 13.5px;
   font-weight: 600;
-  color: #1a2a30;
-  line-height: 1.35;
-  overflow-wrap: anywhere;   // long department names wrap instead of clipping
-}
-
-.dept-option-count {
-  flex-shrink: 0;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 10px;
-  background: rgba(242,102,34,0.1);
-  color: $accent;
-}
-
-.dept-option-check {
-  flex-shrink: 0;
-  font-size: 17px;
   color: $primary;
-}
-
-.dept-empty {
-  padding: 30px 12px;
-  text-align: center;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #a0b4bc;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
 }
 
 .result-count {

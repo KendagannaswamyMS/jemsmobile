@@ -1,40 +1,15 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { filter, take } from 'rxjs/operators';
-import { ToastController } from '@ionic/angular';
 import { AuthService } from '../../core/services/auth.service';
+import { AcademicService, ClassScheduleItem } from '../../core/services/academic.service';
+import { FacultyAttentionService } from '../../core/services/faculty-attention.service';
+import { FacultyAttentionSummary, CiePendingItem, QpsInviteItem, PendingLeaveItem } from '../../models/faculty-attention.model';
 import { CurrentUser } from '../../models/user.model';
+import { BirthdayUser } from '../../models/birthday.model';
 import { BiometricRecord, DayLog } from '../../models/biometric.model';
 import { LatestJoiner } from '../../models/joiner.model';
 import { environment } from 'src/environments/environment';
-
-export interface StaffNewsMember {
-  name: string;
-  designation: string;
-  /** Tblusermaster.UserId — the profile picture is resolved from this. */
-  userId?: number;
-  avatar?: string;
-}
-
-/**
- * Staff profile pictures are served as absolute URLs off the JEMS archive host and
- * follow a per-user folder convention, e.g.
- *   https://jems.jssstuniv.in/archivefilestorage/userprofilepics/278/profile_278.jpg
- * The extension varies per upload (.jpg / .png), so a URL is never constructed from
- * an id — it is taken from Tblusermaster.UserProfilepic as stored.
- */
-const STAFF_PROFILE_PIC_BASE = 'https://jems.jssstuniv.in/archivefilestorage/userprofilepics';
-
-export interface StaffNewsItem {
-  id: number;
-  title: string;
-  detail?: string;
-  category?: string;
-  date?: string;
-  bannerImg: string;
-  staffList: StaffNewsMember[];
-  imgError?: boolean;
-}
 
 @Component({
   selector: 'app-home',
@@ -45,9 +20,26 @@ export interface StaffNewsItem {
 export class HomePage implements OnInit, OnDestroy {
   user: CurrentUser | null = null;
 
+  // Faculty Attention Action Center
+  facultyAttention: FacultyAttentionSummary | null = null;
+  attentionLoading = false;
+
+  // Student Timetable & Next-Class
+  studentScheduleLoading = false;
+  studentScheduleError = false;
+  studentTodayClasses: ClassScheduleItem[] = [];
+  studentNextClass: ClassScheduleItem | null = null;
+
+  // Faculty Teaching Schedule & Next-Class
+  facultyScheduleLoading = false;
+  facultyScheduleError = false;
+  facultyTodayClasses: ClassScheduleItem[] = [];
+  facultyNextClass: ClassScheduleItem | null = null;
+
   // Biometric
   biometric: BiometricRecord | null = null;
   bioLoading = true;
+  bioFailed = false;
   bioImgError = false;
   runningTime = '';
   private timerInterval: any;
@@ -57,131 +49,73 @@ export class HomePage implements OnInit, OnDestroy {
   selectedJoiner: LatestJoiner | null = null;
   joinerImgError = false;
 
-  // Student Clubs / Club Events (student-only)
-  clubs: any[] = [];
-  clubEvents: any[] = [];
+  // Birthdays
+  todayBirthdays: BirthdayUser[] = [];
+  tomorrowBirthdays: BirthdayUser[] = [];
+  selectedUser: BirthdayUser | null = null;
+  selectedImgError = false;
 
-  // University Staff in News
-  staffNewsList: StaffNewsItem[] = [
-    {
-      id: 1,
-      title: 'Congratulations! JSS Science & Technology University Welcomes Prof. Santhosh Chidangil',
-      detail: 'Prof. Santhosh Chidangil joins the Department of Physics as Professor, bringing internationally acclaimed research leadership in Photonics and Biophotonics.',
-      category: 'Welcome',
-      date: '2026-07-30',
-      bannerImg: '',
-      staffList: [
-        {
-          name: 'Dr. Santhosh Chidangil',
-          designation: 'Professor',
-          userId: 678,
-          avatar: `${STAFF_PROFILE_PIC_BASE}/678/profile_678.jpg`
-        }
-      ]
-    },
-    {
-      id: 2,
-      title: 'CPHEEO PHE Sector Development Scheme Grant Awarded',
-      detail: 'Government of India, New Delhi awards research grant under CPHEEO PHE Sector Development Scheme to Department of Environmental Engineering.',
-      category: 'Research Grant',
-      date: '2026-07-28',
-      bannerImg: '',
-      staffList: [
-        {
-          name: 'Dr. C S. Karthik',
-          designation: 'Associate Professor',
-          userId: 27,
-          avatar: `${STAFF_PROFILE_PIC_BASE}/27/profile_27.jpg`
-        },
-        {
-          name: 'Dr. SHIVAPRASAD K S',
-          designation: 'Assistant Professor',
-          userId: 278,
-          avatar: `${STAFF_PROFILE_PIC_BASE}/278/profile_278.jpg`
-        }
-      ]
-    },
-    {
-      id: 3,
-      title: 'Appointed as Dean International Engagements and Rankings',
-      detail: 'Hearty congratulations on your well-deserved appointment as Dean International Engagements and Rankings.',
-      category: 'Leadership',
-      date: '2026-07-25',
-      bannerImg: '',
-      staffList: [
-        {
-          name: 'Dr. Mahanand B S',
-          designation: 'Professor',
-          userId: 312,
-          avatar: `${STAFF_PROFILE_PIC_BASE}/312/profile_312.jpg`
-        }
-      ]
-    },
-    {
-      id: 4,
-      title: 'Felicitation for Excellence in Academic Innovation & Research',
-      detail: 'JSS Science & Technology University felicitates Dr. S. Reddy K. for outstanding contributions to research and innovations.',
-      category: 'Excellence Award',
-      date: '2026-07-20',
-      bannerImg: '',
-      staffList: [
-        {
-          name: 'Dr. P. S. Reddy K.',
-          designation: 'Professor',
-          userId: 398,
-          avatar: `${STAFF_PROFILE_PIC_BASE}/398/profile_398.jpg`
-        }
-      ]
-    }
-  ];
-
-  selectedNewsItem: StaffNewsItem | null = null;
-  showPostModal = false;
-
-  newAchievement = {
-    title: '',
-    category: 'Research Grant',
-    description: '',
-    staffName: '',
-    designation: 'Assistant Professor',
-    bannerUrl: ''
-  };
+  showStudentProfileModal = false;
 
   constructor(
-    private authService: AuthService,
-    private http: HttpClient,
-    private toastCtrl: ToastController
+    public authService: AuthService,
+    private academicService: AcademicService,
+    private facultyAttentionService: FacultyAttentionService,
+    private http: HttpClient
   ) {}
-
-  ngOnInit() {
-    this.authService.user$.subscribe(u => (this.user = u));
-
-    if (!this.isStudent) {
-      // Wait for user to be available, then fetch biometric (staff-only: time-clock punch data)
-      this.authService.user$.pipe(
-        filter(u => !!u),
-        take(1)
-      ).subscribe(u => {
-        this.loadBiometric(u!.userId);
-      });
-
-      this.loadLatestJoiners();
-      this.loadStaffNews();
-    } else {
-      this.bioLoading = false;
-      this.loadClubs();
-      this.loadClubEvents();
-    }
-  }
 
   get isStudent(): boolean {
     return this.authService.isStudent();
   }
 
+  get isDocRequestOnly(): boolean {
+    return this.authService.isDocRequestOnly();
+  }
+
+  get isHod(): boolean {
+    return this.authService.isHod();
+  }
+
+  get isFaculty(): boolean {
+    return this.authService.isFaculty();
+  }
+
+  get isNonTeaching(): boolean {
+    return this.authService.isNonTeaching();
+  }
+
+  get roleBadge(): string {
+    if (this.isHod) return 'HOD';
+    if (this.isFaculty) return 'FACULTY';
+    if (this.isNonTeaching) return 'STAFF';
+    if (this.authService.isAdmin()) return 'ADMIN';
+    return 'EMPLOYEE';
+  }
+
+  ngOnInit() {
+    this.authService.user$.subscribe(u => {
+      this.user = u;
+      if (u) {
+        if (this.authService.isStudent()) {
+          this.loadStudentSchedule(u.userId);
+        } else {
+          this.loadBiometric(u.userId);
+          this.loadBirthdays();
+          this.loadLatestJoiners();
+          if (this.authService.isFaculty() || this.authService.isHod()) {
+            this.loadFacultySchedule(u.userId);
+            this.loadFacultyAttention(u.userId, this.authService.isHod(), this.authService.isFaculty(), u.departmentId);
+          }
+        }
+      }
+    });
+  }
+
   // ── Biometric ──────────────────────────────────────────────────────────────
 
-  private loadBiometric(userId: number) {
+  loadBiometric(userId: number) {
     this.bioLoading = true;
+    this.bioFailed = false;
     this.http.post<BiometricRecord[]>(
       `${environment.apiUrl}biometriclog/getweeklyattendancerecords`,
       { UserId: userId, selectedDate: new Date().toISOString() }
@@ -189,10 +123,20 @@ export class HomePage implements OnInit, OnDestroy {
       next: res => {
         this.biometric = res?.[0] || null;
         this.bioLoading = false;
+        this.bioFailed = false;
         this.startTimer();
       },
-      error: () => { this.bioLoading = false; }
+      error: () => {
+        this.bioLoading = false;
+        this.bioFailed = true;
+      }
     });
+  }
+
+  retryBiometric() {
+    if (this.user?.userId) {
+      this.loadBiometric(this.user.userId);
+    }
   }
 
   get todayLog(): DayLog | null {
@@ -267,110 +211,179 @@ export class HomePage implements OnInit, OnDestroy {
     return new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
+  // ── Birthdays ──────────────────────────────────────────────────────────────
+
+  private loadBirthdays() {
+    this.http.get<{ status: string; data: BirthdayUser[] }>(
+      `${environment.apiUrl}UserMaster/getuserbirthdaylist`
+    ).subscribe({
+      next: res => {
+        const list = res?.data || [];
+        this.todayBirthdays    = list.filter(b => this.matchesDay(b.userDoB, 0));
+        this.tomorrowBirthdays = list.filter(b => this.matchesDay(b.userDoB, 1));
+      },
+      error: () => {}
+    });
+  }
+
+  private matchesDay(dob: string, offset: number): boolean {
+    const ref = new Date();
+    ref.setDate(ref.getDate() + offset);
+    const d = new Date(dob);
+    return d.getMonth() === ref.getMonth() && d.getDate() === ref.getDate();
+  }
+
+  fullName(b: BirthdayUser): string {
+    return [b.salutaion, b.userFName, b.userMname, b.userLName].filter(Boolean).join(' ');
+  }
+
+  initials(b: BirthdayUser): string {
+    return ((b.userFName?.[0] || '') + (b.userLName?.[0] || b.userMname?.[0] || '')).toUpperCase() || '?';
+  }
+
+  openPopup(b: BirthdayUser) { this.selectedUser = b; this.selectedImgError = false; }
+  closePopup() { this.selectedUser = null; }
+
   openJoinerPopup(j: LatestJoiner) { this.selectedJoiner = j; this.joinerImgError = false; }
   closeJoinerPopup() { this.selectedJoiner = null; }
 
-  // ── Student Clubs / Club Events ──────────────────────────────────────────────
+  openStudentProfile() { this.showStudentProfileModal = true; }
+  closeStudentProfile() { this.showStudentProfileModal = false; }
 
-  private loadClubs() {
-    this.http.get<any[]>(`${environment.apiUrl}club/list`)
-      .subscribe({ next: res => (this.clubs = res || []), error: () => {} });
-  }
+  // ── Student Schedule & Next Class ──────────────────────────────────────────
 
-  private loadClubEvents() {
-    this.http.get<any[]>(`${environment.apiUrl}clubevent/upcoming`)
-      .subscribe({ next: res => (this.clubEvents = res || []), error: () => {} });
-  }
+  loadStudentSchedule(studentSlnum?: number) {
+    const slnum = studentSlnum || this.user?.userId;
+    if (!slnum) return;
 
-  // ── University Staff in News Methods ────────────────────────────────────────
+    this.studentScheduleLoading = true;
+    this.studentScheduleError = false;
 
-  private loadStaffNews() {
-    // Keep staffNewsList strictly dedicated to University Staff News & Achievements (no mixing with generic events)
-  }
-
-  openPostAchievementModal() {
-    const u = this.user;
-    this.newAchievement = {
-      title: '',
-      category: 'Research Grant',
-      description: '',
-      staffName: u ? [u.firstName || u.name, u.lastName].filter(Boolean).join(' ') : '',
-      designation: 'Assistant Professor',
-      bannerUrl: ''
-    };
-    this.showPostModal = true;
-  }
-
-  closePostModal() {
-    this.showPostModal = false;
-  }
-
-  async submitAchievement() {
-    if (!this.newAchievement.title?.trim() || !this.newAchievement.staffName?.trim()) {
-      const toast = await this.toastCtrl.create({
-        message: 'Please fill in the achievement title and staff name.',
-        duration: 2500,
-        position: 'bottom',
-        color: 'warning'
-      });
-      await toast.present();
-      return;
-    }
-
-    const newItem: StaffNewsItem = {
-      id: Date.now(),
-      title: this.newAchievement.title,
-      detail: this.newAchievement.description || 'Achievement posted by staff member.',
-      category: this.newAchievement.category || 'Achievement',
-      date: new Date().toISOString().split('T')[0],
-      bannerImg: this.newAchievement.bannerUrl || '',
-      staffList: [
-        {
-          name: this.newAchievement.staffName,
-          designation: this.newAchievement.designation || 'Faculty Member',
-          // The form is prefilled with the signed-in staff member, so their own picture
-          // applies unless they retyped the name as somebody else.
-          userId: this.isOwnAchievement() ? this.user?.userId : undefined,
-          avatar: this.isOwnAchievement() ? (this.user?.profilePic || '') : ''
+    this.academicService.getSessions().subscribe({
+      next: (sessions) => {
+        const cur = sessions.find(s => s.iscurrentsession) || sessions[0];
+        if (!cur) {
+          this.studentScheduleLoading = false;
+          return;
         }
-      ]
-    };
 
-    this.staffNewsList.unshift(newItem);
-    this.showPostModal = false;
+        this.academicService.getSessionWeeks(cur.sessionslnum).subscribe({
+          next: (weeks) => {
+            const today = new Date();
+            const curWeek = (weeks || []).find(w => {
+              const s = new Date(w.weekStartDate);
+              const e = new Date(w.weekEndDate);
+              return today >= s && today <= e;
+            }) || (weeks || [])[0];
 
-    const toast = await this.toastCtrl.create({
-      message: 'Achievement posted successfully! Submitted for university approval.',
-      duration: 3000,
-      position: 'bottom',
-      color: 'success'
+            const weekNum = curWeek ? curWeek.weekNumber : undefined;
+
+            this.academicService.getStudentTimetable(slnum, cur.sessionslnum, weekNum).subscribe({
+              next: (res) => {
+                const allSlots: any[] = res?.slots ?? (Array.isArray(res) ? res : []);
+                const dayOfWeek = today.getDay();
+                const todaySlots = allSlots.filter(s => Number(s.dayOfWeek ?? s.dayofweek ?? 0) === dayOfWeek);
+
+                this.studentTodayClasses = this.academicService.computeClassSchedule(todaySlots);
+                this.studentNextClass = this.academicService.findNextClass(this.studentTodayClasses);
+                this.studentScheduleLoading = false;
+              },
+              error: () => {
+                this.studentScheduleLoading = false;
+                this.studentScheduleError = true;
+              }
+            });
+          },
+          error: () => {
+            this.studentScheduleLoading = false;
+            this.studentScheduleError = true;
+          }
+        });
+      },
+      error: () => {
+        this.studentScheduleLoading = false;
+        this.studentScheduleError = true;
+      }
     });
-    await toast.present();
   }
 
-  openStaffNewsDetail(item: StaffNewsItem) {
-    this.selectedNewsItem = item;
+  // ── Faculty Schedule & Next Class ──────────────────────────────────────────
+
+  loadFacultySchedule(facultyUserId?: number) {
+    const userId = facultyUserId || this.user?.userId;
+    if (!userId) return;
+
+    this.facultyScheduleLoading = true;
+    this.facultyScheduleError = false;
+
+    this.academicService.getSessions().subscribe({
+      next: (sessions) => {
+        const cur = sessions.find(s => s.iscurrentsession) || sessions[0];
+        if (!cur) {
+          this.facultyScheduleLoading = false;
+          return;
+        }
+
+        this.academicService.getSessionWeeks(cur.sessionslnum).subscribe({
+          next: (weeks) => {
+            const today = new Date();
+            const curWeek = (weeks || []).find(w => {
+              const s = new Date(w.weekStartDate);
+              const e = new Date(w.weekEndDate);
+              return today >= s && today <= e;
+            }) || (weeks || [])[0];
+
+            const weekNum = curWeek ? curWeek.weekNumber : undefined;
+
+            this.academicService.getFacultyTimetable(userId, cur.sessionslnum, weekNum).subscribe({
+              next: (slots) => {
+                const dayOfWeek = today.getDay();
+                const todaySlots = (slots || []).filter(s => Number(s.dayofweek ?? (s as any).dayOfWeek ?? 0) === dayOfWeek);
+
+                this.facultyTodayClasses = this.academicService.computeClassSchedule(todaySlots);
+                this.facultyNextClass = this.academicService.findNextClass(this.facultyTodayClasses);
+                this.facultyScheduleLoading = false;
+              },
+              error: () => {
+                this.facultyScheduleLoading = false;
+                this.facultyScheduleError = true;
+              }
+            });
+          },
+          error: () => {
+            this.facultyScheduleLoading = false;
+            this.facultyScheduleError = true;
+          }
+        });
+      },
+      error: () => {
+        this.facultyScheduleLoading = false;
+        this.facultyScheduleError = true;
+      }
+    });
   }
 
-  closeStaffNewsDetail() {
-    this.selectedNewsItem = null;
+  // ── Faculty Attention Center ──────────────────────────────────────────────
+
+  loadFacultyAttention(userId: number, isHod: boolean, isFaculty: boolean, departmentId?: number) {
+    this.attentionLoading = true;
+    this.facultyAttentionService.getFacultyAttentionSummary(userId, isHod, isFaculty, departmentId).subscribe({
+      next: (summary) => {
+        // Find unmarked past classes for today
+        const unmarked = this.facultyTodayClasses.filter(c => c.status === 'done' && !c.marked);
+        summary.unmarkedAttendanceCount = unmarked.length;
+        summary.totalPendingCount += unmarked.length;
+
+        this.facultyAttention = summary;
+        this.attentionLoading = false;
+      },
+      error: () => {
+        this.attentionLoading = false;
+      }
+    });
   }
 
-  /** True when the achievement form still names the signed-in user (the prefilled default). */
-  private isOwnAchievement(): boolean {
-    const u = this.user;
-    if (!u) return false;
-    const normalise = (s: string) => (s || '').toLowerCase().replace(/\s+/g, ' ').trim();
-    const ownName = normalise([u.firstName || u.name, u.lastName].filter(Boolean).join(' '));
-    return !!ownName && ownName === normalise(this.newAchievement.staffName);
-  }
-
-  getStaffInitials(name: string): string {
-    if (!name) return '?';
-    const parts = name.replace(/^(Dr\.|Prof\.|Mr\.|Mrs\.|Ms\.)\s+/i, '').trim().split(' ');
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-    return parts[0].slice(0, 2).toUpperCase();
+  get hasAttentionItems(): boolean {
+    return !!(this.facultyAttention && this.facultyAttention.totalPendingCount > 0);
   }
 }
