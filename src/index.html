@@ -20,10 +20,59 @@
   <!-- add to homescreen for ios -->
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <style>
+    .jems-preloader-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+    }
+    .jems-preloader-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .jems-preloader-logo {
+      width: 180px;
+      max-width: 65vw;
+      height: auto;
+      animation: jemsLogoPulse 1.8s ease-in-out infinite;
+    }
+    .jems-preloader-spinner {
+      width: 34px;
+      height: 34px;
+      border: 3px solid rgba(18, 88, 117, 0.15);
+      border-top-color: #125875;
+      border-right-color: #F26622;
+      border-radius: 50%;
+      animation: jemsSpin 0.85s linear infinite;
+    }
+    @keyframes jemsSpin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes jemsLogoPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.03); opacity: 0.9; }
+    }
+  </style>
 </head>
 
 <body>
-  <app-root></app-root>
+  <app-root>
+    <div class="jems-preloader-screen">
+      <div class="jems-preloader-content">
+        <img src="assets/images/JEMS_LOGO.png" alt="JEMS Logo" class="jems-preloader-logo" />
+        <div class="jems-preloader-spinner"></div>
+      </div>
+    </div>
+  </app-root>
 </body>
 
 </html>

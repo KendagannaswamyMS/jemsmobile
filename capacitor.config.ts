@@ -9,16 +9,13 @@ const config: CapacitorConfig = {
     cleartext: true
   },
   plugins: {
-    Keyboard: {
-      resizeOnFullScreen: true
-    },
     CapacitorHttp: {
       enabled: true
     },
     SplashScreen: {
       launchShowDuration: 1500,
       launchAutoHide: true,
-      backgroundColor: '#125875',
+      backgroundColor: '#ffffff',
       androidSplashResourceName: 'splash',
       androidScaleType: 'CENTER_CROP',
       showSpinner: false

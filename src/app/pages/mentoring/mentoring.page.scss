@@ -1,0 +1,260 @@
+.mentoring-content {
+  --background: #f8fafc;
+}
+
+.mentor-profile-card {
+  background: linear-gradient(135deg, #125875 0%, #17688b 100%);
+  border-radius: 20px;
+  padding: 20px;
+  color: #ffffff;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 24px rgba(18, 88, 117, 0.18);
+
+  .mp-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 8px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+  }
+
+  .mp-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .mp-avatar {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      border: 2px solid #F26622;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+
+    .mp-info {
+      .mp-name {
+        margin: 0 0 4px;
+        font-size: 1.15rem;
+        font-weight: 800;
+      }
+      .mp-desig {
+        margin: 0 0 4px;
+        font-size: 0.82rem;
+        opacity: 0.88;
+      }
+      .mp-email {
+        margin: 0;
+        font-size: 0.76rem;
+        opacity: 0.8;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+    }
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+
+  ion-icon {
+    font-size: 48px;
+    color: #cbd5e1;
+    margin-bottom: 10px;
+  }
+
+  h4 {
+    margin: 0 0 6px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+}
+
+.sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .session-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+
+    .sc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+
+      .sc-date {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #125875;
+
+        ion-icon { font-size: 15px; }
+      }
+
+      .sc-status {
+        font-size: 0.65rem;
+        font-weight: 800;
+        padding: 2px 8px;
+        border-radius: 6px;
+        background: #ecfdf5;
+        color: #059669;
+        text-transform: uppercase;
+      }
+    }
+
+    .sc-body {
+      .sc-topic {
+        margin: 0 0 8px;
+        font-size: 0.96rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .sc-remark-box {
+        background: #f8fafc;
+        border-left: 3px solid #125875;
+        padding: 8px 12px;
+        border-radius: 4px;
+        margin-top: 8px;
+
+        .r-lbl {
+          font-size: 0.68rem;
+          font-weight: 700;
+          color: #64748b;
+          text-transform: uppercase;
+        }
+
+        .r-val {
+          margin: 2px 0 0;
+          font-size: 0.82rem;
+          color: #334155;
+          font-style: italic;
+        }
+      }
+
+      .sc-action-box {
+        margin-top: 6px;
+        padding: 6px 10px;
+        background: #fffbeb;
+        border-radius: 6px;
+
+        .r-lbl { font-size: 0.68rem; font-weight: 700; color: #b45309; }
+        .r-val { margin: 2px 0 0; font-size: 0.8rem; color: #92400e; }
+      }
+    }
+  }
+}
+
+.search-box {
+  margin-bottom: 14px;
+  ion-searchbar {
+    --background: #ffffff;
+    --border-radius: 14px;
+    --box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    padding: 0;
+  }
+}
+
+.mentees-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .mentee-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+
+    .mc-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+
+      .mc-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: #eff6ff;
+        color: #125875;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: 800;
+        flex-shrink: 0;
+      }
+
+      .mc-meta {
+        .mc-name {
+          margin: 0 0 2px;
+          font-size: 0.95rem;
+          font-weight: 700;
+          color: #0f172a;
+        }
+        .mc-usn {
+          margin: 0 0 2px;
+          font-size: 0.78rem;
+          color: #64748b;
+        }
+        .mc-dept {
+          margin: 0;
+          font-size: 0.72rem;
+          color: #94a3b8;
+        }
+      }
+    }
+
+    .mc-stats-row {
+      display: flex;
+      gap: 16px;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 10px;
+
+      .mc-stat {
+        display: flex;
+        flex-direction: column;
+
+        .st-lbl { font-size: 0.68rem; color: #94a3b8; font-weight: 600; }
+        .st-val { font-size: 0.84rem; font-weight: 700; color: #0f172a; margin-top: 1px; }
+
+        .text-primary { color: #125875; }
+        .text-success { color: #16a34a; }
+        .text-danger { color: #dc2626; }
+      }
+    }
+  }
+}
+
+.font-mono {
+  font-family: monospace;
+}

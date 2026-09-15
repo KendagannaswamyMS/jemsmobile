@@ -633,3 +633,187 @@ $accent:  #F26622;
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+// ── Substitute Duty Delegation Modal ─────────────────────────────────
+.delegation-modal {
+  --border-radius: 20px 20px 0 0;
+  --max-height: 88vh;
+
+  ion-toolbar {
+    --background: #fff7ed;
+    --color: #c2410c;
+    font-weight: 800;
+  }
+}
+
+.modal-scroll-content {
+  --background: #f8fafc;
+}
+
+.modal-warn-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-left: 4px solid #f59e0b;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 20px;
+
+  .warn-icon-wrap {
+    ion-icon {
+      font-size: 28px;
+      color: #f59e0b;
+      margin-top: 2px;
+    }
+  }
+
+  .warn-text-wrap {
+    flex: 1;
+
+    .warn-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #92400e;
+      margin: 0 0 6px;
+    }
+
+    .warn-desc {
+      font-size: 13px;
+      line-height: 1.5;
+      color: #78350f;
+      margin: 0;
+
+      strong {
+        color: #b45309;
+      }
+    }
+  }
+}
+
+.conflict-items-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.conflict-card-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+
+  .conflict-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+
+    .chain-icon {
+      font-size: 20px;
+      color: #F26622;
+    }
+
+    .chain-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+  }
+
+  .conflict-explanation {
+    font-size: 13px;
+    color: #334155;
+    line-height: 1.5;
+    margin: 0 0 14px;
+
+    .highlight-date {
+      font-weight: 700;
+      color: #125875;
+      background: rgba(18, 88, 117, 0.08);
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+  }
+
+  .delegation-select-group {
+    margin-bottom: 10px;
+  }
+
+  .resolved-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #16a34a;
+    background: #f0fdf4;
+    padding: 6px 10px;
+    border-radius: 8px;
+    margin-top: 8px;
+
+    ion-icon {
+      font-size: 16px;
+    }
+  }
+}
+
+.modal-footer-bar {
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  padding: 12px 16px;
+
+  .modal-buttons-row {
+    display: flex;
+    gap: 12px;
+
+    .modal-btn {
+      flex: 1;
+      height: 46px;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      ion-icon {
+        font-size: 18px;
+      }
+
+      &.outline-btn {
+        background: transparent;
+        border: 1.5px solid #cbd5e1;
+        color: #475569;
+
+        &:active {
+          background: #f1f5f9;
+        }
+      }
+
+      &.confirm-btn {
+        background: linear-gradient(135deg, #125875 0%, #0d3f54 100%);
+        border: none;
+        color: #ffffff;
+        box-shadow: 0 4px 14px rgba(18, 88, 117, 0.28);
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          box-shadow: none;
+        }
+
+        &:not(:disabled):active {
+          transform: scale(0.98);
+        }
+      }
+    }
+  }
+}
+

@@ -1,0 +1,115 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Digital Library</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="loadLibraryData()">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <ion-toolbar color="primary" class="segment-toolbar">
+    <ion-segment [(ngModel)]="selectedSegment" mode="md">
+      <ion-segment-button value="borrowed">
+        <ion-label>Borrowed ({{ borrowedBooks.length }})</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="history">
+        <ion-label>History</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding lib-content">
+  <ion-refresher slot="fixed" (ionRefresh)="loadLibraryData($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Overdue Banner -->
+  <div class="overdue-banner" *ngIf="overdueCount > 0">
+    <ion-icon name="alert-circle-outline"></ion-icon>
+    <div class="ob-text">
+      <h4>{{ overdueCount }} Book(s) Overdue</h4>
+      <p>Please return or renew overdue books at the circulation counter to avoid additional fines.</p>
+    </div>
+  </div>
+
+  <!-- Loading Skeletons -->
+  <div *ngIf="loading" class="skeleton-list">
+    <ion-skeleton-text animated style="width: 100%; height: 110px; border-radius: 14px; margin-bottom: 12px;"></ion-skeleton-text>
+    <ion-skeleton-text animated style="width: 100%; height: 110px; border-radius: 14px;"></ion-skeleton-text>
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- ── TAB 1: BORROWED BOOKS ── -->
+    <div *ngIf="selectedSegment === 'borrowed'">
+      <div class="empty-state" *ngIf="borrowedBooks.length === 0">
+        <ion-icon name="book-outline"></ion-icon>
+        <h4>No Books Currently Borrowed</h4>
+        <p>You have returned all borrowed books. Visit the library circulation counter or browse digital OPAC to check out new books.</p>
+      </div>
+
+      <div class="books-list" *ngIf="borrowedBooks.length > 0">
+        <div class="book-card" *ngFor="let b of borrowedBooks" [class.is-overdue]="b.isOverdue">
+          <div class="bc-left">
+            <div class="bc-icon-wrap" [class.icon-overdue]="b.isOverdue">
+              <ion-icon name="book"></ion-icon>
+            </div>
+          </div>
+          <div class="bc-details">
+            <div class="bc-badge-row">
+              <span class="bc-barcode font-mono">Barcode: {{ b.barcode }}</span>
+              <span class="bc-status-pill" [class.pill-overdue]="b.isOverdue" [class.pill-ok]="!b.isOverdue">
+                {{ b.isOverdue ? 'OVERDUE' : (b.daysRemaining != null && b.daysRemaining <= 2 ? 'DUE SOON' : 'ACTIVE') }}
+              </span>
+            </div>
+            <h4 class="bc-title">{{ b.title }}</h4>
+            <p class="bc-author" *ngIf="b.author">By {{ b.author }}</p>
+
+            <div class="bc-dates-grid">
+              <div class="date-col">
+                <span class="d-lbl">Issue Date</span>
+                <span class="d-val">{{ b.issuedDate | date:'dd MMM yyyy' }}</span>
+              </div>
+              <div class="date-col" [class.col-overdue]="b.isOverdue">
+                <span class="d-lbl">Due Date</span>
+                <span class="d-val">{{ b.dueDate | date:'dd MMM yyyy' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB 2: CIRCULATION HISTORY ── -->
+    <div *ngIf="selectedSegment === 'history'">
+      <div class="empty-state" *ngIf="historyItems.length === 0">
+        <ion-icon name="time-outline"></ion-icon>
+        <h4>No Return History</h4>
+        <p>Your returned checkouts will be logged here once completed.</p>
+      </div>
+
+      <div class="history-list" *ngIf="historyItems.length > 0">
+        <div class="history-card" *ngFor="let h of historyItems">
+          <div class="hc-icon">
+            <ion-icon name="checkmark-done-circle-outline"></ion-icon>
+          </div>
+          <div class="hc-info">
+            <h4 class="hc-title">{{ h.title }}</h4>
+            <p class="hc-author" *ngIf="h.author">By {{ h.author }} · <span class="font-mono">{{ h.barcode }}</span></p>
+            <div class="hc-dates">
+              <span>Issued: {{ h.issuedDate | date:'dd MMM yyyy' }}</span>
+              <span>·</span>
+              <span class="text-returned">Returned: {{ h.returnedDate | date:'dd MMM yyyy' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
+</ion-content>

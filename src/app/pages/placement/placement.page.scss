@@ -1,0 +1,237 @@
+.metrics-ribbon {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  background: var(--ion-color-primary);
+  padding: 0 16px 12px;
+
+  .metric-chip {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 8px 4px;
+    text-align: center;
+    backdrop-filter: blur(8px);
+
+    .mc-val {
+      display: block;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.2;
+
+      &.applied-val { color: #93c5fd; }
+      &.short-val { color: #fde047; }
+      &.offer-val { color: #86efac; }
+    }
+
+    .mc-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: rgba(255, 255, 255, 0.75);
+      font-weight: 600;
+    }
+  }
+}
+
+.segment-toolbar {
+  --background: var(--ion-color-primary);
+  padding-bottom: 4px;
+
+  ion-segment {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 2px;
+
+    ion-segment-button {
+      --color: rgba(255, 255, 255, 0.75);
+      --color-checked: #ffffff;
+      --indicator-color: rgba(255, 255, 255, 0.28);
+      font-weight: 600;
+      font-size: 0.8rem;
+      min-height: 36px;
+    }
+  }
+}
+
+.placement-content {
+  --background: #f8fafc;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 24px;
+  text-align: center;
+
+  .empty-icon-wrap {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+
+    ion-icon {
+      font-size: 32px;
+      color: #64748b;
+    }
+  }
+
+  h4 {
+    margin: 0 0 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: #64748b;
+    line-height: 1.5;
+  }
+}
+
+.jobs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .job-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: transform 0.15s ease;
+
+    &.is-selected {
+      border: 1.5px solid #22c55e;
+      background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+    }
+
+    .jc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+
+      .jc-company-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .jc-icon {
+          width: 42px;
+          height: 42px;
+          border-radius: 10px;
+          background: #e0e7ff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          ion-icon {
+            font-size: 22px;
+            color: #4338ca;
+          }
+        }
+
+        .jc-company {
+          margin: 0;
+          font-size: 1rem;
+          font-weight: 700;
+          color: #0f172a;
+        }
+
+        .jc-role {
+          margin: 2px 0 0;
+          font-size: 0.84rem;
+          color: #64748b;
+          font-weight: 500;
+        }
+      }
+
+      .jc-status-pill {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+
+        &.status-eligible {
+          background: #eff6ff;
+          color: #2563eb;
+        }
+
+        &.status-applied {
+          background: #fef3c7;
+          color: #d97706;
+        }
+
+        &.status-shortlisted {
+          background: #ede9fe;
+          color: #7c3aed;
+        }
+
+        &.status-selected {
+          background: #dcfce7;
+          color: #16a34a;
+        }
+
+        &.status-rejected {
+          background: #fee2e2;
+          color: #dc2626;
+        }
+      }
+    }
+
+    .jc-details-grid {
+      display: flex;
+      gap: 16px;
+      padding: 10px 0;
+      border-top: 1px solid #f1f5f9;
+      border-bottom: 1px solid #f1f5f9;
+      margin-bottom: 10px;
+
+      .jd-item {
+        display: flex;
+        flex-direction: column;
+
+        .jd-label {
+          font-size: 0.7rem;
+          color: #94a3b8;
+          text-transform: uppercase;
+          font-weight: 600;
+        }
+
+        .jd-val {
+          font-size: 0.88rem;
+          font-weight: 600;
+          color: #334155;
+
+          &.package-highlight {
+            color: #059669;
+            font-weight: 700;
+          }
+        }
+      }
+    }
+
+    .jc-criteria {
+      font-size: 0.8rem;
+      color: #64748b;
+
+      .crit-label {
+        font-weight: 700;
+        color: #475569;
+        margin-right: 4px;
+      }
+    }
+  }
+}

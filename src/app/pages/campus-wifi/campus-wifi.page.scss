@@ -138,32 +138,6 @@ $accent:  #F26622;
   }
 }
 
-.captive-portal-btn-wrap {
-  .portal-btn {
-    width: 100%;
-    height: 44px;
-    border: 1px dashed rgba(18, 88, 117, 0.25);
-    background: rgba(18, 88, 117, 0.04);
-    border-radius: 14px;
-    color: $primary;
-    font-size: 12.5px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-
-    ion-icon {
-      font-size: 16px;
-      color: $accent;
-    }
-
-    &:active {
-      background: rgba(18, 88, 117, 0.08);
-    }
-  }
-}
 
 // ── 2. Password Change Form ──────────────────────────────────────────
 .form-group {

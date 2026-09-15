@@ -1,0 +1,110 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Placements & Training</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="loadPlacements()">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <!-- Metric Counters Ribbon -->
+  <div class="metrics-ribbon">
+    <div class="metric-chip">
+      <span class="mc-val">{{ overview.eligibleDrivesCount }}</span>
+      <span class="mc-label">Drives</span>
+    </div>
+    <div class="metric-chip">
+      <span class="mc-val applied-val">{{ overview.appliedCount }}</span>
+      <span class="mc-label">Applied</span>
+    </div>
+    <div class="metric-chip">
+      <span class="mc-val short-val">{{ overview.shortlistedCount }}</span>
+      <span class="mc-label">Shortlisted</span>
+    </div>
+    <div class="metric-chip">
+      <span class="mc-val offer-val">{{ overview.offersCount }}</span>
+      <span class="mc-label">Offers</span>
+    </div>
+  </div>
+
+  <ion-toolbar color="primary" class="segment-toolbar">
+    <ion-segment [(ngModel)]="selectedSegment" mode="md">
+      <ion-segment-button value="all">
+        <ion-label>All Drives ({{ overview.jobs.length }})</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="applied">
+        <ion-label>Applied ({{ overview.appliedCount }})</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="selected">
+        <ion-label>Offers ({{ overview.offersCount }})</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding placement-content">
+  <ion-refresher slot="fixed" (ionRefresh)="loadPlacements($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading Skeletons -->
+  <div *ngIf="loading" class="skeleton-list">
+    <ion-skeleton-text animated style="width: 100%; height: 130px; border-radius: 16px; margin-bottom: 12px;"></ion-skeleton-text>
+    <ion-skeleton-text animated style="width: 100%; height: 130px; border-radius: 16px;"></ion-skeleton-text>
+  </div>
+
+  <ng-container *ngIf="!loading">
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="filteredJobs.length === 0">
+      <div class="empty-icon-wrap">
+        <ion-icon name="briefcase-outline"></ion-icon>
+      </div>
+      <h4>No Drives in This Category</h4>
+      <p>Active placement drives, company registration links, and interview schedules will appear here when announced.</p>
+    </div>
+
+    <!-- Jobs / Drives List -->
+    <div class="jobs-list" *ngIf="filteredJobs.length > 0">
+      <div class="job-card" *ngFor="let job of filteredJobs" [class.is-selected]="job.status === 'Selected'">
+        <div class="jc-header">
+          <div class="jc-company-info">
+            <div class="jc-icon">
+              <ion-icon name="business-outline"></ion-icon>
+            </div>
+            <div>
+              <h3 class="jc-company">{{ job.companyName }}</h3>
+              <p class="jc-role">{{ job.jobRole }}</p>
+            </div>
+          </div>
+          <span class="jc-status-pill status-{{ job.status.toLowerCase() }}">
+            {{ job.status }}
+          </span>
+        </div>
+
+        <div class="jc-details-grid">
+          <div class="jd-item" *ngIf="job.packageLpa">
+            <span class="jd-label">CTC Package</span>
+            <span class="jd-val package-highlight">₹{{ job.packageLpa }} LPA</span>
+          </div>
+          <div class="jd-item" *ngIf="job.driveDate">
+            <span class="jd-label">Drive Date</span>
+            <span class="jd-val">{{ job.driveDate | date:'dd MMM yyyy' }}</span>
+          </div>
+          <div class="jd-item" *ngIf="job.applicationDeadline">
+            <span class="jd-label">Deadline</span>
+            <span class="jd-val">{{ job.applicationDeadline | date:'dd MMM yyyy' }}</span>
+          </div>
+        </div>
+
+        <div class="jc-criteria" *ngIf="job.eligibilityCriteria">
+          <span class="crit-label">Eligibility:</span>
+          <span class="crit-text">{{ job.eligibilityCriteria }}</span>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</ion-content>

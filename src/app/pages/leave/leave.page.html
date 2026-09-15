@@ -63,7 +63,7 @@
         <label class="input-label">Substitute Staff (Mandatory) <span class="required">*</span></label>
         <div class="select-wrap">
           <ion-icon name="people-outline" class="field-icon"></ion-icon>
-          <ion-select [(ngModel)]="selectedSubstituteUserId" placeholder="Select Substitute Faculty / Staff" interface="action-sheet" class="custom-select">
+          <ion-select [(ngModel)]="selectedSubstituteUserId" (ionChange)="onSubstituteSelected()" placeholder="Select Substitute Faculty / Staff" interface="action-sheet" class="custom-select">
             <ion-select-option *ngFor="let s of substituteStaffList" [value]="s.userId">
               {{ s.fullName }} <ng-container *ngIf="s.employeeCode">({{ s.employeeCode }})</ng-container>
             </ion-select-option>
@@ -268,5 +268,81 @@
       </div>
     </div>
   </div>
+
+  <!-- ── 5. SUBSTITUTE DUTY DELEGATION (CHAINING) MODAL ─────────────── -->
+  <ion-modal [isOpen]="isDelegationModalOpen" (didDismiss)="isDelegationModalOpen = false" class="delegation-modal">
+    <ng-template>
+      <ion-header class="ion-no-border">
+        <ion-toolbar color="warning">
+          <ion-title>Substitute Duty Conflict</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="isDelegationModalOpen = false">
+              <ion-icon name="close-outline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding modal-scroll-content">
+        <div class="modal-warn-banner">
+          <div class="warn-icon-wrap">
+            <ion-icon name="alert-circle"></ion-icon>
+          </div>
+          <div class="warn-text-wrap">
+            <h4 class="warn-title">You Are a Substitute on These Dates</h4>
+            <p class="warn-desc">
+              You are currently nominated as a substitute for another staff member during these dates. To proceed with your leave application, please <strong>delegate/chain that substitute duty</strong> to another colleague, or adjust your leave dates.
+            </p>
+          </div>
+        </div>
+
+        <div class="conflict-items-wrap">
+          <div class="conflict-card-item" *ngFor="let row of conflictRows; let i = index">
+            <div class="conflict-card-header">
+              <ion-icon name="swap-horizontal-outline" class="chain-icon"></ion-icon>
+              <span class="chain-title">Substitute Assignment #{{ i + 1 }}</span>
+            </div>
+
+            <p class="conflict-explanation">
+              <strong>{{ row.conflict.originalApplicantName }}</strong> made you their substitute from
+              <span class="highlight-date">{{ formatDateStr(row.conflict.originalFromDate) }}</span>
+              to
+              <span class="highlight-date">{{ formatDateStr(row.conflict.originalToDate) }}</span>.
+            </p>
+
+            <div class="form-group delegation-select-group">
+              <label class="input-label">Delegate duty to: <span class="required">*</span></label>
+              <div class="select-wrap">
+                <ion-icon name="person-add-outline" class="field-icon"></ion-icon>
+                <ion-select [(ngModel)]="row.selectedSubstituteId" placeholder="Select Colleague to Take Over" interface="action-sheet" class="custom-select">
+                  <ion-select-option *ngFor="let staff of getEligibleDelegates(row.conflict)" [value]="staff.userId">
+                    {{ staff.fullName }} <ng-container *ngIf="staff.employeeCode">({{ staff.employeeCode }})</ng-container>
+                  </ion-select-option>
+                </ion-select>
+              </div>
+            </div>
+
+            <div class="resolved-badge" *ngIf="row.selectedSubstituteId">
+              <ion-icon name="checkmark-circle"></ion-icon>
+              <span>Substitute duty reassigned to replacement colleague</span>
+            </div>
+          </div>
+        </div>
+      </ion-content>
+
+      <ion-footer class="ion-no-border modal-footer-bar">
+        <div class="modal-buttons-row">
+          <button class="modal-btn outline-btn" (click)="adjustMyDates()">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <span>Adjust Dates</span>
+          </button>
+          <button class="modal-btn confirm-btn" [disabled]="!isAllDelegationsResolved()" (click)="confirmDelegationAndSubmit()">
+            <ion-icon name="swap-horizontal-outline"></ion-icon>
+            <span>Delegate & Submit</span>
+          </button>
+        </div>
+      </ion-footer>
+    </ng-template>
+  </ion-modal>
 
 </ion-content>

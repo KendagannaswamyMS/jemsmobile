@@ -12,15 +12,13 @@
     <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <!-- Shows through the safe-area padding behind the status/navigation bars.
-             Left dark so the default light system icons stay legible. -->
-        <item name="android:windowBackground">@color/brandPrimary</item>
+        <item name="android:windowBackground">@android:color/white</item>
     </style>
 
 
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="android:background">@drawable/splash</item>
-        <item name="windowSplashScreenBackground">#125875</item>
+        <item name="windowSplashScreenBackground">#ffffff</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash</item>
         <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
     </style>

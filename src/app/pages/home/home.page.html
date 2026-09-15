@@ -7,6 +7,14 @@
       <img src="assets/images/JEMS_LOGO.png" alt="JEMS Logo" class="header-logo-img" />
       <span class="header-title">JEMS</span>
     </div>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/tabs/notifications" class="notif-header-btn">
+        <ion-icon slot="icon-only" name="notifications-outline"></ion-icon>
+        <ion-badge color="danger" class="header-notif-badge" *ngIf="unreadNotificationsCount > 0">
+          {{ unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount }}
+        </ion-badge>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -155,6 +163,27 @@
             <ion-icon name="wallet-outline"></ion-icon>
           </div>
           <span class="shortcut-title">Fees & Dues</span>
+        </div>
+
+        <div class="shortcut-card" routerLink="/tabs/student/library">
+          <div class="shortcut-icon-bg icon-teal">
+            <ion-icon name="book-outline"></ion-icon>
+          </div>
+          <span class="shortcut-title">Digital Library</span>
+        </div>
+
+        <div class="shortcut-card" routerLink="/tabs/student/mentoring">
+          <div class="shortcut-icon-bg icon-blue">
+            <ion-icon name="people-outline"></ion-icon>
+          </div>
+          <span class="shortcut-title">Mentoring</span>
+        </div>
+
+        <div class="shortcut-card" routerLink="/tabs/student/placement">
+          <div class="shortcut-icon-bg icon-purple">
+            <ion-icon name="briefcase-outline"></ion-icon>
+          </div>
+          <span class="shortcut-title">Placements</span>
         </div>
       </div>
 
@@ -388,6 +417,18 @@
         </div>
         <span class="shortcut-title">Events</span>
       </div>
+      <div class="shortcut-card" routerLink="/tabs/mentoring">
+        <div class="shortcut-icon-bg icon-teal">
+          <ion-icon name="people-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">My Mentees</span>
+      </div>
+      <div class="shortcut-card" routerLink="/tabs/library">
+        <div class="shortcut-icon-bg icon-indigo">
+          <ion-icon name="book-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">Library</span>
+      </div>
     </div>
   </ng-container>
 
@@ -432,6 +473,18 @@
           <ion-icon name="megaphone-outline"></ion-icon>
         </div>
         <span class="shortcut-title">Events</span>
+      </div>
+      <div class="shortcut-card" routerLink="/tabs/mentoring">
+        <div class="shortcut-icon-bg icon-teal">
+          <ion-icon name="people-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">My Mentees</span>
+      </div>
+      <div class="shortcut-card" routerLink="/tabs/library">
+        <div class="shortcut-icon-bg icon-indigo">
+          <ion-icon name="book-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">Library</span>
       </div>
     </div>
 
@@ -620,6 +673,12 @@
           <ion-icon name="megaphone-outline"></ion-icon>
         </div>
         <span class="shortcut-title">Events</span>
+      </div>
+      <div class="shortcut-card" routerLink="/tabs/library">
+        <div class="shortcut-icon-bg icon-indigo">
+          <ion-icon name="book-outline"></ion-icon>
+        </div>
+        <span class="shortcut-title">Library</span>
       </div>
     </div>
   </ng-container>

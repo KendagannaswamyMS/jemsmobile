@@ -55,6 +55,25 @@ export interface SubstituteStaffItem {
   employeeCode: string;
 }
 
+export interface MySubstituteConflict {
+  conflictingApplicationId: number;
+  originalApplicantName: string;
+  originalFromDate: string;
+  originalToDate: string;
+  combinedFromDate: string;
+  combinedToDate: string;
+}
+
+export interface ConflictDutyRow {
+  conflict: MySubstituteConflict;
+  selectedSubstituteId: number | null;
+}
+
+export interface SubstituteDelegationResolution {
+  conflictingApplicationId: number;
+  newSubstituteId: number;
+}
+
 @Component({
   selector: 'app-leave',
   templateUrl: './leave.page.html',
@@ -65,6 +84,10 @@ export class LeavePage implements OnInit {
   selectedSegment: 'apply' | 'history' | 'approvals' | 'balances' = 'apply';
   loading = false;
   isApprover = false;
+
+  // Substitute Conflict & Delegation Modal
+  isDelegationModalOpen = false;
+  conflictRows: ConflictDutyRow[] = [];
 
   // Form Models
   selectedLeaveTypeId: number | null = null;
@@ -208,7 +231,7 @@ export class LeavePage implements OnInit {
     });
 
     // 3. Fetch User Leave Balances from DB
-    const academicYear = String(new Date().getFullYear());
+    const academicYear = this.getCurrentAcademicYear();
     this.http.post<any[]>(`${environment.apiUrl}leavemanagement/getleavebalance`, {
       employeeid: user.userId,
       academicyear: academicYear
@@ -216,12 +239,24 @@ export class LeavePage implements OnInit {
       next: (res) => {
         if (Array.isArray(res) && res.length > 0) {
           this.leaveBalances = res.map((b, idx) => {
-            const alloc = b.allotteddays || b.openingbalance || b.allocated || 15;
-            const used = b.useddays || b.leavestaken || b.consumeddays || b.used || 0;
-            const bal = b.currentbalance ?? b.closingbalance ?? (alloc - used);
+            const leaveName = b.leaveType || b.LeaveType || b.leavename || b.leaveName || 'Leave';
+            const matchedType = this.leaveTypes.find(t =>
+              t.leaveName?.toLowerCase() === leaveName.toLowerCase() ||
+              t.leaveCode?.toLowerCase() === (b.leaveCode || b.LeaveCode || b.leavecode || '').toLowerCase()
+            );
+            const leaveCode = b.leaveCode || b.LeaveCode || b.leavecode || matchedType?.leaveCode || leaveName.substring(0, 2).toUpperCase();
+
+            const opening = Number(b.openingBalance ?? b.OpeningBalance ?? b.openingbalance ?? 0);
+            const earned = Number(b.earnedLeaves ?? b.EarnedLeaves ?? b.earnedleaves ?? 0);
+            const rawEntitlement = b.entitlementDays ?? b.EntitlementDays ?? b.entitlementdays;
+
+            const alloc = Number(rawEntitlement ?? (opening + earned > 0 ? opening + earned : (matchedType?.maxDaysPerYear || 15)));
+            const used = Number(b.leavesTaken ?? b.LeavesTaken ?? b.leavestaken ?? b.usedDays ?? b.useddays ?? b.used ?? 0);
+            const bal = Number(b.closingBalance ?? b.ClosingBalance ?? b.closingbalance ?? b.currentBalance ?? b.currentbalance ?? Math.max(0, alloc - used));
+
             return {
-              leaveCode: b.leavecode || b.leaveCode || b.leaveType || 'LV',
-              leaveName: b.leavename || b.leaveName || b.leaveType || 'Leave',
+              leaveCode: leaveCode,
+              leaveName: leaveName,
               allocated: alloc,
               used: used,
               balance: Math.max(0, bal),
@@ -236,6 +271,13 @@ export class LeavePage implements OnInit {
         this.buildDefaultBalancesFromTypes();
       }
     });
+  }
+
+  getCurrentAcademicYear(): string {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    // June-May academic year cycle: June onwards is (current - next), Jan-May is (previous - current)
+    return today.getMonth() >= 5 ? `${currentYear}-${currentYear + 1}` : `${currentYear - 1}-${currentYear}`;
   }
 
   fetchFallbackAllLeaveTypes() {
@@ -341,6 +383,10 @@ export class LeavePage implements OnInit {
     const diffTime = Math.abs(end.getTime() - start.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
     this.calculatedDays = diffDays;
+
+    if (this.selectedSubstituteUserId) {
+      this.checkSubstituteAvailability();
+    }
   }
 
   onHalfDayToggle() {
@@ -348,6 +394,59 @@ export class LeavePage implements OnInit {
       this.toDate = this.fromDate;
     }
     this.calculateDays();
+  }
+
+  onSubstituteSelected() {
+    this.checkSubstituteAvailability();
+  }
+
+  checkSubstituteAvailability() {
+    if (!this.selectedSubstituteUserId || !this.fromDate || !this.toDate) return;
+
+    const payload = {
+      substituteId: this.selectedSubstituteUserId,
+      fromDate: this.fromDate,
+      toDate: this.toDate,
+      excludeApplicationId: null
+    };
+
+    this.http.post<any>(`${environment.apiUrl}leavemanagement/checksubstituteleave`, payload).subscribe({
+      next: async (res) => {
+        if (res && res.hasConflict) {
+          const profile = res.substituteProfile;
+          const staffName = profile
+            ? [profile.salutationName, profile.userFName, profile.userLName].filter(Boolean).join(' ')
+            : 'Selected staff member';
+
+          let datesMsg = '';
+          if (Array.isArray(res.conflictingDates) && res.conflictingDates.length > 0) {
+            datesMsg = res.conflictingDates
+              .map((d: any) => `${this.formatDateStr(d.fromDate)} to ${this.formatDateStr(d.toDate)} (${d.statusName || 'Leave'})`)
+              .join(', ');
+          }
+
+          const alert = await this.alertCtrl.create({
+            header: 'Substitute Not Available',
+            subHeader: `${staffName} is already on leave`,
+            message: `${staffName} has already applied for leave on ${datesMsg || 'the selected dates'}. Therefore, they cannot be chosen as your substitute. Please select another colleague.`,
+            buttons: [
+              {
+                text: 'OK, Select Another',
+                role: 'cancel',
+                handler: () => {
+                  this.selectedSubstituteUserId = null;
+                }
+              }
+            ]
+          });
+          await alert.present();
+          this.selectedSubstituteUserId = null;
+        }
+      },
+      error: (err) => {
+        console.warn('Substitute availability pre-check failed:', err);
+      }
+    });
   }
 
   async submitLeaveApplication() {
@@ -369,8 +468,81 @@ export class LeavePage implements OnInit {
     }
 
     const user = this.authService.getCurrentUser();
+    if (!user || !user.userId) {
+      this.showToast('User session expired. Please log in again.', 'warning');
+      return;
+    }
+
     const loader = await this.loadingCtrl.create({
-      message: 'Submitting leave application to database...',
+      message: 'Checking substitute duties & availability...',
+      spinner: 'crescent'
+    });
+    await loader.present();
+
+    // Check whether applicant is already an active substitute for another colleague's leave on overlapping dates
+    const checkUrl = `${environment.apiUrl}leavemanagement/checkmysubstituteconflicts?employeeId=${user.userId}&fromDate=${this.fromDate}&toDate=${this.toDate}`;
+    this.http.get<any>(checkUrl).subscribe({
+      next: async (res) => {
+        await loader.dismiss();
+        if (res && res.hasConflict && Array.isArray(res.conflicts) && res.conflicts.length > 0) {
+          this.conflictRows = res.conflicts.map((c: any) => ({
+            conflict: c,
+            selectedSubstituteId: null
+          }));
+          this.isDelegationModalOpen = true;
+        } else {
+          this.doSubmitLeaveApplication();
+        }
+      },
+      error: async (err) => {
+        await loader.dismiss();
+        console.warn('Substitution conflicts pre-check skipped, proceeding to submit:', err);
+        this.doSubmitLeaveApplication();
+      }
+    });
+  }
+
+  getEligibleDelegates(conflict?: MySubstituteConflict): SubstituteStaffItem[] {
+    const user = this.authService.getCurrentUser();
+    return this.substituteStaffList.filter(s => {
+      // Cannot delegate to yourself
+      if (s.userId === user?.userId) return false;
+      // Cannot delegate to the original applicant
+      if (conflict && conflict.originalApplicantName && s.fullName.toLowerCase().includes(conflict.originalApplicantName.toLowerCase())) {
+        return false;
+      }
+      return true;
+    });
+  }
+
+  isAllDelegationsResolved(): boolean {
+    return this.conflictRows.length > 0 && this.conflictRows.every(r => !!r.selectedSubstituteId);
+  }
+
+  adjustMyDates() {
+    this.isDelegationModalOpen = false;
+    this.showToast('Please adjust your leave dates to avoid overlapping substitute duties.', 'primary');
+  }
+
+  confirmDelegationAndSubmit() {
+    if (!this.isAllDelegationsResolved()) {
+      this.showToast('Please assign a replacement substitute for every conflict duty before submitting.', 'warning');
+      return;
+    }
+
+    const resolutions: SubstituteDelegationResolution[] = this.conflictRows.map(r => ({
+      conflictingApplicationId: r.conflict.conflictingApplicationId,
+      newSubstituteId: r.selectedSubstituteId!
+    }));
+
+    this.isDelegationModalOpen = false;
+    this.doSubmitLeaveApplication(resolutions);
+  }
+
+  async doSubmitLeaveApplication(resolutions?: SubstituteDelegationResolution[]) {
+    const user = this.authService.getCurrentUser();
+    const loader = await this.loadingCtrl.create({
+      message: 'Submitting leave application...',
       spinner: 'crescent'
     });
     await loader.present();
@@ -387,6 +559,9 @@ export class LeavePage implements OnInit {
     if (this.emergencyContact) {
       formData.append('emergencycontact', this.emergencyContact);
     }
+    if (resolutions && resolutions.length > 0) {
+      formData.append('substituteConflictResolutionsJson', JSON.stringify(resolutions));
+    }
 
     this.http.post(`${environment.apiUrl}leavemanagement/createleaveapplication`, formData).subscribe({
       next: async (res: any) => {
@@ -396,36 +571,21 @@ export class LeavePage implements OnInit {
         this.selectedSegment = 'history';
         this.fetchLeaveData();
       },
-      error: async () => {
-        // Fallback JSON payload
-        const jsonPayload = {
-          userId: user?.userId || 0,
-          employeeid: user?.userId || 0,
-          leavetypeid: this.selectedLeaveTypeId,
-          substitutestaff: this.selectedSubstituteUserId,
-          fromdate: this.fromDate,
-          todate: this.toDate,
-          totaldays: this.calculatedDays,
-          reason: this.reason.trim(),
-          ishalfday: this.isHalfDay,
-          emergencycontact: this.emergencyContact
-        };
-        this.http.post(`${environment.apiUrl}hrms/LeaveApplication/create`, jsonPayload).subscribe({
-          next: async () => {
-            await loader.dismiss();
-            this.showToast('Leave application submitted successfully!', 'success');
-            this.resetForm();
-            this.selectedSegment = 'history';
-            this.fetchLeaveData();
-          },
-          error: async (err) => {
-            await loader.dismiss();
-            this.showToast(err?.error?.message || 'Submitted leave request.', 'success');
-            this.resetForm();
-            this.selectedSegment = 'history';
-            this.fetchLeaveData();
-          }
-        });
+      error: async (err: any) => {
+        await loader.dismiss();
+
+        // If backend returns 409 Conflict due to unresolved substitution duties
+        if (err?.status === 409 && err?.error?.substituteConflicts?.length > 0) {
+          this.conflictRows = err.error.substituteConflicts.map((c: any) => ({
+            conflict: c,
+            selectedSubstituteId: null
+          }));
+          this.isDelegationModalOpen = true;
+          return;
+        }
+
+        const errMsg = err?.error?.message || 'Error submitting leave application. Please check details and try again.';
+        this.showToast(errMsg, 'danger');
       }
     });
   }

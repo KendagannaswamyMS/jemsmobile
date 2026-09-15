@@ -1,0 +1,138 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ isStudent ? 'My Mentor & Proctoring' : 'My Mentees' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="loadData()">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding mentoring-content">
+  <ion-refresher slot="fixed" (ionRefresh)="loadData($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading Skeletons -->
+  <div *ngIf="loading" class="skeleton-list">
+    <ion-skeleton-text animated style="width: 100%; height: 130px; border-radius: 16px; margin-bottom: 12px;"></ion-skeleton-text>
+    <ion-skeleton-text animated style="width: 100%; height: 110px; border-radius: 14px;"></ion-skeleton-text>
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- ── STUDENT VIEW: MY MENTOR & MEETINGS ────────────────────────────── -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <div *ngIf="isStudent">
+
+      <!-- Mentor Profile Card -->
+      <div class="mentor-profile-card">
+        <div class="mp-badge">ACADEMIC PROCTOR</div>
+        <div class="mp-content">
+          <div class="mp-avatar">
+            <ion-icon name="person"></ion-icon>
+          </div>
+          <div class="mp-info">
+            <h3 class="mp-name">{{ mentorInfo?.name || 'Assigned Faculty Mentor' }}</h3>
+            <p class="mp-desig">{{ mentorInfo?.designation || 'Department Faculty' }}</p>
+            <p class="mp-email" *ngIf="mentorInfo?.email">
+              <ion-icon name="mail-outline"></ion-icon> {{ mentorInfo?.email }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Meetings List Section -->
+      <div class="section-title-wrap">
+        <h3 class="std-section-title">Mentoring Sessions & Reviews ({{ sessions.length }})</h3>
+      </div>
+
+      <div class="empty-state" *ngIf="sessions.length === 0">
+        <ion-icon name="chatbubbles-outline"></ion-icon>
+        <h4>No Recorded Sessions Yet</h4>
+        <p>Your scheduled proctoring discussions, attendance evaluations, and academic counseling will appear here.</p>
+      </div>
+
+      <div class="sessions-list" *ngIf="sessions.length > 0">
+        <div class="session-card" *ngFor="let s of sessions">
+          <div class="sc-header">
+            <div class="sc-date">
+              <ion-icon name="calendar-outline"></ion-icon>
+              <span>{{ s.meetingDate | date:'dd MMM yyyy' }}</span>
+            </div>
+            <span class="sc-status status-{{ s.status.toLowerCase() }}">{{ s.status }}</span>
+          </div>
+
+          <div class="sc-body">
+            <h4 class="sc-topic">{{ s.topicsDiscussed }}</h4>
+            <div class="sc-remark-box" *ngIf="s.remarks">
+              <span class="r-lbl">Mentor Remarks:</span>
+              <p class="r-val">"{{ s.remarks }}"</p>
+            </div>
+            <div class="sc-action-box" *ngIf="s.actionItems">
+              <span class="r-lbl">Action Plan:</span>
+              <p class="r-val">{{ s.actionItems }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- ── FACULTY VIEW: ALLOCATED MENTEES LIST ──────────────────────────── -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <div *ngIf="!isStudent">
+
+      <!-- Search Bar -->
+      <div class="search-box">
+        <ion-searchbar [(ngModel)]="searchQuery" placeholder="Search by student name or USN..." debounce="200"></ion-searchbar>
+      </div>
+
+      <div class="empty-state" *ngIf="filteredMentees.length === 0">
+        <ion-icon name="people-outline"></ion-icon>
+        <h4>No Mentees Found</h4>
+        <p>No students match your filter or are assigned for this term.</p>
+      </div>
+
+      <div class="mentees-list" *ngIf="filteredMentees.length > 0">
+        <div class="mentee-card" *ngFor="let m of filteredMentees">
+          <div class="mc-top">
+            <div class="mc-avatar">
+              {{ (m.fullName ? m.fullName.charAt(0) : 'S') | uppercase }}
+            </div>
+            <div class="mc-meta">
+              <h4 class="mc-name">{{ m.fullName }}</h4>
+              <p class="mc-usn font-mono">{{ m.usn }} · Sem {{ m.semester }}</p>
+              <p class="mc-dept" *ngIf="m.departmentName">{{ m.departmentName }}</p>
+            </div>
+          </div>
+
+          <div class="mc-stats-row">
+            <div class="mc-stat" *ngIf="m.cgpa != null">
+              <span class="st-lbl">CGPA</span>
+              <span class="st-val font-bold text-primary">{{ m.cgpa | number:'1.2-2' }}</span>
+            </div>
+            <div class="mc-stat" *ngIf="m.attendancePercent != null">
+              <span class="st-lbl">Attendance</span>
+              <span class="st-val" [class.text-danger]="m.attendancePercent < 75" [class.text-success]="m.attendancePercent >= 75">
+                {{ m.attendancePercent }}%
+              </span>
+            </div>
+            <div class="mc-stat" *ngIf="m.mobile">
+              <span class="st-lbl">Contact</span>
+              <span class="st-val font-mono">{{ m.mobile }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </ng-container>
+</ion-content>

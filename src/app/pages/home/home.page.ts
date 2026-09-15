@@ -11,6 +11,8 @@ import { BiometricRecord, DayLog } from '../../models/biometric.model';
 import { LatestJoiner } from '../../models/joiner.model';
 import { environment } from 'src/environments/environment';
 
+import { NotificationService } from '../../core/services/notification.service';
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.page.html',
@@ -19,6 +21,7 @@ import { environment } from 'src/environments/environment';
 })
 export class HomePage implements OnInit, OnDestroy {
   user: CurrentUser | null = null;
+  unreadNotificationsCount = 0;
 
   // Faculty Attention Action Center
   facultyAttention: FacultyAttentionSummary | null = null;
@@ -59,6 +62,7 @@ export class HomePage implements OnInit, OnDestroy {
 
   constructor(
     public authService: AuthService,
+    public notificationService: NotificationService,
     private academicService: AcademicService,
     private facultyAttentionService: FacultyAttentionService,
     private http: HttpClient
@@ -93,6 +97,10 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.notificationService.unreadCount$.subscribe(c => {
+      this.unreadNotificationsCount = c;
+    });
+
     this.authService.user$.subscribe(u => {
       this.user = u;
       if (u) {

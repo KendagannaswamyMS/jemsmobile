@@ -119,6 +119,42 @@ const routes: Routes = [
         data: { roles: ['HOD', 'Admin'] }
       },
       {
+        path: 'student/library',
+        loadChildren: () => import('../pages/library/library.module').then(m => m.LibraryPageModule),
+        canActivate: [DocRequestOnlyGuard]
+      },
+      {
+        path: 'library',
+        loadChildren: () => import('../pages/library/library.module').then(m => m.LibraryPageModule)
+      },
+      {
+        path: 'student/mentoring',
+        loadChildren: () => import('../pages/mentoring/mentoring.module').then(m => m.MentoringPageModule),
+        canActivate: [DocRequestOnlyGuard]
+      },
+      {
+        path: 'mentoring',
+        loadChildren: () => import('../pages/mentoring/mentoring.module').then(m => m.MentoringPageModule)
+      },
+      {
+        path: 'student/placement',
+        loadChildren: () => import('../pages/placement/placement.module').then(m => m.PlacementPageModule),
+        canActivate: [DocRequestOnlyGuard]
+      },
+      {
+        path: 'placement',
+        loadChildren: () => import('../pages/placement/placement.module').then(m => m.PlacementPageModule),
+        canActivate: [DocRequestOnlyGuard]
+      },
+      {
+        path: 'student/notifications',
+        loadChildren: () => import('../pages/notifications/notifications.module').then(m => m.NotificationsPageModule)
+      },
+      {
+        path: 'notifications',
+        loadChildren: () => import('../pages/notifications/notifications.module').then(m => m.NotificationsPageModule)
+      },
+      {
         path: '',
         redirectTo: 'home',
         pathMatch: 'full'

@@ -41,15 +41,7 @@ export class CampusWifiPage implements OnInit {
   showConfirmPassword = false;
 
   // Active Sessions
-  activeSessions: WifiSession[] = [
-    {
-      iPAddress: '172.16.24.102',
-      macAddress: '8A:3F:4C:91:B2:7D',
-      loginTime: 'Today, 09:15 AM',
-      bytesIn: '42.5 MB',
-      bytesOut: '8.2 MB'
-    }
-  ];
+  activeSessions: WifiSession[] = [];
 
   constructor(
     private http: HttpClient,
@@ -189,10 +181,6 @@ export class CampusWifiPage implements OnInit {
         this.activeSessions = [];
       }
     });
-  }
-
-  openCaptivePortal() {
-    window.open('https://172.16.16.16:8090', '_blank');
   }
 
   async showToast(msg: string, color: 'success' | 'warning' | 'danger' | 'primary' = 'primary') {
